@@ -333,7 +333,7 @@ impl SlintServer {
             M::PreviewTypeChanged { target } => {
                 ctx.to_preview
                     .set_preview_target(target)
-                    .map_err(|err| js_sys::Error::new(&format!("{err}").into()))?;
+                    .map_err(|err| js_sys::Error::new(&format!("{err}")))?;
             }
             M::RequestState { .. } => {
                 crate::language::send_state_to_preview(&ctx);
@@ -441,10 +441,10 @@ impl SlintServer {
 
 #[cfg(any(feature = "preview-external", feature = "preview-engine", feature = "preview-remote"))]
 fn handle_preview_to_lsp_message(
-    message: preview_protocol::PreviewToLspMessage,
+    message: i_slint_preview_protocol::PreviewToLspMessage,
     ctx: &Context,
 ) -> Result<()> {
-    use preview_protocol::PreviewToLspMessage as M;
+    use i_slint_preview_protocol::PreviewToLspMessage as M;
 
     match message {
         M::Diagnostics { diagnostics, version, uri } => {
