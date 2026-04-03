@@ -28,7 +28,9 @@ pub struct ChildProcessLspToPreview {
 
 impl ChildProcessLspToPreview {
     pub fn new(
-        preview_to_lsp_channel: mpsc::UnboundedSender<i_slint_preview_protocol::PreviewToLspMessage>,
+        preview_to_lsp_channel: mpsc::UnboundedSender<
+            i_slint_preview_protocol::PreviewToLspMessage,
+        >,
     ) -> Self {
         Self { inner: RefCell::new(None), preview_to_lsp_channel }
     }
@@ -110,7 +112,8 @@ impl Drop for ChildProcessLspToPreview {
     fn drop(&mut self) {
         if let Some(inner) = self.inner.borrow_mut().take() {
             let message =
-                serde_json::to_string(&i_slint_preview_protocol::LspToPreviewMessage::Quit).unwrap();
+                serde_json::to_string(&i_slint_preview_protocol::LspToPreviewMessage::Quit)
+                    .unwrap();
             let _ = inner.to_child_sender.send(message);
         }
     }
