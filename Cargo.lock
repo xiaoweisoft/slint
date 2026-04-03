@@ -5218,6 +5218,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "i-slint-preview-protocol"
+version = "1.16.0"
+dependencies = [
+ "lsp-types",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "i-slint-renderer-femtovg"
 version = "1.16.0"
 dependencies = [
@@ -8261,15 +8270,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "preview-protocol"
-version = "1.16.0"
-dependencies = [
- "lsp-types",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "printerdemo"
 version = "1.16.0"
 dependencies = [
@@ -10144,6 +10144,7 @@ dependencies = [
  "i-slint-common",
  "i-slint-compiler",
  "i-slint-core",
+ "i-slint-preview-protocol",
  "itertools 0.14.0",
  "js-sys",
  "lsp-server",
@@ -10151,7 +10152,6 @@ dependencies = [
  "muda",
  "nucleo-matcher",
  "objc2-foundation 0.3.2",
- "preview-protocol",
  "send_wrapper",
  "serde",
  "serde-wasm-bindgen",
