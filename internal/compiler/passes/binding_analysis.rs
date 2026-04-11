@@ -904,13 +904,7 @@ fn propagate_is_set_on_aliases(doc: &Document, reverse_aliases: &mut ReverseAlia
                 for a in &binding.borrow().two_way_bindings {
                     if let Some(a) = a.property()
                         && a != &nr
-                        && !a
-                            .element()
-                            .borrow()
-                            .enclosing_component
-                            .upgrade()
-                            .unwrap()
-                            .is_global()
+                        && !a.element().borrow().enclosing_component.upgrade().unwrap().is_global()
                     {
                         reverse_aliases.entry(a.clone()).or_default().push(nr.clone())
                     }
