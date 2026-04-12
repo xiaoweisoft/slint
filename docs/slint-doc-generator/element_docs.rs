@@ -44,6 +44,8 @@ struct ElementDoc {
     /// Path relative to docs/reference/, e.g. "elements/rectangle.mdx".
     /// Extracted from `\doc-file:` annotation. Empty means no page.
     doc_file: String,
+    /// Override for the page title from `\doc-title:`.
+    doc_title: String,
     members: Vec<MemberDoc>,
     /// Direct child component names (sub-elements).
     children: Vec<String>,
@@ -148,6 +150,22 @@ fn extract_default(doc: &str) -> (String, Option<String>) {
         }
     }
     (doc.to_string(), None)
+}
+
+/// Extract and remove `\doc-title:` annotation.
+fn extract_doc_title(doc: &mut String) -> String {
+    let mut result = String::new();
+    let lines: Vec<&str> = doc.lines().collect();
+    let mut kept = Vec::new();
+    for line in &lines {
+        if let Some(val) = line.strip_prefix("\\doc-title:") {
+            result = val.trim().to_string();
+        } else {
+            kept.push(*line);
+        }
+    }
+    *doc = kept.join("\n").trim_end().to_string();
+    result
 }
 
 /// Extract and remove `\doc-file:path` annotation.
@@ -361,9 +379,13 @@ fn resolve_inheritance(
         }
 
         // Collect inherited members, ancestors first.
+        // Skip ancestors that have their own doc page.
         let mut inherited = Vec::new();
         for ancestor in chain.iter().rev() {
             if let Some(parent_elem) = components.get(ancestor) {
+                if !parent_elem.doc_file.is_empty() {
+                    continue;
+                }
                 for m in &parent_elem.members {
                     if m.kind == MemberKind::SectionHeader
                         || !inherited.iter().any(|im: &MemberDoc| im.name == m.name)
@@ -447,6 +469,7 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
         description = desc;
         let skip_inherited = strip_skip_inherited(&mut description);
         let doc_file = extract_doc_file(&mut description);
+        let doc_title = extract_doc_title(&mut description);
 
         let children = elem_node
             .SubElement()
@@ -467,6 +490,7 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
                 footer,
                 skip_inherited,
                 doc_file,
+                doc_title,
                 members: extract_members(&elem_node),
                 children,
             },
@@ -509,9 +533,8 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
                 &e.footer
             }),
             skip_inherited: false,
-            doc_file: resolve_inherited_field(
-                internal_name, &components, &inheritance, |e| &e.doc_file,
-            ),
+            doc_file: elem.doc_file.clone(),
+            doc_title: elem.doc_title.clone(),
             members: elem.members.clone(),
             children: elem.children.clone(),
         });
@@ -539,9 +562,8 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
                     |e| &e.footer,
                 ),
                 skip_inherited: false,
-                doc_file: resolve_inherited_field(
-                    internal_name, &components, &inheritance, |e| &e.doc_file,
-                ),
+                doc_file: elem.doc_file.clone(),
+                doc_title: elem.doc_title.clone(),
                 members: elem.members.clone(),
                 children: elem.children.clone(),
             });
@@ -569,6 +591,7 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
             footer: resolve_inherited_field(name, &components, &inheritance, |e| &e.footer),
             skip_inherited: false,
             doc_file: elem.doc_file.clone(),
+            doc_title: elem.doc_title.clone(),
             members: elem.members.clone(),
             children: elem.children.clone(),
         });
@@ -833,13 +856,17 @@ pub fn generate() -> Result<(), Box<dyn std::error::Error>> {
         );
 
         // Frontmatter.
-        writeln!(file, "---")?;
-        writeln!(file, "title: {}", elem.name)?;
-        if elem.is_global {
-            writeln!(file, "description: {} Namespace", elem.name)?;
+        let title = if elem.doc_title.is_empty() { &elem.name } else { &elem.doc_title };
+        let description = if !elem.doc_title.is_empty() {
+            elem.doc_title.clone()
+        } else if elem.is_global {
+            format!("{} Namespace", elem.name)
         } else {
-            writeln!(file, "description: {} element api.", elem.name)?;
-        }
+            format!("{} element api.", elem.name)
+        };
+        writeln!(file, "---")?;
+        writeln!(file, "title: {title}")?;
+        writeln!(file, "description: {description}")?;
         writeln!(file, "---")?;
 
         // Imports.

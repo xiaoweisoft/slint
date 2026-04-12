@@ -10,17 +10,18 @@ import Link from '@slint/common-files/src/components/Link.astro';
 The Slint elements have many common properties, callbacks and behavior.
 This page describes these properties and their usage.
 
-
 ## Common Visual Properties
 
 These properties are valid on all visual items. For example `Rectangle`, `Text`, and `layouts`. Non
 visual items such as `Timer` don't have these properties.
 
 
+
 ### x, y
 <SlintProperty propName="x, y" typeName="length" >
 The position of the element relative to its parent.
 </SlintProperty>
+
 
 ### z
 <SlintProperty propName="z" typeName="float" >
@@ -34,10 +35,12 @@ Currently the `z` value is a compile time constant and cannot be changed at runt
 </SlintProperty>
 
 
+
 ### width, height
 <SlintProperty propName="width, height" typeName="length" >
 The width and height of the element. When set, this overrides the default size.
 </SlintProperty>
+
 
 
 ### Transforms
@@ -56,8 +59,10 @@ Image {
 }
 ```
 
+
 #### transform-rotation
 <SlintProperty propName="transform-rotation" typeName="angle" defaultValue='0deg'/>
+
 
 #### transform-origin
 <SlintProperty propName="transform-origin" typeName="struct" structName="Point" defaultValue='{x: self.width / 2, y: self.height / 2}'>
@@ -65,6 +70,7 @@ The origin to rotate and scale around.
 
 Default to the center of the element.
 </SlintProperty>
+
 
 #### transform-scale
 <SlintProperty propName="transform-scale" typeName="float" defaultValue='100%'>
@@ -76,10 +82,13 @@ The scale is done around the `transform-origin` point.
 It is also possible to use the `transform-scale-x` and `transform-scale-y` properties to specify the scale factors for the x and y axis.
 </SlintProperty>
 
+
 #### transform-scale-x
 <SlintProperty propName="transform-scale-x" typeName="float" defaultValue='self.scale'/>
+
 #### transform-scale-y
 <SlintProperty propName="transform-scale-y" typeName="float" defaultValue='self.scale'/>
+
 
 ### opacity
 <CodeSnippetMD imagePath="/src/assets/generated/rectangle-opacity.png" scale="3" imageWidth="100" imageHeight="310"  imageAlt='rectangle opacity'>
@@ -269,12 +278,14 @@ export component ExportedComponent2 inherits Window {
 
 </SlintProperty>
 
+
 ### visible
 <SlintProperty propName="visible" typeName="bool" defaultValue="true">
 When set to `false`, the element and all his children won't be drawn and not react to mouse input. The element
 will still take up layout space within any layout container.
 
 </SlintProperty>
+
 
 ### absolute-position
 <SlintProperty propName="absolute-position" typeName="struct" structName="Point" propertyVisibility="out">
@@ -289,7 +300,9 @@ It defines coordinates (x,y) relative to the enclosing Window or PopupWindow, bu
 
 
 
+
 ## Miscellaneous
+
 
 ### cache-rendering-hint
 <SlintProperty typeName="bool" propName="cache-rendering-hint" default="false" >
@@ -301,12 +314,15 @@ all rendering backends support this, so this is merely a hint.
 
 
 
+
 ### dialog-button-role
 <SlintProperty typeName="enum" enumName="DialogButtonRole" defaultValue="none">
 Specify that this is a button in a `Dialog`.
 </SlintProperty>
 
+
 ## Common Callbacks
+
 
 ### init()
 
@@ -369,35 +385,42 @@ export component AppWindow inherits Window {
 }
 ```
 
+
 ## Accessibility Properties
 
 Use the following `accessible-` properties to make your items interact well with software like screen readers, braille terminals and other software to make your application accessible.
 `accessible-role` must be set in order to be able to set any other accessible property or callback.
+
 
 ### accessible-role
 <SlintProperty typeName="enum" enumName="AccessibleRole">
 The role of the element. This property is mandatory to be able to use any other accessible properties. It should be set to a constant value. (default value: `none` for most elements, but `text` for the Text element)
 </SlintProperty>
 
+
 ### accessible-checkable
 <SlintProperty typeName="bool" propName="accessible-checkable" default="false">
 Whether the element is can be checked or not.
 </SlintProperty>
+
 
 ### accessible-checked
 <SlintProperty typeName="bool" propName="accessible-checked" default="false">
 Whether the element is checked or not. This maps to the "checked" state of checkboxes, radio buttons, and other widgets.
 </SlintProperty>
 
+
 ### accessible-description
 <SlintProperty typeName="string" propName="accessible-description" default='""'>
 The description for the current element.
 </SlintProperty>
 
+
 ### accessible-enabled
 <SlintProperty typeName="bool" propName="accessible-enabled" default="true">
 Whether the element is enabled or not. This maps to the "enabled" state of most widgets. (default value: `true`)
 </SlintProperty>
+
 
 ### accessible-expandable
 <SlintProperty typeName="bool" propName="accessible-expandable" default="false">
@@ -405,11 +428,13 @@ Whether the element can be expanded or not. For example, a `ComboBox` widget sho
 as its selection can be changed via an expandable popup.
 </SlintProperty>
 
+
 ### accessible-expanded
 <SlintProperty typeName="bool" propName="accessible-expanded" default="false">
 Whether the element is expanded or not. Applies to combo boxes, menu items,
 tree view items and other widgets.
 </SlintProperty>
+
 
 ### accessible-id
 <SlintProperty typeName="string" propName="accessible-id" default='""'>
@@ -428,55 +453,66 @@ for i in 5: Rectangle {
 ```
 </SlintProperty>
 
+
 ### accessible-label
 <SlintProperty typeName="string" propName="accessible-label" default='""'>
 The label for an interactive element. (default value: empty for most elements, or the value of the `text` property for Text elements)
 </SlintProperty>
+
 
 ### accessible-value-maximum
 <SlintProperty typeName="float" propName="accessible-value-maximum" default="0">
 The maximum value of the item. This is used for example by spin boxes.
 </SlintProperty>
 
+
 ### accessible-value-minimum
 <SlintProperty typeName="float" propName="accessible-value-minimum" default="0">
 The minimum value of the item.
 </SlintProperty>
+
 
 ### accessible-value-step
 <SlintProperty typeName="float" propName="accessible-value-step" default="0">
 The smallest increment or decrement by which the current value can change. This corresponds to the step by which a handle on a slider can be dragged.
 </SlintProperty>
 
+
 ### accessible-value
 <SlintProperty typeName="string" propName="accessible-value" default='""'>
 The current value of the item.
 </SlintProperty>
+
 
 ### accessible-placeholder-text
 <SlintProperty typeName="string" propName="accessible-placeholder-text" default='""'>
 A placeholder text to use when the item's value is empty. Applies to text elements.
 </SlintProperty>
 
+
 ### accessible-read-only
 <SlintProperty typeName="bool" propName="accessible-read-only" default="false">
 Whether the element's content can be edited. This maps to the "read-only" state of line edit and text edit widgets.
 </SlintProperty>
+
 
 ### accessible-item-selectable
 <SlintProperty typeName="bool" propName="accessible-value" >
 Whether the element can be selected or not.
 </SlintProperty>
 
+
 ### accessible-item-selected
 <SlintProperty typeName="bool" propName="accessible-item-selected" >
 Whether the element is selected or not. This maps to the "is-selected" state of listview items.
 </SlintProperty>
 
+
 ### accessible-item-index
 <SlintProperty typeName="int" propName="accessible-item-index">
  The index (starting from 0) of this element in a group of similar elements. Applies to list items, radio buttons and other elements.
 </SlintProperty>
+
 
 ### accessible-item-count
 <SlintProperty typeName="int" propName="accessible-item-count">
@@ -484,20 +520,27 @@ The total number of elements in a group. Applies to the parent container of a gr
 </SlintProperty>
 
 
+
 ## Accessibility Callbacks
 You can also use the following callbacks that are going to be called by the accessibility framework:
+
 
 ### accessible-action-default()
 Invoked when the default action for this widget is requested (eg: pressed for a button).
 
+
 ### accessible-action-set-value(string)
 Invoked when the user wants to change the accessible value.
+
 
 ### accessible-action-increment()
 Invoked when the user requests to increment the value.
 
+
 ### accessible-action-decrement()
 Invoked when the user requests to decrement the value.
 
+
 ### accessible-action-expand()
 Invoked when the user requests to expand the widget (eg: disclose the list of available choices for a combo box).
+
