@@ -41,6 +41,9 @@ struct ElementDoc {
     description: String,
     footer: String,
     skip_inherited: bool,
+    /// Path relative to docs/reference/, e.g. "elements/rectangle.mdx".
+    /// Extracted from `\doc-file:` annotation. Empty means no page.
+    doc_file: String,
     members: Vec<MemberDoc>,
     /// Direct child component names (sub-elements).
     children: Vec<String>,
@@ -145,6 +148,20 @@ fn extract_default(doc: &str) -> (String, Option<String>) {
         }
     }
     (doc.to_string(), None)
+}
+
+/// Extract and remove `\doc-file:path` annotation.
+fn extract_doc_file(doc: &mut String) -> String {
+    let mut result = String::new();
+    let mut lines: Vec<&str> = doc.lines().collect();
+    for i in (0..lines.len()).rev() {
+        if let Some(val) = lines[i].strip_prefix("\\doc-file:") {
+            result = val.trim().to_string();
+            lines.remove(i);
+        }
+    }
+    *doc = lines.join("\n").trim_end().to_string();
+    result
 }
 
 /// Strip `\skip_inherited` and return whether it was present.
@@ -429,6 +446,7 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
         let (desc, footer) = split_footer(&description);
         description = desc;
         let skip_inherited = strip_skip_inherited(&mut description);
+        let doc_file = extract_doc_file(&mut description);
 
         let children = elem_node
             .SubElement()
@@ -448,6 +466,7 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
                 description,
                 footer,
                 skip_inherited,
+                doc_file,
                 members: extract_members(&elem_node),
                 children,
             },
@@ -490,6 +509,9 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
                 &e.footer
             }),
             skip_inherited: false,
+            doc_file: resolve_inherited_field(
+                internal_name, &components, &inheritance, |e| &e.doc_file,
+            ),
             members: elem.members.clone(),
             children: elem.children.clone(),
         });
@@ -517,10 +539,39 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
                     |e| &e.footer,
                 ),
                 skip_inherited: false,
+                doc_file: resolve_inherited_field(
+                    internal_name, &components, &inheritance, |e| &e.doc_file,
+                ),
                 members: elem.members.clone(),
                 children: elem.children.clone(),
             });
         }
+    }
+
+    // Third pass: non-exported components with a doc-file (e.g. MenuBar).
+    // Collect internal names already handled via export aliases.
+    let seen_internal: HashSet<&str> =
+        export_aliases.values().map(|s| s.as_str()).collect();
+    for (name, elem) in &components {
+        if seen.contains(name.as_str())
+            || seen_internal.contains(name.as_str())
+            || elem.doc_file.is_empty()
+        {
+            continue;
+        }
+        seen.insert(name.clone());
+        result.push(ElementDoc {
+            name: name.clone(),
+            is_global: elem.is_global,
+            description: resolve_inherited_field(name, &components, &inheritance, |e| {
+                &e.description
+            }),
+            footer: resolve_inherited_field(name, &components, &inheritance, |e| &e.footer),
+            skip_inherited: false,
+            doc_file: elem.doc_file.clone(),
+            members: elem.members.clone(),
+            children: elem.children.clone(),
+        });
     }
 
     result.sort_by(|a, b| a.name.cmp(&b.name));
@@ -529,34 +580,9 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
 
 // -- MDX output --
 
-/// Map element name to its page path under docs/reference/.
-fn element_page_path(name: &str) -> Option<&'static str> {
-    match name {
-        "Rectangle" => Some("elements/rectangle.mdx"),
-        "Text" => Some("elements/text.mdx"),
-        "Image" => Some("elements/image.mdx"),
-        "Path" => Some("elements/path.mdx"),
-        "StyledText" => Some("elements/styled-text.mdx"),
-        "TouchArea" => Some("gestures/toucharea.mdx"),
-        "Flickable" => Some("gestures/flickable.mdx"),
-        "SwipeGestureHandler" => Some("gestures/swipegesturehandler.mdx"),
-        "ScaleRotateGestureHandler" => Some("gestures/scalerotategesturehandler.mdx"),
-        "FocusScope" => Some("keyboard-input/focusscope.mdx"),
-        "TextInput" => Some("keyboard-input/textinput.mdx"),
-        "TextInputInterface" => Some("keyboard-input/textinputinterface.mdx"),
-        "Window" => Some("window/window.mdx"),
-        "Dialog" => Some("window/dialog.mdx"),
-        "PopupWindow" => Some("window/popupwindow.mdx"),
-        "ContextMenuArea" => Some("window/contextmenuarea.mdx"),
-        "MenuBar" => Some("window/menubar.mdx"),
-        "VerticalLayout" => Some("layouts/verticallayout.mdx"),
-        "HorizontalLayout" => Some("layouts/horizontallayout.mdx"),
-        "GridLayout" => Some("layouts/gridlayout.mdx"),
-        "FlexboxLayout" => Some("layouts/flexboxlayout.mdx"),
-        "Timer" => Some("timer.mdx"),
-        "Platform" => Some("global-namespaces/platform.mdx"),
-        _ => None,
-    }
+/// Build a set of internal component names that have their own doc page.
+fn components_with_own_page(all: &BTreeMap<String, ElementDoc>) -> HashSet<String> {
+    all.iter().filter(|(_, e)| !e.doc_file.is_empty()).map(|(k, _)| k.clone()).collect()
 }
 
 fn write_slint_property(
@@ -790,17 +816,14 @@ pub fn generate() -> Result<(), Box<dyn std::error::Error>> {
 
     let enum_names: HashSet<String> = mdx::extract_enum_docs().keys().cloned().collect();
     let struct_names: HashSet<String> = mdx::extract_builtin_structs().keys().cloned().collect();
+    let own_page = components_with_own_page(&all_components);
 
     for elem in &elements {
-        let rel_path = match element_page_path(&elem.name) {
-            Some(p) => p,
-            None => continue,
-        };
-        if elem.description.is_empty() && !elem.members.iter().any(|m| m.has_doc_comment) {
+        if elem.doc_file.is_empty() {
             continue;
         }
 
-        let path = reference_dir.join(rel_path);
+        let path = reference_dir.join(&elem.doc_file);
         if let Some(parent) = path.parent() {
             create_dir_all(parent)?;
         }
@@ -878,7 +901,7 @@ pub fn generate() -> Result<(), Box<dyn std::error::Error>> {
         // Skip children that have their own page.
         let mut seen_children = HashSet::new();
         for child_name in &elem.children {
-            if element_page_path(child_name).is_some() {
+            if own_page.contains(child_name) {
                 continue;
             }
             if let Some(child) = all_components.get(child_name) {
