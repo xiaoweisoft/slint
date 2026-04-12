@@ -11,6 +11,7 @@ pub fn generate() -> Result<(), Box<dyn std::error::Error>> {
     generate_enum_docs()?;
     generate_builtin_struct_docs()?;
     generate_keys_docs()?;
+    crate::element_docs::generate()?;
 
     let root = crate::root_dir();
     let enums = extract_enum_docs();
