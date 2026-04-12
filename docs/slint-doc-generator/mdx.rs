@@ -1,35 +1,21 @@
 // Copyright © SixtyFPS GmbH <info@slint.dev>
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 
-// cspell:ignore slintdocs pipenv pipfile
-
-use anyhow::{Context, Result};
+use anyhow::Context;
 use std::fs::create_dir_all;
 use std::io::{BufWriter, Write};
 use std::path::Path;
-use xshell::{Shell, cmd};
 
+/// Generate all markdown/mdx documentation files.
 pub fn generate() -> Result<(), Box<dyn std::error::Error>> {
     generate_enum_docs()?;
     generate_builtin_struct_docs()?;
     generate_keys_docs()?;
 
-    let root = super::root_dir();
-
-    {
-        let enums = extract_enum_docs();
-        let structs = extract_builtin_structs();
-        write_global_structs_enums_index(&root, &structs, &enums)?;
-    }
-
-    let docs_source_dir = root.join("docs/astro");
-
-    {
-        let sh = Shell::new()?;
-        let _p = sh.push_dir(&docs_source_dir);
-        cmd!(sh, "pnpm install --frozen-lockfile --ignore-scripts").run()?;
-        cmd!(sh, "pnpm run build").run()?;
-    }
+    let root = crate::root_dir();
+    let enums = extract_enum_docs();
+    let structs = extract_builtin_structs();
+    write_global_structs_enums_index(&root, &structs, &enums)?;
 
     Ok(())
 }
@@ -117,7 +103,7 @@ title: {0}
 description: {0} content
 ---
 
-<!-- Generated with `cargo xtask slintdocs` from internal/commons/enums.rs -->
+<!-- Generated with slint-doc-generator from internal/commons/enums.rs -->
 
 `{0}`
 
@@ -179,9 +165,7 @@ pub fn extract_enum_docs() -> std::collections::BTreeMap<String, EnumDoc> {
 
 pub fn generate_enum_docs() -> Result<(), Box<dyn std::error::Error>> {
     let enums = extract_enum_docs();
-
-    write_individual_enum_files(&super::root_dir(), &enums)?;
-
+    write_individual_enum_files(&crate::root_dir(), &enums)?;
     Ok(())
 }
 
@@ -327,7 +311,7 @@ title: {0}
 description: {0} content
 ---
 
-<!-- Generated with `cargo xtask slintdocs` from internal/common/builtin_structs.rs -->
+<!-- Generated with slint-doc-generator from internal/common/builtin_structs.rs -->
 
 `{0}`
 
@@ -348,10 +332,10 @@ description: {0} content
 
 pub fn generate_builtin_struct_docs() -> Result<(), Box<dyn std::error::Error>> {
     let structs = extract_builtin_structs();
-    write_individual_struct_files(&super::root_dir(), structs)
+    write_individual_struct_files(&crate::root_dir(), structs)
 }
 
-/// Convert a ascii pascal case string to kebab case
+/// Convert a ascii pascal case string to kebab case.
 fn to_kebab_case(str: &str) -> String {
     let mut result = Vec::with_capacity(str.len());
     for x in str.as_bytes() {
@@ -368,7 +352,7 @@ fn to_kebab_case(str: &str) -> String {
 }
 
 fn generate_keys_docs() -> Result<(), Box<dyn std::error::Error>> {
-    let root_dir = &super::root_dir();
+    let root_dir = &crate::root_dir();
     let enums_dir = root_dir.join("docs/astro/src/content/collections/enums");
     create_dir_all(&enums_dir).context(format!(
         "Failed to create folder holding individual enum doc files {enums_dir:?}"

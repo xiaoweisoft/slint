@@ -10065,10 +10065,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "slint-docsnapper"
+name = "slint-doc-generator"
 version = "1.16.0"
 dependencies = [
+ "anyhow",
  "clap",
+ "i-slint-common",
  "i-slint-compiler",
  "i-slint-core",
  "i-slint-renderer-skia",
@@ -10078,6 +10080,7 @@ dependencies = [
  "spin_on",
  "termcolor",
  "walkdir",
+ "xshell",
 ]
 
 [[package]]

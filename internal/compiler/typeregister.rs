@@ -628,7 +628,7 @@ impl TypeRegister {
 
         register.elements.remove("DragArea").unwrap();
         register.elements.remove("DropArea").unwrap();
-        register.types.remove("DropEvent").unwrap(); // Also removed in xtask/src/slintdocs.rs
+        register.types.remove("DropEvent").unwrap(); // Also removed in docs/slint-doc-generator
 
         match register.elements.get_mut("Window").unwrap() {
             ElementType::Builtin(b) => {
