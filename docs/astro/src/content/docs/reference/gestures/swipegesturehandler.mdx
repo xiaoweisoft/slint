@@ -62,6 +62,20 @@ If the pointer moves by more than 8 logical pixels in one of the enabled swipe d
 When disabled, the `SwipeGestureHandler` doesn't recognize any gestures.
 </SlintProperty>
 
+### Handle swipe directions properties
+
+### handle-swipe-left
+<SlintProperty propName="handle-swipe-left" typeName="bool"/>
+
+### handle-swipe-right
+<SlintProperty propName="handle-swipe-right" typeName="bool"/>
+
+### handle-swipe-up
+<SlintProperty propName="handle-swipe-up" typeName="bool"/>
+
+### handle-swipe-down
+<SlintProperty propName="handle-swipe-down" typeName="bool"/>
+
 ### pressed-position
 <SlintProperty propName="pressed-position" typeName="struct" structName="Point" propertyVisibility="out">
 The position of the pointer when the swipe started.
@@ -76,20 +90,6 @@ The current pointer position.
 <SlintProperty propName="swiping" typeName="bool" propertyVisibility="out">
 `true` while the gesture is recognized, false otherwise.
 </SlintProperty>
-
-### Handle swipe directions properties
-
-### handle-swipe-left
-<SlintProperty propName="handle-swipe-left" typeName="bool" defaultValue="false"/>
-
-### handle-swipe-right
-<SlintProperty propName="handle-swipe-right" typeName="bool" defaultValue="false"/>
-
-### handle-swipe-up
-<SlintProperty propName="handle-swipe-up" typeName="bool" defaultValue="false"/>
-
-### handle-swipe-down
-<SlintProperty propName="handle-swipe-down" typeName="bool" defaultValue="false"/>
 
 ## Callbacks
 

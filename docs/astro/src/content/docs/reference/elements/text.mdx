@@ -7,7 +7,6 @@ import SlintProperty from '@slint/common-files/src/components/SlintProperty.astr
 import CodeSnippetMD from '@slint/common-files/src/components/CodeSnippetMD.astro';
 import Link from '@slint/common-files/src/components/Link.astro';
 
-
 ```slint playground
 // text-example.slint
 export component TextExample inherits Window {
@@ -55,31 +54,6 @@ Text {
 </CodeSnippetMD>
 </SlintProperty>
 
-
-
-
-### font-family
-<SlintProperty propName="font-family" typeName="string" >
-The name of the font family selected for rendering the text.
-
-<CodeSnippetMD imagePath="/src/assets/generated/text-font-family.png" needsBackground="true" imageWidth="200" imageHeight="200" imageAlt='text font-family'>
-```slint  'font-family: "Comic Sans MS";'
-Text {
-    text: "CoMiC!";
-    color: black;
-    font-size: 40pt;
-    font-family: "Comic Sans MS";
-}
-```
-</CodeSnippetMD>
-
-:::note[Note]
-  Make sure the font is loaded before using it in a `Text` element.
-  See <Link type="FontHandling" /> for more.
-:::
-</SlintProperty>
-
-
 ### font-size
 <SlintProperty propName="font-size" typeName="length">
 The font size of the text.
@@ -112,6 +86,52 @@ Text {
 </CodeSnippetMD>
 </SlintProperty>
 
+### horizontal-alignment
+<SlintProperty propName="horizontal-alignment" typeName="enum" enumName="TextHorizontalAlignment">
+<CodeSnippetMD imagePath="/src/assets/generated/text-horizontal-alignment.png" needsBackground="true" imageWidth="200" imageHeight="200"  imageAlt='text-horizontal-alignment'>
+```slint "horizontal-alignment: left;"
+Text {
+    x: 0;
+    text: "Hello";
+    color: black;
+    font-size: 40pt;
+    horizontal-alignment: left;
+}
+```
+</CodeSnippetMD>
+</SlintProperty>
+
+### text
+<SlintProperty propName="text" typeName="string" defaultValue="&quot;&quot;">
+The text rendered.
+</SlintProperty>
+
+### vertical-alignment
+<SlintProperty propName="vertical-alignment" typeName="enum" enumName="TextVerticalAlignment">
+The vertical alignment of the text.
+</SlintProperty>
+
+### font-family
+<SlintProperty propName="font-family" typeName="string">
+The name of the font family selected for rendering the text.
+
+<CodeSnippetMD imagePath="/src/assets/generated/text-font-family.png" needsBackground="true" imageWidth="200" imageHeight="200" imageAlt='text font-family'>
+```slint  'font-family: "Comic Sans MS";'
+Text {
+    text: "CoMiC!";
+    color: black;
+    font-size: 40pt;
+    font-family: "Comic Sans MS";
+}
+```
+</CodeSnippetMD>
+
+:::note[Note]
+  Make sure the font is loaded before using it in a `Text` element.
+  See <Link type="FontHandling" /> for more.
+:::
+</SlintProperty>
+
 ### font-italic
 <SlintProperty propName="font-italic" typeName="bool" defaultValue="false">
 Whether or not the font face should be drawn italicized or not.
@@ -128,22 +148,21 @@ Text {
 </CodeSnippetMD>
 </SlintProperty>
 
-### font-metrics
-<SlintProperty propName="font-metrics" typeName="struct" structName="FontMetrics" propertyVisibility="out">
-The design metrics of the font scaled to the font pixel size used by the element.
+### overflow
+<SlintProperty propName="overflow" typeName="enum" enumName="TextOverflow">
+How the text should behave when it exceeds the available space.
 </SlintProperty>
 
-### horizontal-alignment
-<SlintProperty propName="horizontal-alignment" typeName="enum" enumName='TextHorizontalAlignment' >
+### wrap
+<SlintProperty propName="wrap" typeName="enum" enumName="TextWrap">
+<CodeSnippetMD imagePath="/src/assets/generated/text_wrap.png" needsBackground="true" imageWidth="200" imageHeight="200" imageAlt='wrap'>
 
-<CodeSnippetMD imagePath="/src/assets/generated/text-horizontal-alignment.png" needsBackground="true" imageWidth="200" imageHeight="200"  imageAlt='text-horizontal-alignment'>
-```slint "horizontal-alignment: left;"
+```slint "wrap: word-wrap;"
 Text {
-    x: 0;
-    text: "Hello";
-    color: black;
-    font-size: 40pt;
-    horizontal-alignment: left;
+    text: "This paragraph breaks into multiple lines of text";
+    font-size: 20pt;
+    wrap: word-wrap;
+    width: 180px;
 }
 ```
 </CodeSnippetMD>
@@ -159,38 +178,6 @@ Text {
     color: black;
     font-size: 30pt;
     letter-spacing: 4px;
-}
-```
-</CodeSnippetMD>
-</SlintProperty>
-
-### overflow
-<SlintProperty propName="overflow" typeName="enum" enumName="TextOverflow">
-How the text should behave when it exceeds the available space.
-</SlintProperty>
-
-### text
-<SlintProperty propName="text" typeName="string" defaultValue='""' >
-The text rendered.
-</SlintProperty>
-
-### vertical-alignment
-<SlintProperty propName="vertical-alignment" typeName="enum" enumName="TextVerticalAlignment">
-The vertical alignment of the text.
-</SlintProperty>
-
-### wrap
-<SlintProperty propName="wrap" typeName="enum" enumName="TextWrap">
-
-
-<CodeSnippetMD imagePath="/src/assets/generated/text_wrap.png" needsBackground="true" imageWidth="200" imageHeight="200" imageAlt='wrap'>
-
-```slint "wrap: word-wrap;"
-Text {
-    text: "This paragraph breaks into multiple lines of text";
-    font-size: 20pt;
-    wrap: word-wrap;
-    width: 180px;
 }
 ```
 </CodeSnippetMD>
@@ -233,6 +220,11 @@ Text {
 }
 ```
 </CodeSnippetMD>
+</SlintProperty>
+
+### font-metrics
+<SlintProperty propName="font-metrics" typeName="struct" structName="FontMetrics" propertyVisibility="out">
+The design metrics of the font scaled to the font pixel size used by the element.
 </SlintProperty>
 
 ## Accessibility

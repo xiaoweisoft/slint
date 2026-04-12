@@ -65,6 +65,7 @@ This single value is applied as both horizontal and vertical spacing between ite
 </SlintProperty>
 
 To target specific directions with different values use the following properties:
+
 ### spacing-horizontal
 <SlintProperty propName="spacing-horizontal" typeName="length">
 The horizontal distance between items in the layout. CSS Flexbox calls this "column-gap".
@@ -77,28 +78,34 @@ The vertical distance between items in the layout. CSS Flexbox calls this "row-g
 
 ## Padding Properties
 
+
 ### padding
 <SlintProperty propName="padding" typeName="length">
 The padding around the layout as a whole. This single value is applied to all sides.
 </SlintProperty>
 
 To target specific sides with different values use the following properties:
+
 ### padding-left
 <SlintProperty propName="padding-left" typeName="length"/>
+
 
 ### padding-right
 <SlintProperty propName="padding-right" typeName="length"/>
 
+
 ### padding-top
 <SlintProperty propName="padding-top" typeName="length"/>
+
 
 ### padding-bottom
 <SlintProperty propName="padding-bottom" typeName="length"/>
 
+
 ## Alignment Properties
 
 ### alignment
-<SlintProperty propName="alignment" typeName="enum" enumName="LayoutAlignment">
+<SlintProperty propName="alignment" typeName="enum" enumName="LayoutAlignment" defaultValue="LayoutAlignment.start">
 Set the alignment of items along the main axis. CSS Flexbox calls this "justify-content".
 Note that the `stretch` value has no effect on FlexboxLayout (main-axis stretching in CSS Flexbox is controlled by `flex-grow`).
 </SlintProperty>
@@ -111,12 +118,6 @@ The primary direction in which items are placed. Set to `row` to place items hor
 It also supports `row-reverse` and `column-reverse` which invert the flow: `row-reverse` places items right-to-left (starting at the right edge), and `column-reverse` places items bottom-to-top (starting at the bottom edge).
 </SlintProperty>
 
-### flex-wrap
-<SlintProperty propName="flex-wrap" typeName="enum" enumName="FlexboxLayoutWrap">
-Controls whether flex items wrap onto multiple lines when they don't fit in the container.
-The default value is `wrap`.
-</SlintProperty>
-
 ### align-content
 <SlintProperty propName="align-content" typeName="enum" enumName="FlexboxLayoutAlignContent">
 Set the distribution of flex lines along the cross axis.
@@ -127,6 +128,12 @@ The default value is `stretch`.
 <SlintProperty propName="align-items" typeName="enum" enumName="FlexboxLayoutAlignItems">
 Set the alignment of individual items along the cross axis within each flex line.
 The default value is `stretch`.
+</SlintProperty>
+
+### flex-wrap
+<SlintProperty propName="flex-wrap" typeName="enum" enumName="FlexboxLayoutWrap">
+Controls whether flex items wrap onto multiple lines when they don't fit in the container.
+The default value is `wrap`.
 </SlintProperty>
 
 ## Per-Item Properties

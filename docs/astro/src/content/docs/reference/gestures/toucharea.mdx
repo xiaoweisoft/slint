@@ -5,9 +5,9 @@ description: TouchArea element api.
 
 import SlintProperty from '@slint/common-files/src/components/SlintProperty.astro';
 import CodeSnippetMD from '@slint/common-files/src/components/CodeSnippetMD.astro';
+import EventResult from '/src/content/collections/enums/EventResult.md';
 import PointerEvent from '/src/content/collections/structs/PointerEvent.md';
 import PointerScrollEvent from '/src/content/collections/structs/PointerScrollEvent.md';
-import EventResult from '/src/content/collections/enums/EventResult.md';
 
 Use `TouchArea` to control what happens when the region it covers is touched or interacted with
 using the mouse.
@@ -77,14 +77,14 @@ be reset to `false`.
 :::
 </SlintProperty>
 
+### pressed
+<SlintProperty propName="pressed" typeName="bool" propertyVisibility="out">
+Set to `true` by the `TouchArea` when the mouse is pressed over it.
+</SlintProperty>
+
 ### has-hover
 <SlintProperty propName="has-hover" typeName="bool" propertyVisibility="out">
 Set to true when the mouse is over the `TouchArea` area.
-</SlintProperty>
-
-### mouse-cursor
-<SlintProperty propName="mouse-cursor" typeName="enum" enumName="MouseCursor">
-The mouse cursor type when the mouse is hovering the `TouchArea`.
 </SlintProperty>
 
 ### mouse-x
@@ -107,9 +107,9 @@ Set by the `TouchArea` to the position of the mouse at the moment it was last pr
 Set by the `TouchArea` to the position of the mouse at the moment it was last pressed.
 </SlintProperty>
 
-### pressed
-<SlintProperty propName="pressed" typeName="bool" propertyVisibility="out">
-Set to `true` by the `TouchArea` when the mouse is pressed over it.
+### mouse-cursor
+<SlintProperty propName="mouse-cursor" typeName="enum" enumName="MouseCursor">
+The mouse cursor type when the mouse is hovering the `TouchArea`.
 </SlintProperty>
 
 ## Callbacks

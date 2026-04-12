@@ -55,11 +55,6 @@ to deliver the key event to the parent element.
 
 ## Properties
 
-### has-focus
-<SlintProperty propName="has-focus" typeName="bool" propertyVisibility="out">
-Is `true` when the element has keyboard focus.
-</SlintProperty>
-
 ### enabled
 <SlintProperty propName="enabled" typeName="bool" defaultValue="true">
 When false, the FocusScope will not accept focus, neither via click nor via tab focus traversal, not even programmatically.
@@ -81,13 +76,10 @@ When true, the `FocusScope` will accept focus as part of the tab focus traversal
 This property has no effect if the `enabled` property is set to false.
 </SlintProperty>
 
-## Functions
-
-### focus()
-Call this function to transfer keyboard focus to this `FocusScope`, to receive future <Link type="KeyEvent" />s.
-
-### clear-focus()
-Call this function to remove keyboard focus from this `FocusScope` if it currently has the focus. See also <Link type="FocusHandling" />.
+### has-focus
+<SlintProperty propName="has-focus" typeName="bool" propertyVisibility="out">
+Is `true` when the element has keyboard focus.
+</SlintProperty>
 
 ## Callbacks
 
@@ -116,7 +108,17 @@ Invoked when the `FocusScope` gains focus. The argument is a a <Link type="Focus
 ### focus-lost(reason: FocusReason)
 Invoked when the `FocusScope` loses focus. The argument is a a <Link type="FocusReason" /> enum containing the reason for focus loss.
 
-## `KeyBinding`
+## Functions
+
+
+### focus()
+Call this function to transfer keyboard focus to this `FocusScope`, to receive future <Link type="KeyEvent" />s.
+
+
+### clear-focus()
+Call this function to remove keyboard focus from this `FocusScope` if it currently has the focus. See also <Link type="FocusHandling" />.
+
+## KeyBinding Sub-Element for `FocusScope`
 
 Place `KeyBinding` elements inside a `FocusScope` to declare keyboard shortcuts.
 KeyBindings use **logical keys**, based on the character a key produces, not physical key positions.
@@ -125,14 +127,14 @@ See <Link type="KeyBindingOverview" label="Key Bindings"/> for details.
 
 ### Properties of `KeyBinding`
 
-#### keys
-<SlintProperty propName="keys" typeName="keys">
-The <Link type="keys" label="keys" /> to match against incoming key events.
-</SlintProperty>
-
 #### enabled
 <SlintProperty propName="enabled" typeName="bool" defaultValue="true">
 Whether this KeyBinding is currently enabled. Disabled KeyBinding elements don't consume key events and never invoke their `activated()` callback.
+</SlintProperty>
+
+#### keys
+<SlintProperty propName="keys" typeName="keys">
+The <Link type="keys" label="keys" /> to match against incoming key events.
 </SlintProperty>
 
 ### Callbacks of `KeyBinding`

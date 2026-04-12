@@ -2,6 +2,7 @@
 title: Timer
 description: Timer element api.
 ---
+
 import SlintProperty from '@slint/common-files/src/components/SlintProperty.astro';
 
 :::note[Note]
@@ -76,6 +77,20 @@ Timer {
 ```
 </SlintProperty>
 
+## Callbacks
+
+### triggered()
+Invoked every time the timer ticks (every `interval`).
+```slint {4-6}
+Timer {
+    property <int> count: 0;
+    interval: 250ms;
+    triggered() => {
+        debug("count is:", count);
+    }
+}
+```
+
 ### running
 <SlintProperty propName="running" typeName="bool" defaultValue="true">
 `true` if the timer is running.
@@ -91,20 +106,6 @@ Timer {
 ```
 </SlintProperty>
 
-## Callbacks
-
-### triggered()
-Invoked every time the timer ticks (every `interval`).
-```slint {4-6}
-Timer {
-    property <int> count: 0;
-    interval: 250ms;
-    triggered() => {
-        debug("count is:", count);
-    }
-}
-```
-
 ## Functions
 
 ### start()
@@ -115,3 +116,4 @@ Stop the timer (equivalent to setting `running` to false).
 
 ### restart()
 Restarts the timer if it was previously started.
+

@@ -53,7 +53,7 @@ The appearance of the joins between segments of stroked paths.
 </SlintProperty>
 
 ### stroke-miter-limit
-<SlintProperty propName="stroke-miter-limit" typeName="float" defaultValue='4'>
+<SlintProperty propName="stroke-miter-limit" typeName="float" defaultValue="4">
 The limit on the ratio of the miter length to the stroke width when `stroke-line-join` is set to `miter`.
 When the limit is exceeded, the join is rendered as a bevel instead.
 </SlintProperty>
@@ -63,21 +63,26 @@ When the limit is exceeded, the join is rendered as a bevel instead.
 If non-zero, the path will be scaled to fit into the specified width.
 </SlintProperty>
 
+
 ### height
 <SlintProperty propName="height" typeName="length">
 If non-zero, the path will be scaled to fit into the specified height.
 </SlintProperty>
+
 
 ## Viewbox Properties
 
 ### viewbox-x
 <SlintProperty propName="viewbox-x" typeName="float"/>
 
+
 ### viewbox-y
 <SlintProperty propName="viewbox-y" typeName="float"/>
 
+
 ### viewbox-width
 <SlintProperty propName="viewbox-width" typeName="float"/>
+
 
 ### viewbox-height
 <SlintProperty propName="viewbox-height" typeName="float"/>
@@ -95,15 +100,18 @@ If no view box is defined, the implicit bounding rectangle is used.
 
 ### clip
 <SlintProperty propName="clip" typeName="bool" defaultValue="false"/>
+
  By default, when a path has a view box defined and the elements render
 outside of it, they are still rendered. When this property is set to `true`, then rendering will be
 clipped at the boundaries of the view box.
 
 ### anti-alias
 <SlintProperty propName="anti-alias" typeName="bool" defaultValue="true"/>
+
  By default, the fill and stroke of a path is rendered with anti-aliasing, for best quality. Some GPUs
  have performance issues when rendering with anti-aliasing and animation. Setting the value to `false`
  might improve the frame-rate at the expense of a smoother looking path.
+
 
 ## Path Using SVG Commands
 
@@ -125,11 +133,13 @@ export component Example inherits Path {
 
 The commands are provided in a property:
 
+
 ### Commands
 <SlintProperty propName="commands" typeName="string">
 A string providing the commands according to the SVG path specification.
 This property can only be set in a binding and cannot be accessed in an expression.
 </SlintProperty>
+
 
 ## Path Using SVG Path Elements
 
@@ -207,9 +217,14 @@ current position to the location specified by the `x` and `y` properties. The re
 are modelled after the SVG specification and allow tuning visual features such as the direction
 or angle.
 
-### large-arc
-<SlintProperty propName="large-arc" typeName="bool">
-Out of the two arcs of a closed ellipse, this flag selects that the larger arc is to be rendered. If the property is `false`, the shorter arc is rendered instead.
+### x
+<SlintProperty propName="x" typeName="float">
+The target x position of the line.
+</SlintProperty>
+
+### y
+<SlintProperty propName="y" typeName="float">
+The target y position of the line.
 </SlintProperty>
 
 ### radius-x
@@ -222,24 +237,19 @@ The x-radius of the ellipse.
 The y-radius of the ellipse.
 </SlintProperty>
 
-### sweep
-<SlintProperty propName="sweep" typeName="bool">
-If the property is `true`, the arc will be drawn as a clockwise turning arc; anti-clockwise otherwise.
-</SlintProperty>
-
 ### x-rotation
 <SlintProperty propName="x-rotation" typeName="float">
 The x-axis of the ellipse will be rotated by the value of this properties, specified in as angle in degrees from 0 to 360.
 </SlintProperty>
 
-### x
-<SlintProperty propName="x" typeName="float">
-The target x position of the line.
+### large-arc
+<SlintProperty propName="large-arc" typeName="bool">
+Out of the two arcs of a closed ellipse, this flag selects that the larger arc is to be rendered. If the property is `false`, the shorter arc is rendered instead.
 </SlintProperty>
 
-### y
-<SlintProperty propName="y" typeName="float">
-The target y position of the line.
+### sweep
+<SlintProperty propName="sweep" typeName="bool">
+If the property is `true`, the arc will be drawn as a clockwise turning arc; anti-clockwise otherwise.
 </SlintProperty>
 
 ## CubicTo Sub-Element for `Path`
