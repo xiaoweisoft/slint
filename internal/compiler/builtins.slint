@@ -30,9 +30,9 @@ component Rectangle inherits Empty {
 }
 
 component BasicBorderRectangle inherits Rectangle {
+    in property <brush> border-color;
     in property <length> border-width;
     in property <length> border-radius;
-    in property <brush> border-color;
 }
 
 component BorderRectangle inherits BasicBorderRectangle {
@@ -48,21 +48,15 @@ export { BorderRectangle as Rectangle }
 component ImageItem inherits Empty {
     in property <length> width;
     in property <length> height;
+    in property <brush> colorize;
     in property <image> source;
     in property <ImageFit> image-fit;
     in property <ImageRendering> image-rendering;
-    in property <brush> colorize;
 
     in property <angle> rotation-angle <=> transform-rotation;
 }
 
 export component ClippedImage inherits ImageItem {
-    in property <int> source-clip-x;
-    in property <int> source-clip-y;
-    in property <int> source-clip-width;
-    in property <int> source-clip-height;
-    //-default_size_binding:implicit_size
-
     in property <ImageHorizontalAlignment> horizontal-alignment;
     in property <ImageVerticalAlignment> vertical-alignment;
     in property <ImageTiling> horizontal-tiling;
@@ -70,6 +64,11 @@ export component ClippedImage inherits ImageItem {
     // TODO: sets both horizontal-tiling and vertical-tiling at the same time.
     // in property <ImageTiling> tiling;
 
+    in property <int> source-clip-x;
+    in property <int> source-clip-y;
+    in property <int> source-clip-width;
+    in property <int> source-clip-height;
+    //-default_size_binding:implicit_size
 }
 
 export { ClippedImage as Image }
@@ -95,11 +94,11 @@ export component Transform inherits Empty {
 component SimpleText inherits Empty {
     in property <length> width;
     in property <length> height;
-    in property <string> text;
+    in property <brush> color;  // StyleMetrics.default-text-color  set in apply_default_properties_from_style
     in property <length> font-size;
     in property <int> font-weight;
-    in property <brush> color;  // StyleMetrics.default-text-color  set in apply_default_properties_from_style
     in property <TextHorizontalAlignment> horizontal-alignment;
+    in property <string> text;
     in property <TextVerticalAlignment> vertical-alignment;
     //-default_size_binding:implicit_size
 
@@ -324,20 +323,20 @@ export component ContextMenuArea inherits Empty {
 component WindowItem {
     in-out property <length> width;
     in-out property <length> height;
-    out property <Edges> safe-area-insets;
-    out property <Point> virtual-keyboard-position;
-    out property <Size> virtual-keyboard-size;
-    in property <brush> background; // StyleMetrics.background  set in apply_default_properties_from_style
-    in property <brush> color <=> background;
-    in property <string> title: "Slint Window";
-    in property <bool> no-frame;
-    in property <length> resize-border-width;
     in property <bool> always-on-top;
     in-out property <bool> full-screen;
+    in property <brush> background; // StyleMetrics.background  set in apply_default_properties_from_style
+    in property <brush> color <=> background;
     in property <string> default-font-family;
     in property <length> default-font-size;
     in property <int> default-font-weight;
     in property <image> icon;
+    in property <bool> no-frame;
+    in property <length> resize-border-width;
+    in property <string> title: "Slint Window";
+    out property <Edges> safe-area-insets;
+    out property <Point> virtual-keyboard-position;
+    out property <Size> virtual-keyboard-size;
     function hide() {
     }
 }
