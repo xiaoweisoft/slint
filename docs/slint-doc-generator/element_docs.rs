@@ -1,5 +1,5 @@
 // Copyright © SixtyFPS GmbH <info@slint.dev>
-// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+// SPDX-License-Identifier: MIT
 
 // Extract documentation from builtins.slint and generate mdx files.
 
@@ -322,7 +322,8 @@ fn extract_members(elem_node: &syntax_nodes::Element) -> Vec<MemberDoc> {
             SyntaxKind::Comment => {
                 if let Some(t) = child.as_token() {
                     let text = t.text();
-                    if let Some(content) = text.strip_prefix("//! ").or_else(|| text.strip_prefix("//!"))
+                    if let Some(content) =
+                        text.strip_prefix("//! ").or_else(|| text.strip_prefix("//!"))
                     {
                         // Merge consecutive non-heading //! lines into one block.
                         if !content.starts_with('#') {
@@ -398,8 +399,7 @@ fn resolve_inheritance(
 
         let elem = components.get_mut(name).unwrap();
         let own_names: HashSet<String> = elem.members.iter().map(|m| m.name.clone()).collect();
-        inherited
-            .retain(|m| m.kind == MemberKind::SectionHeader || !own_names.contains(&m.name));
+        inherited.retain(|m| m.kind == MemberKind::SectionHeader || !own_names.contains(&m.name));
         inherited.append(&mut elem.members);
         elem.members = inherited;
     }
@@ -523,12 +523,9 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
         result.push(ElementDoc {
             name: export_name,
             is_global: elem.is_global,
-            description: resolve_inherited_field(
-                internal_name,
-                &components,
-                &inheritance,
-                |e| &e.description,
-            ),
+            description: resolve_inherited_field(internal_name, &components, &inheritance, |e| {
+                &e.description
+            }),
             footer: resolve_inherited_field(internal_name, &components, &inheritance, |e| {
                 &e.footer
             }),
@@ -555,12 +552,9 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
                     &inheritance,
                     |e| &e.description,
                 ),
-                footer: resolve_inherited_field(
-                    internal_name,
-                    &components,
-                    &inheritance,
-                    |e| &e.footer,
-                ),
+                footer: resolve_inherited_field(internal_name, &components, &inheritance, |e| {
+                    &e.footer
+                }),
                 skip_inherited: false,
                 doc_file: elem.doc_file.clone(),
                 doc_title: elem.doc_title.clone(),
@@ -572,8 +566,7 @@ fn extract_builtin_element_docs() -> (Vec<ElementDoc>, BTreeMap<String, ElementD
 
     // Third pass: non-exported components with a doc-file (e.g. MenuBar).
     // Collect internal names already handled via export aliases.
-    let seen_internal: HashSet<&str> =
-        export_aliases.values().map(|s| s.as_str()).collect();
+    let seen_internal: HashSet<&str> = export_aliases.values().map(|s| s.as_str()).collect();
     for (name, elem) in &components {
         if seen.contains(name.as_str())
             || seen_internal.contains(name.as_str())
@@ -731,8 +724,7 @@ fn write_sub_element(
     if !seen.insert(child_name.to_string()) {
         return Ok(());
     }
-    let has_doc = !child.description.is_empty()
-        || child.members.iter().any(|m| m.has_doc_comment);
+    let has_doc = !child.description.is_empty() || child.members.iter().any(|m| m.has_doc_comment);
     if !has_doc {
         return Ok(());
     }
@@ -744,17 +736,25 @@ fn write_sub_element(
         writeln!(file)?;
     }
 
-    let props: Vec<_> = child.members.iter().filter(|m| m.kind == MemberKind::Property && m.has_doc_comment).collect();
-    let cbs: Vec<_> = child.members.iter().filter(|m| m.kind == MemberKind::Callback && m.has_doc_comment).collect();
-    let fns: Vec<_> = child.members.iter().filter(|m| m.kind == MemberKind::Function && m.has_doc_comment).collect();
+    let props: Vec<_> = child
+        .members
+        .iter()
+        .filter(|m| m.kind == MemberKind::Property && m.has_doc_comment)
+        .collect();
+    let cbs: Vec<_> = child
+        .members
+        .iter()
+        .filter(|m| m.kind == MemberKind::Callback && m.has_doc_comment)
+        .collect();
+    let fns: Vec<_> = child
+        .members
+        .iter()
+        .filter(|m| m.kind == MemberKind::Function && m.has_doc_comment)
+        .collect();
 
     // Use grouped (####) headings when there are multiple member kinds.
     let grouped = (props.len() + cbs.len() + fns.len()) > 0
-        && [!props.is_empty(), !cbs.is_empty(), !fns.is_empty()]
-            .iter()
-            .filter(|&&b| b)
-            .count()
-            > 1;
+        && [!props.is_empty(), !cbs.is_empty(), !fns.is_empty()].iter().filter(|&&b| b).count() > 1;
     let (prop_h, cb_h, fn_h) =
         if grouped { ("####", "####", "####") } else { ("###", "###", "###") };
 
@@ -791,7 +791,16 @@ fn write_sub_element(
     // Recurse into grandchildren.
     for gc_name in &child.children {
         if let Some(gc) = all_components.get(gc_name.as_str()) {
-            write_sub_element(file, gc_name, parent_name, gc, all_components, enums, structs, seen)?;
+            write_sub_element(
+                file,
+                gc_name,
+                parent_name,
+                gc,
+                all_components,
+                enums,
+                structs,
+                seen,
+            )?;
         }
     }
 
@@ -851,8 +860,7 @@ pub fn generate() -> Result<(), Box<dyn std::error::Error>> {
             create_dir_all(parent)?;
         }
         let mut file = BufWriter::new(
-            std::fs::File::create(&path)
-                .map_err(|e| format!("error creating {path:?}: {e}"))?,
+            std::fs::File::create(&path).map_err(|e| format!("error creating {path:?}: {e}"))?,
         );
 
         // Frontmatter.
@@ -886,8 +894,7 @@ pub fn generate() -> Result<(), Box<dyn std::error::Error>> {
         // Sorted struct/enum imports.
         let mut extra_imports = Vec::new();
         for name in &struct_names {
-            if all_text.contains(&format!("<{name} />"))
-                || all_text.contains(&format!("<{name}/>"))
+            if all_text.contains(&format!("<{name} />")) || all_text.contains(&format!("<{name}/>"))
             {
                 extra_imports.push(format!(
                     "import {name} from '/src/content/collections/structs/{name}.md';"
@@ -895,8 +902,7 @@ pub fn generate() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         for name in &enum_names {
-            if all_text.contains(&format!("<{name} />"))
-                || all_text.contains(&format!("<{name}/>"))
+            if all_text.contains(&format!("<{name} />")) || all_text.contains(&format!("<{name}/>"))
             {
                 extra_imports.push(format!(
                     "import {name} from '/src/content/collections/enums/{name}.md';"
@@ -908,10 +914,7 @@ pub fn generate() -> Result<(), Box<dyn std::error::Error>> {
             writeln!(file, "{imp}")?;
         }
         if all_text.contains("<Link ") {
-            writeln!(
-                file,
-                "import Link from '@slint/common-files/src/components/Link.astro';"
-            )?;
+            writeln!(file, "import Link from '@slint/common-files/src/components/Link.astro';")?;
         }
         writeln!(file)?;
 
