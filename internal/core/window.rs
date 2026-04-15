@@ -469,6 +469,9 @@ pub struct WindowInner {
     close_requested: Callback<(), CloseRequestResponse>,
     click_state: ClickState,
     pub(crate) ctx: once_cell::unsync::Lazy<crate::SlintContext>,
+    /// Per-window xdg app id override (takes precedence over context global).
+    #[cfg(all(unix, not(target_os = "macos")))]
+    xdg_app_id_override: RefCell<Option<SharedString>>,
 }
 
 impl Drop for WindowInner {
@@ -532,6 +535,8 @@ impl WindowInner {
             ctx: once_cell::unsync::Lazy::new(|| {
                 crate::context::GLOBAL_CONTEXT.with(|ctx| ctx.get().unwrap().clone())
             }),
+            #[cfg(all(unix, not(target_os = "macos")))]
+            xdg_app_id_override: Default::default(),
         }
     }
 
@@ -1576,9 +1581,23 @@ impl WindowInner {
         self.update_window_properties()
     }
 
-    /// Returns the (context global) xdg app id for use with wayland and x11.
+    /// Returns the xdg app id for use with wayland and x11.
+    /// Checks for a per-window override first, then falls back to the context global.
     pub fn xdg_app_id(&self) -> Option<SharedString> {
+        #[cfg(all(unix, not(target_os = "macos")))]
+        if let Some(id) = self.xdg_app_id_override.borrow().as_ref() {
+            return Some(id.clone());
+        }
         self.ctx.xdg_app_id()
+    }
+
+    /// Set a per-window xdg app id override. Takes precedence over the global app id.
+    /// Must be called before `show()`.
+    pub fn set_xdg_app_id(&self, _app_id: SharedString) {
+        #[cfg(all(unix, not(target_os = "macos")))]
+        {
+            self.xdg_app_id_override.replace(Some(_app_id));
+        }
     }
 
     /// Returns the upgraded window adapter

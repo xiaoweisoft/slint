@@ -596,6 +596,13 @@ impl Window {
         self.0.set_minimized(minimized);
     }
 
+    /// Sets a per-window xdg application id override for Wayland or X11.
+    /// This overrides the global id set by [`set_xdg_app_id()`].
+    /// Must be called before the window is shown.
+    pub fn set_xdg_app_id(&self, app_id: impl Into<SharedString>) {
+        self.0.set_xdg_app_id(app_id.into());
+    }
+
     /// The area of the window covered by the software keyboard is changing (animated).
     #[doc(hidden)]
     pub fn set_virtual_keyboard(
