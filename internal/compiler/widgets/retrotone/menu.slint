@@ -1,0 +1,75 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { RetroTonePalette, RetroToneFontSettings } from "styling.slint";
+import { MenuBarItemBase, MenuBarBase, MenuFrameBase, MenuItemBase } from "../common/menu-base.slint";
+
+export component MenuBarItem {
+    in property <MenuEntry> entry <=> base.entry;
+
+    callback clicked <=> base.clicked;
+    callback hovered <=> base.hovered;
+
+    min-width: base.min-width;
+    min-height: base.min-height;
+
+    base := MenuBarItemBase {
+        horizontal-padding: 11px;
+        top-padding: 4px;
+        bottom-padding: 6px;
+        default-foreground: RetroTonePalette.foreground;
+        hover-foreground: RetroTonePalette.foreground;
+        pressed-foreground: RetroTonePalette.text-secondary;
+        hover-background: RetroTonePalette.subtle-secondary;
+        pressed-background: RetroTonePalette.control-alt-tertiary;
+        font-size: RetroToneFontSettings.body.font-size;
+        font-weight: RetroToneFontSettings.body.font-weight;
+        border-radius: 0px;
+    }
+}
+
+export component MenuBar inherits MenuBarBase {
+    spacing: 10px;
+    min-layout-height: 40px;
+}
+
+export component MenuFrame inherits MenuFrameBase {
+    background: RetroTonePalette.background;
+    border-radius: 0px;
+    border-width: 2px;
+    border-color: RetroTonePalette.border;
+    margin: 5px;
+    layout-min-width: 280px;
+}
+
+export component MenuItem {
+    in property <bool> is-current <=> base.is-current;
+    in property <MenuEntry> entry <=> base.entry;
+
+    callback set-current <=> base.set-current;
+    callback clear-current <=> base.clear-current;
+    callback activate <=> base.activate;
+
+    min-height: entry.is-separator ? 9px : max(32px, base.min-height);
+    max-height: entry.is-separator ? 9px : base.max-height;
+
+    HorizontalLayout {
+        padding: entry.is-separator ? 4px : 1px;
+        padding-left: entry.is-separator ? 0px : 1px;
+        padding-right: entry.is-separator ? 0px : 1px;
+
+        base := MenuItemBase {
+            default-foreground: RetroTonePalette.foreground;
+            current-foreground: RetroTonePalette.foreground;
+            current-background: RetroTonePalette.subtle-secondary;
+            separator-color: RetroTonePalette.border;
+            font-size: RetroToneFontSettings.body.font-size;
+            font-weight: RetroToneFontSettings.body.font-weight;
+            border-radius: 0px;
+            horizontal-padding: 11px;
+            spacing: 8px;
+            sub-menu-icon: @image-url("_arrow_forward.svg");
+            icon-size: 12px;
+        }
+    }
+}

@@ -1,0 +1,38 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+//! This file contains only StyleMetrics and Palette, with minimal dependencies.
+//! It is used by the compiler to avoid loading the entire widget library.
+
+import { RetroTonePalette } from "styling.slint";
+
+export global StyleMetrics {
+    out property <length> layout-spacing: 8px;
+    out property <length> layout-padding: 8px;
+    out property <length> text-cursor-width: 1px;
+    out property <color> window-background: RetroTonePalette.background;
+    out property <color> default-text-color: RetroTonePalette.foreground;
+    out property <color> textedit-background: RetroTonePalette.background;
+    out property <color> textedit-text-color: RetroTonePalette.foreground;
+    out property <color> textedit-background-disabled: RetroTonePalette.control-disabled;
+    out property <color> textedit-text-color-disabled: RetroTonePalette.text-disabled;
+    out property <bool> dark-color-scheme: Palette.color-scheme == ColorScheme.dark;
+}
+
+export global Palette {
+    out property <brush> background: RetroTonePalette.background;
+    out property <brush> foreground: RetroTonePalette.foreground;
+    out property <brush> alternate-background: RetroTonePalette.alternate-background;
+    out property <brush> alternate-foreground: RetroTonePalette.alternate-foreground;
+    out property <brush> control-background: RetroTonePalette.control-background;
+    out property <brush> control-foreground: RetroTonePalette.control-foreground;
+    out property <brush> accent-background: RetroTonePalette.accent-background;
+    out property <brush> accent-foreground: RetroTonePalette.accent-foreground;
+    out property <brush> selection-background: RetroTonePalette.selection-background;
+    out property <brush> selection-foreground: RetroTonePalette.selection-foreground;
+    out property <brush> border: RetroTonePalette.border;
+    in-out property <ColorScheme> color-scheme <=> RetroTonePalette.color-scheme;
+    in-out property <string> theme-engine <=> RetroTonePalette.theme-engine;
+    in-out property <string> font-family <=> RetroTonePalette.font-family;
+    in-out property <color> accent-color-override <=> RetroTonePalette.accent-color-override;
+}

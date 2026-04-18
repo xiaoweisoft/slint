@@ -97,6 +97,8 @@ mod builtin_library {
         ("material-dark", "material"),
         ("cupertino-light", "cupertino"),
         ("cupertino-dark", "cupertino"),
+        ("retrotone-light", "retrotone"),
+        ("retrotone-dark", "retrotone"),
     ];
 
     pub(crate) fn styles() -> Vec<&'static str> {

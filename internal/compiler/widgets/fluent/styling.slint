@@ -42,6 +42,11 @@ export global FluentPalette {
     // Font family — set from Rust, propagates through Palette singleton
     in-out property <string> font-family: "Microsoft YaHei";
 
+    // Accent color overrides — set from Rust (user's chosen accent)
+    // When alpha > 0, overrides the default accent for the respective theme engine.
+    in-out property <color> accent-color-override: #00000000;
+    in-out property <color> retro-accent-color-override: #00000000;
+
     // base palette — retrotone overrides with CRT amber (dark) / parchment (light) colors
     out property <brush> background:
         retro ? (dark-color-scheme ? #1A1A08 : #F0E8C8)
@@ -62,14 +67,17 @@ export global FluentPalette {
         retro ? (dark-color-scheme ? #E0D090 : #2A2810)
         : (dark-color-scheme ? #FFFFFF : #000000E6);
     out property <brush> accent-background:
-        retro ? (dark-color-scheme ? #F0A820 : #C88018)
-        : (dark-color-scheme ? #60CDFF : #005FB8);
+        retro ? (retro-accent-color-override.alpha > 0 ? retro-accent-color-override
+                 : (dark-color-scheme ? #F0A820 : #C88018))
+        : (accent-color-override.alpha > 0 ? accent-color-override
+           : (dark-color-scheme ? #60CDFF : #005FB8));
     out property <brush> accent-foreground:
         retro ? (dark-color-scheme ? #1A1A08 : #F0E8C8)
         : (dark-color-scheme ? #000000 : #FFFFFF);
     out property <brush> selection-background:
-        retro ? (dark-color-scheme ? #F0A820 : #C88018)
-        : #0078D4;
+        retro ? (retro-accent-color-override.alpha > 0 ? retro-accent-color-override
+                 : (dark-color-scheme ? #F0A820 : #C88018))
+        : (accent-color-override.alpha > 0 ? accent-color-override : #0078D4);
     out property <brush> selection-foreground:
         retro ? (dark-color-scheme ? #1A1A08 : #F0E8C8)
         : (dark-color-scheme ? #000000 : #FFFFFF);
@@ -79,11 +87,15 @@ export global FluentPalette {
 
     // additional palette — retrotone uses flat, opaque variants derived from base colors
     out property <brush> secondary-accent-background:
-        retro ? (dark-color-scheme ? #D89818 : #B07010)
-        : (dark-color-scheme ? #60CDFFE6 : #005FB8E6);
+        retro ? (retro-accent-color-override.alpha > 0 ? retro-accent-color-override.transparentize(10%)
+                 : (dark-color-scheme ? #D89818 : #B07010))
+        : (accent-color-override.alpha > 0 ? accent-color-override.transparentize(10%)
+           : (dark-color-scheme ? #60CDFFE6 : #005FB8E6));
     out property <brush> tertiary-accent-background:
-        retro ? (dark-color-scheme ? #C08810 : #986008)
-        : (dark-color-scheme ? #60CDFFCC : #005FB8CC);
+        retro ? (retro-accent-color-override.alpha > 0 ? retro-accent-color-override.transparentize(20%)
+                 : (dark-color-scheme ? #C08810 : #986008))
+        : (accent-color-override.alpha > 0 ? accent-color-override.transparentize(20%)
+           : (dark-color-scheme ? #60CDFFCC : #005FB8CC));
     out property <brush> accent-disabled:
         retro ? (dark-color-scheme ? #504820 : #B0A880)
         : (dark-color-scheme ? #FFFFFF29 : #00000038);
