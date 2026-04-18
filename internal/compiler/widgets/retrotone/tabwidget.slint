@@ -28,18 +28,13 @@ export component TabWidgetImpl inherits Rectangle {
 }
 
 export component TabImpl inherits Rectangle {
-    // The currently focused tab
     in property <int> current-focused;
-    // The index of this tab
     in property <int> tab-index;
-    // The total number of tabs
     in property <int> num-tabs;
     in property <string> title <=> i-text.text;
     in property <bool> enabled: true;
     out property <bool> has-focus: root.current-focused == root.tab-index;
-    // The currently selected tab
     in-out property <int> current;
-    private property <bool> hide-right-border: root.tab-index == root.num-tabs - 1 || tab-index + 1 == current;
     private property <bool> is-current: root.tab-index == root.current;
     min-width: max(32px, i-text.min-width);
     min-height: max(32px, i-text.min-height);
@@ -54,19 +49,13 @@ export component TabImpl inherits Rectangle {
     accessible-action-default => {
         i-touch-area.clicked();
     }
-    Rectangle {
-        clip: true;
-        width: 100%;
-        height: 100%;
-        i-background := Rectangle {
-            y: 1px;
-            width: 100%;
-            height: parent.height + self.border-radius;
-            border-radius: 0px;
-            border-width: root.is-current ? 1px : 0px;
-            border-color: RetroTonePalette.card-stroke;
-            background: i-touch-area.pressed || root.is-current ? RetroTonePalette.layer-on-mica-base-alt : i-touch-area.has-hover ? RetroTonePalette.layer-on-mica-base-alt-secondary : transparent;
-        }
+
+    // 2px accent bottom underline on active tab
+    if root.is-current : Rectangle {
+        y: parent.height - 2px;
+        width: parent.width;
+        height: 2px;
+        background: RetroTonePalette.accent-background;
     }
 
     i-touch-area := TouchArea {
@@ -76,41 +65,25 @@ export component TabImpl inherits Rectangle {
         }
     }
 
-    i-layout := HorizontalLayout {
-        padding-left: 12px;
-        padding-right: 12px;
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
         i-text := Text {
             vertical-alignment: center;
             horizontal-alignment: left;
-            font-size: root.is-current ? RetroToneFontSettings.body-strong.font-size : RetroToneFontSettings.body.font-size;
+            font-size: RetroToneFontSettings.body.font-size;
             font-weight: root.is-current ? RetroToneFontSettings.body-strong.font-weight : RetroToneFontSettings.body.font-weight;
-            color: root.is-current ? RetroTonePalette.control-foreground : RetroTonePalette.text-secondary;
+            color: root.is-current ? RetroTonePalette.foreground : RetroTonePalette.text-secondary;
             accessible-role: none;
         }
     }
 
-    if (!root.is-current && !root.hide-right-border && !i-touch-area.has-hover && !i-touch-area.pressed): Rectangle {
-        x: (parent.width - self.width);
-        width: 2px;
-        height: 16px;
-        background: RetroTonePalette.divider;
-    }
-    if (!root.is-current && !i-touch-area.has-hover && !i-touch-area.pressed): Rectangle {
-        y: (parent.height - self.height);
-        width: 100%;
-        height: 1px;
-        background: RetroTonePalette.divider;
-    }
-
-    // focus border
     if (root.has-focus && root.enabled): FocusBorder {
-        border-radius: i-background.border-radius;
+        border-radius: 0px;
     }
 }
 
-component FluentTabBarBase inherits TabBarBase {
-    // injected properties:
-    // The currently focused tab
+component RetroToneTabBarBase inherits TabBarBase {
     in-out property <int> current-focused: i-focus-scope.has-focus ? i-focus-scope.focused-tab : -1;
     accessible-role: tab-list;
     accessible-delegate-focus: root.current-focused >= 0 ? root.current-focused : root.current;
@@ -118,7 +91,6 @@ component FluentTabBarBase inherits TabBarBase {
     i-focus-scope := FocusScope {
         property <int> focused-tab: 0;
         x: 0;
-        // Do not react on clicks
         width: 0px;
         key-pressed(event) => {
             if (event.text == "\n") {
@@ -145,7 +117,7 @@ component FluentTabBarBase inherits TabBarBase {
     }
 }
 
-export component TabBarHorizontalImpl inherits FluentTabBarBase {
+export component TabBarHorizontalImpl inherits RetroToneTabBarBase {
     Flickable {
         HorizontalLayout {
             @children
@@ -153,7 +125,7 @@ export component TabBarHorizontalImpl inherits FluentTabBarBase {
     }
 }
 
-export component TabBarVerticalImpl inherits FluentTabBarBase {
+export component TabBarVerticalImpl inherits RetroToneTabBarBase {
     Flickable {
         VerticalLayout {
             @children

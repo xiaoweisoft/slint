@@ -9,17 +9,20 @@ component SpinBoxButton {
 
     in property <image> icon <=> icon.source;
 
-    min-width: 28px;
+    min-width: 24px;
     horizontal-stretch: 0;
 
     states [
         pressed when touch-area.pressed : {
-            background.background: RetroTonePalette.subtle;
+            icon.colorize: RetroTonePalette.accent-background;
+        }
+        hover when touch-area.has-hover : {
+            icon.colorize: RetroTonePalette.foreground;
         }
     ]
 
-    background := Rectangle {
-        border-radius: 0px;
+    Rectangle {
+        background: transparent;
 
         icon := Image {
             image-fit: contain;
@@ -45,7 +48,7 @@ export component SpinBox {
     callback edited <=> base.edited;
 
     min-width: max(128px, layout.min-width);
-    min-height: max(30px, layout.min-height);
+    min-height: max(32px, layout.min-height);
     vertical-stretch: 0;
     horizontal-stretch: 1;
     forward-focus: base;
@@ -63,27 +66,20 @@ export component SpinBox {
 
     states [
         disabled when !root.enabled : {
-            background.background: RetroTonePalette.control-disabled;
-            background.border-color: RetroTonePalette.border;
             base.color: RetroTonePalette.text-disabled;
             base.selection-foreground-color: RetroTonePalette.text-accent-foreground-disabled;
         }
         focused when root.has-focus : {
-            background.background: RetroTonePalette.control-input-active;
-            background.border-color: RetroTonePalette.border;
             focus-border.background: RetroTonePalette.accent-background;
         }
     ]
 
-    background := Rectangle {
-        border-radius: 0px;
-        background: RetroTonePalette.control-background;
-        border-width: 2px;
-        border-color: RetroTonePalette.text-control-border;
+    Rectangle {
+        background: transparent;
 
         layout := HorizontalLayout {
-            padding-left: 12px;
-            padding-right: 2px;
+            padding-left: 8px;
+            padding-right: 4px;
             padding-top: 4px;
             padding-bottom: 4px;
             spacing: 4px;
@@ -122,10 +118,11 @@ export component SpinBox {
         }
 
         focus-border := Rectangle {
-            x: parent.border-radius;
+            x: 0;
             y: parent.height - self.height;
-            width: parent.width - 2 * parent.border-radius;
-            height: 2px;
+            width: parent.width;
+            height: 1px;
+            background: RetroTonePalette.border;
         }
     }
 }

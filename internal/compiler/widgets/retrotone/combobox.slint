@@ -33,19 +33,16 @@ export component ComboBox {
 
     states [
         disabled when !root.enabled : {
-            background.background: RetroTonePalette.control-disabled;
-            background.border-color: RetroTonePalette.border;
             text.color: RetroTonePalette.text-disabled;
             icon.colorize: RetroTonePalette.text-disabled;
         }
         pressed when base.pressed : {
-            background.background: RetroTonePalette.control-alt-tertiary;
-            background.border-color: RetroTonePalette.border;
             text.color: RetroTonePalette.text-secondary;
             icon.colorize: RetroTonePalette.text-tertiary;
         }
         hover when base.has-hover : {
-            background.background: RetroTonePalette.control-secondary;
+            text.color: RetroTonePalette.accent-background;
+            icon.colorize: RetroTonePalette.accent-background;
         }
     ]
 
@@ -61,15 +58,12 @@ export component ComboBox {
         }
     }
 
-    background := Rectangle {
-        border-radius: 0px;
-        background: RetroTonePalette.control-background;
-        border-width: 2px;
-        border-color: RetroTonePalette.control-border;
+    Rectangle {
+        background: transparent;
 
         layout := HorizontalLayout {
-            padding-left: 11px;
-            padding-right: 11px;
+            padding-left: 8px;
+            padding-right: 8px;
             spacing: 8px;
 
             text := Text {
@@ -90,17 +84,24 @@ export component ComboBox {
                 accessible-role: none;
             }
         }
+
+        // Bottom border — accent when focused
+        Rectangle {
+            x: 0;
+            y: parent.height - self.height;
+            width: parent.width;
+            height: root.has-focus ? 2px : 1px;
+            background: root.has-focus ? RetroTonePalette.accent-background : RetroTonePalette.border;
+        }
     }
 
     // focus border
     if root.has-focus && root.enabled : FocusBorder {
-        border-radius: background.border-radius;
+        border-radius: 0px;
     }
 
     popup := PopupWindow {
         x: 0;
-        // Position the popup so that the first element is over the popup.
-        // Ideally it should be so that the current element is over the popup.
         y: -4px;
         width: root.width;
         height: root.visible-items * RetroToneSizeSettings.item-height +  2 * root.popup-padding;

@@ -15,7 +15,7 @@ component ScrollViewButton inherits TouchArea {
         y: (parent.height - self.height) / 2;
         width: parent.width;
         source: root.icon;
-        colorize: RetroTonePalette.border;
+        colorize: RetroTonePalette.text-secondary;
         accessible-role: none;
     }
 
@@ -26,7 +26,7 @@ component ScrollViewButton inherits TouchArea {
         }
         hover when root.has-hover : {
             opacity: 1;
-            icon.colorize: RetroTonePalette.text-secondary;
+            icon.colorize: RetroTonePalette.foreground;
         }
     ]
 }
@@ -46,15 +46,12 @@ component ScrollBar inherits Rectangle {
     property <length> track-size: root.horizontal ? root.width - 2 * root.offset : root.height - 2 * offset;
     property <length> step-size: 10px;
 
-    border-width: 2px;
-    border-radius: 0px;
     visible: (self.policy == ScrollBarPolicy.always-on) || (self.policy == ScrollBarPolicy.as-needed && self.maximum > 0);
     clip: true;
 
     states [
         hover when touch-area.has-hover || down-scroll-button.has-hover || up-scroll-button.has-hover : {
-            root.background: RetroTonePalette.alternate-background;
-            root.size: 6px;
+            root.size: 4px;
             up-scroll-button.opacity: 1;
             down-scroll-button.opacity: 1;
         }
@@ -65,8 +62,8 @@ component ScrollBar inherits Rectangle {
         height: root.horizontal ? root.size : root.maximum <= 0phx ? 0phx : max(min(16px, root.height), root.track-size * (root.page-size / (root.maximum + root.page-size)));
         x: !root.horizontal ? parent.width - 4px - self.width : root.offset + (root.track-size - thumb.width) * (-root.value / root.maximum);
         y: root.horizontal ? parent.height - 4px - self.height : root.offset + (root.track-size - thumb.height) * (-root.value / root.maximum);
-        border-radius: (root.horizontal ? self.height : self.width) / 2;
-        background: RetroTonePalette.border;
+        border-radius: 0px;
+        background: RetroTonePalette.text-secondary;
     }
 
     touch-area := TouchArea {
@@ -87,10 +84,6 @@ component ScrollBar inherits Rectangle {
 
         moved => {
             if (self.enabled && self.pressed) {
-                // Update reference points when the size of the viewport changes to
-                // avoid 'jumping' during scrolling.
-                // This happens when height estimate of a ListView changes after
-                // new items are loaded.
                 if (self.saved-values.maximum != root.maximum) {
                     self.update-saved-values();
                 }
@@ -176,7 +169,7 @@ export component ScrollView {
 
     vertical-bar := ScrollBar {
         enabled: root.enabled;
-        width: 14px;
+        width: 8px;
         x: flickable.width + flickable.x - self.width;
         y: flickable.y;
         height: horizontal-bar.visible ? parent.height - horizontal-bar.height : parent.height;
@@ -190,7 +183,7 @@ export component ScrollView {
     horizontal-bar := ScrollBar {
         enabled: root.enabled;
         width: vertical-bar.visible ? parent.width - vertical-bar.width : parent.width;
-        height: 14px;
+        height: 8px;
         y: flickable.height + flickable.y - self.height;
         x: flickable.x;
         horizontal: true;

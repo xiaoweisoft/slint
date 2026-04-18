@@ -18,7 +18,7 @@ export component Button {
 
     callback clicked;
 
-    private property <brush> text-color: primary || checked ? RetroTonePalette.accent-foreground : RetroTonePalette.control-foreground;
+    private property <brush> text-color: primary ? RetroTonePalette.accent-background : RetroTonePalette.control-foreground;
 
     min-width: max(32px, i-layout.min-width);
     min-height: max(32px, i-layout.min-height);
@@ -35,40 +35,27 @@ export component Button {
 
     states [
         disabled when !root.enabled : {
-            i-background.background: root.primary || root.checked ? RetroTonePalette.accent-disabled : RetroTonePalette.control-disabled;
-            i-border.border-color: root.primary || root.checked ? transparent : RetroTonePalette.border;
-            root.text-color: root.primary || root.checked ? RetroTonePalette.text-accent-foreground-disabled : RetroTonePalette.text-disabled;
+            root.text-color: RetroTonePalette.text-disabled;
         }
         pressed when root.pressed : {
-            i-background.background: root.primary || root.checked ? RetroTonePalette.tertiary-accent-background : RetroTonePalette.control-tertiary;
-            i-border.border-color: RetroTonePalette.border;
-            root.text-color: root.primary || root.checked ? RetroTonePalette.text-accent-foreground-secondary : RetroTonePalette.text-secondary;
+            root.text-color: RetroTonePalette.text-secondary;
         }
         hover when i-touch-area.has-hover : {
-            i-background.background: root.primary || root.checked ? RetroTonePalette.secondary-accent-background : RetroTonePalette.control-secondary;
+            root.text-color: RetroTonePalette.accent-background;
         }
         checked when root.checked : {
-            i-background.background: RetroTonePalette.accent-background;
-            i-border.border-color: RetroTonePalette.accent-control-border;
-            root.text-color: RetroTonePalette.accent-foreground;
+            root.text-color: RetroTonePalette.accent-background;
         }
     ]
 
-    i-background := Rectangle {
-        border-radius: 0px;
-        background: root.primary ? RetroTonePalette.accent-background : RetroTonePalette.control-background;
-
-        i-border := Rectangle {
-            border-radius: parent.border-radius;
-            border-width: 2px;
-            border-color: root.primary ? RetroTonePalette.accent-control-border : RetroTonePalette.control-border;
-        }
+    Rectangle {
+        background: transparent;
 
         i-layout := HorizontalLayout {
-            padding-left: 12px;
-            padding-right: 12px;
-            padding-top: 5px;
-            padding-bottom: 5px;
+            padding-left: 8px;
+            padding-right: 8px;
+            padding-top: 4px;
+            padding-bottom: 4px;
             spacing: 4px;
             alignment: center;
 
@@ -90,6 +77,15 @@ export component Button {
                 accessible-role: none;
             }
         }
+
+        // Accent underline for checked/active state
+        if root.checked : Rectangle {
+            x: i-layout.padding-left;
+            y: parent.height - 2px;
+            width: parent.width - i-layout.padding-left - i-layout.padding-right;
+            height: 2px;
+            background: RetroTonePalette.accent-background;
+        }
     }
 
     i-touch-area := TouchArea {
@@ -103,7 +99,7 @@ export component Button {
 
     i-focus-scope := FocusScope {
         x: 0;
-        width: 0; // Do not react on clicks
+        width: 0;
         enabled <=> root.enabled;
 
         key-pressed(event) => {
@@ -116,8 +112,7 @@ export component Button {
         }
     }
 
-    // focus border
     if (root.has-focus && root.enabled) : FocusBorder {
-        border-radius: i-background.border-radius;
+        border-radius: 0px;
     }
 }

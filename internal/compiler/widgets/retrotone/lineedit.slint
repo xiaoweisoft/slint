@@ -59,29 +59,24 @@ export component LineEdit {
 
     states [
         disabled when !root.enabled : {
-            background.background: RetroTonePalette.control-disabled;
-            background.border-color: RetroTonePalette.border;
             base.text-color: RetroTonePalette.text-disabled;
             base.selection-foreground-color: RetroTonePalette.text-accent-foreground-disabled;
             base.placeholder-color: RetroTonePalette.text-disabled;
+            focus-border.background: RetroTonePalette.control-strong-stroke-disabled;
         }
         focused when root.has-focus : {
-            background.background: RetroTonePalette.control-input-active;
-            background.border-color: RetroTonePalette.border;
             focus-border.background: RetroTonePalette.accent-background;
+            focus-border.height: 2px;
             base.placeholder-color: RetroTonePalette.text-tertiary;
         }
     ]
 
-    background := Rectangle {
-        border-radius: 0px;
-        background: RetroTonePalette.control-background;
-        border-width: 2px;
-        border-color: RetroTonePalette.text-control-border;
+    Rectangle {
+        background: transparent;
 
         layout := HorizontalLayout {
-            padding-left: 12px;
-            padding-right: 12px;
+            padding-left: 8px;
+            padding-right: 8px;
 
             base := LineEditBase {
                 input-type: root.input-type;
@@ -120,11 +115,13 @@ export component LineEdit {
             }
         }
 
+        // Bottom border only
         focus-border := Rectangle {
-            x: parent.border-radius;
+            x: 0;
             y: parent.height - self.height;
-            width: parent.width - 2 * parent.border-radius;
-            height: 2px;
+            width: parent.width;
+            height: 1px;
+            background: RetroTonePalette.border;
         }
     }
 }

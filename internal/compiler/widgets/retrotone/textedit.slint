@@ -63,26 +63,23 @@ export component TextEdit {
 
     states [
         disabled when !root.enabled: {
-            base.background: RetroTonePalette.control-disabled;
-            base.border-color: RetroTonePalette.border;
             base.foreground: RetroTonePalette.text-disabled;
             base.selection-foreground-color: RetroTonePalette.text-accent-foreground-disabled;
+            i-focus-border.background: RetroTonePalette.control-strong-stroke-disabled;
         }
         focused when root.has-focus: {
-            base.background: RetroTonePalette.control-input-active;
-            base.border-color: RetroTonePalette.border;
             i-focus-border.background: RetroTonePalette.accent-background;
+            i-focus-border.height: 2px;
         }
     ]
 
     base := TextEditBase {
         width: 100%;
         height: 100%;
-        background: RetroTonePalette.control-background;
+        background: transparent;
         border-radius: 0px;
-        border-width: 2px;
-        border-color: RetroTonePalette.text-control-border;
-        scroll-view-padding: 12px;
+        border-width: 0px;
+        scroll-view-padding: 8px;
         foreground: RetroTonePalette.foreground;
         font-size: RetroToneFontSettings.body.font-size;
         font-weight: RetroToneFontSettings.body.font-weight;
@@ -91,10 +88,11 @@ export component TextEdit {
         selection-foreground-color: RetroTonePalette.selection-foreground;
 
         i-focus-border := Rectangle {
-            x: parent.border-radius;
+            x: 0;
             y: parent.height - self.height;
-            width: parent.width - 2 * parent.border-radius;
-            height: 2px;
+            width: parent.width;
+            height: 1px;
+            background: RetroTonePalette.border;
         }
     }
 }

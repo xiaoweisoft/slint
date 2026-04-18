@@ -4,28 +4,16 @@
 import { RetroTonePalette, RetroToneFontSettings, RetroToneSizeSettings } from "styling.slint";
 
 export component FocusBorder inherits Rectangle {
-    border-width: 3px;
-    border-color: RetroTonePalette.focus-stroke-outer;
-
-    Rectangle {
-        x: parent.border-width;
-        y: parent.border-width;
-        width: parent.width - 2 * parent.border-width;
-        height: parent.height - 2 * parent.border-width;
-        border-width: 2px;
-        border-radius: parent.border-radius - 2px;
-        border-color: RetroTonePalette.focus-stroke-inner;
-    }
+    border-width: 2px;
+    border-color: RetroTonePalette.accent-background;
 }
 
 export component MenuBorder inherits Rectangle {
-    border-radius: 0px;
-    background: RetroTonePalette.alternate-background;
+    background: transparent;
 
     Rectangle {
-        border-width: 2px;
-        border-radius: parent.border-radius;
-        border-color: RetroTonePalette.control-background-stroke-flyout;
+        border-width: 1px;
+        border-color: RetroTonePalette.border;
     }
 }
 
@@ -40,7 +28,7 @@ export component ListItem {
     in property <length> pressed-y;
 
     min-width: i-layout.min-width;
-    min-height: max(RetroToneSizeSettings.item-height, i-layout.min-height);
+    min-height: max(32px, i-layout.min-height);
     vertical-stretch: 0;
     horizontal-stretch: 1;
     accessible-role: list-item;
@@ -51,16 +39,14 @@ export component ListItem {
 
     states [
         pressed when root.pressed : {
-            i-background.background: is-selected ? RetroTonePalette.subtle-secondary : RetroTonePalette.subtle-tertiary;
+            i-text.color: RetroTonePalette.accent-background;
         }
         hover when root.has-hover : {
-            i-text.color: RetroTonePalette.text-secondary;
-            i-background.background: is-selected ? RetroTonePalette.subtle-tertiary : RetroTonePalette.subtle-secondary;
-            i-selector.height: root.is-selected ? 16px : 0;
+            i-text.color: RetroTonePalette.foreground;
         }
         is-selected when root.is-selected : {
-            i-background.background: RetroTonePalette.subtle-secondary;
-            i-selector.height: 16px;
+            i-text.color: RetroTonePalette.foreground;
+            i-text.font-weight: RetroToneFontSettings.body-strong.font-weight;
         }
     ]
 
@@ -68,11 +54,19 @@ export component ListItem {
         border-radius: 0px;
     }
 
+    // Thin 2px accent left bar for selected state
+    if root.is-selected : Rectangle {
+        x: 0;
+        y: (parent.height - self.height) / 2;
+        width: 2px;
+        height: parent.height - 8px;
+        background: RetroTonePalette.accent-background;
+    }
+
     i-background := Rectangle {
-        width: root.width - 6px;
-        height: root.height - 4px;
+        width: root.width;
+        height: root.height;
         background: transparent;
-        border-radius: 0px;
 
         i-layout := HorizontalLayout {
             padding-left: 16px;
@@ -81,7 +75,7 @@ export component ListItem {
 
             i-text := Text {
                 text: root.item.text;
-                color: RetroTonePalette.control-foreground;
+                color: RetroTonePalette.text-secondary;
                 font-size: RetroToneFontSettings.body.font-size;
                 font-weight: RetroToneFontSettings.body.font-weight;
                 vertical-alignment: center;
@@ -89,15 +83,6 @@ export component ListItem {
                 overflow: elide;
                 accessible-role: none;
             }
-        }
-
-        i-selector := Rectangle {
-            x: 0px;
-            y: (parent.height - self.height) / 2;
-            width: 3px;
-            height: 0px;
-            background: RetroTonePalette.accent-background;
-            border-radius: 0px;
         }
     }
 

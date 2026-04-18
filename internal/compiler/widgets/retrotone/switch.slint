@@ -42,30 +42,20 @@ export component Switch {
 
     states [
         disabled when !root.enabled : {
-            rail.background: root.checked ? RetroTonePalette.accent-disabled : transparent;
             rail.border-color: RetroTonePalette.control-strong-stroke-disabled;
             thumb.background: RetroTonePalette.text-disabled;
             root.text-color: RetroTonePalette.text-disabled;
-            thumb.background: root.checked ? RetroTonePalette.text-accent-foreground-disabled : RetroTonePalette.text-secondary;
         }
         pressed when touch-area.pressed : {
-            rail.background: root.checked ? RetroTonePalette.tertiary-accent-background : RetroTonePalette.control-alt-quartiary;
-            thumb.width: 17px;
-            thumb.height: 14px;
-            thumb.border-width: root.checked ? 1px : 0;
-            thumb.background: root.checked ? RetroTonePalette.accent-foreground : RetroTonePalette.text-secondary;
+            thumb.background: root.checked ? RetroTonePalette.accent-background : RetroTonePalette.text-secondary;
         }
         hover when touch-area.has-hover : {
-            rail.background:  root.checked ? RetroTonePalette.secondary-accent-background : RetroTonePalette.control-alt-tertiary;
-            thumb.width: 14px;
-            thumb.border-width: root.checked ? 1px : 0;
-            thumb.background: root.checked ? RetroTonePalette.accent-foreground : RetroTonePalette.text-secondary;
+            rail.border-color: RetroTonePalette.accent-background;
+            thumb.background: root.checked ? RetroTonePalette.accent-background : RetroTonePalette.text-secondary;
         }
         selected when root.checked : {
-            rail.background: RetroTonePalette.accent-background;
-            thumb.border-width: 2px;
-            thumb.border-color: RetroTonePalette.circle-border;
-            thumb.background: RetroTonePalette.accent-foreground;
+            rail.border-color: RetroTonePalette.accent-background;
+            thumb.background: RetroTonePalette.accent-background;
         }
     ]
 
@@ -77,28 +67,24 @@ export component Switch {
 
            Rectangle {
                 width: 40px;
-                height: 20px;
+                height: 16px;
 
                 rail := Rectangle {
-                    border-radius: 0px;
-                    border-width: root.checked ? 0 : 1px;
+                    border-width: 1px;
                     border-color: RetroTonePalette.control-strong-stroke;
-                    background: RetroTonePalette.control-alt-secondary;
+                    background: transparent;
                 }
 
                 thumb := Rectangle {
-                    x: root.checked ? parent.width - self.width - 4px : 4px;
+                    x: root.checked ? parent.width - self.width - 1px : 1px;
                     y: (parent.height - self.height) / 2;
-                    width: 12px;
-                    height: self.width;
-                    border-radius: self.height / 2;
+                    width: 14px;
+                    height: 14px;
                     background: RetroTonePalette.text-secondary;
-                    border-color: RetroTonePalette.circle-border;
                 }
 
-                // focus border
                 if root.has-focus && root.enabled : FocusBorder {
-                    border-radius: rail.border-radius;
+                    border-radius: 0px;
                 }
             }
         }
@@ -123,7 +109,7 @@ export component Switch {
 
     focus-scope := FocusScope {
         x:0;
-        width: 0px; // Do not react on clicks
+        width: 0px;
         enabled <=> root.enabled;
 
         key-pressed(event) => {

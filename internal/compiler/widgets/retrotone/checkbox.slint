@@ -14,7 +14,7 @@ export component CheckBox {
 
     private property <color> text-color: RetroTonePalette.foreground;
 
-    min-height: max(18px, layout.min-height);
+    min-height: max(24px, layout.min-height);
     accessible-checkable: true;
     accessible-enabled: root.enabled;
     accessible-label: root.text;
@@ -31,44 +31,39 @@ export component CheckBox {
     states [
         disabled when !root.enabled : {
             border.border-color: RetroTonePalette.control-strong-stroke-disabled;
-            background.background: root.checked ? RetroTonePalette.accent-disabled : RetroTonePalette.control-alt-disabled;
-            icon.colorize: RetroTonePalette.text-accent-foreground-disabled;
             root.text-color: RetroTonePalette.text-disabled;
+            icon.colorize: RetroTonePalette.text-disabled;
         }
         pressed when touch-area.pressed : {
-            border.border-color: RetroTonePalette.control-strong-stroke-disabled;
-            background.background: root.checked ? RetroTonePalette.tertiary-accent-background : RetroTonePalette.control-alt-quartiary;
-            icon.colorize: RetroTonePalette.text-accent-foreground-secondary;
+            border.border-color: RetroTonePalette.accent-background;
         }
         hover when touch-area.has-hover : {
-            background.background: root.checked ?  RetroTonePalette.secondary-accent-background : RetroTonePalette.control-alt-tertiary;
+            border.border-color: RetroTonePalette.accent-background;
         }
         checked when root.checked && root.enabled : {
-            background.background: RetroTonePalette.accent-background;
+            border.border-color: RetroTonePalette.accent-background;
         }
     ]
 
     layout := HorizontalLayout {
         spacing: 12px;
 
-        background := Rectangle {
+        Rectangle {
             width: 18px;
             height: self.width;
             y: (parent.height - self.height) / 2;
-            background: RetroTonePalette.control-alt-secondary;
-            border-radius: 0px;
+            background: transparent;
 
             border := Rectangle {
                 border-color: RetroTonePalette.control-strong-stroke;
-                border-width: root.checked ? 0 : 1px;
-                border-radius: parent.border-radius;
+                border-width: 1px;
             }
 
             icon := Image {
                 image-fit: contain;
                 visible: root.checked;
                 source: Icons.check-mark;
-                colorize: RetroTonePalette.accent-foreground;
+                colorize: RetroTonePalette.accent-background;
                 width: 12px;
                 accessible-role: none;
             }
@@ -95,7 +90,7 @@ export component CheckBox {
 
     focus-scope := FocusScope {
         x: 0;
-        width: 0; // Do not react on clicks
+        width: 0;
         enabled <=> root.enabled;
 
         key-pressed(event) => {
@@ -107,7 +102,6 @@ export component CheckBox {
         }
     }
 
-    // focus border
     if root.has-focus && root.enabled : FocusBorder {
         border-radius: 0px;
     }

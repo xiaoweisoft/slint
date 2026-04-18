@@ -17,9 +17,16 @@ export component GroupBox {
         padding-top: 16px;
         padding-bottom: 8px;
 
+        // Thin accent top border
+        Rectangle {
+            height: 1px;
+            background: RetroTonePalette.accent-background;
+            vertical-stretch: 0;
+        }
+
         if root.title != "" : Text {
             vertical-stretch: 0;
-            color: !root.enabled ? RetroTonePalette.text-disabled : RetroTonePalette.control-foreground;
+            color: !root.enabled ? RetroTonePalette.text-disabled : RetroTonePalette.foreground;
             font-size: RetroToneFontSettings.body-strong.font-size;
             font-weight: RetroToneFontSettings.body-strong.font-weight;
             text: root.title;
