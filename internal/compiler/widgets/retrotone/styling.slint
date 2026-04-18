@@ -1,7 +1,7 @@
 // Copyright © SixtyFPS GmbH <info@slint.dev>
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 
-// RetroTone style — CRT amber palette, flat opaque surfaces, no gradients/shadows
+// RetroTone style — cool neutral palette, flat opaque surfaces, no gradients/shadows
 
 import { ColorSchemeSelector } from "color-scheme.slint";
 
@@ -43,102 +43,102 @@ export global RetroTonePalette {
 
     in-out property <color> accent-color-override: #00000000;
 
-    // CRT amber (dark) / parchment (light)
+    // Cool neutral (dark) / light gray (light)
     out property <brush> background:
-        dark-color-scheme ? #1A1A08 : #F0E8C8;
+        dark-color-scheme ? #141414 : #F0F0F0;
     out property <brush> foreground:
-        dark-color-scheme ? #E0D090 : #2A2810;
+        dark-color-scheme ? #D0D0D0 : #1A1A1A;
     out property <brush> alternate-background:
-        dark-color-scheme ? #2A2810 : #E0D8B0;
+        dark-color-scheme ? #1E1E1E : #E4E4E4;
     out property <brush> alternate-foreground:
-        dark-color-scheme ? #E0D090 : #2A2810;
+        dark-color-scheme ? #D0D0D0 : #1A1A1A;
     out property <brush> control-background:
-        dark-color-scheme ? #33301A : #D8D098;
+        dark-color-scheme ? #282828 : #DADADA;
     out property <brush> control-foreground:
-        dark-color-scheme ? #E0D090 : #2A2810;
+        dark-color-scheme ? #D0D0D0 : #1A1A1A;
     out property <brush> accent-background:
         accent-color-override.alpha > 0 ? accent-color-override
-        : (dark-color-scheme ? #F0A820 : #C88018);
+        : (dark-color-scheme ? #A0A0A0 : #505050);
     out property <brush> accent-foreground:
-        dark-color-scheme ? #1A1A08 : #F0E8C8;
+        dark-color-scheme ? #141414 : #F0F0F0;
     out property <brush> selection-background:
         accent-color-override.alpha > 0 ? accent-color-override
-        : (dark-color-scheme ? #F0A820 : #C88018);
+        : (dark-color-scheme ? #A0A0A0 : #505050);
     out property <brush> selection-foreground:
-        dark-color-scheme ? #1A1A08 : #F0E8C8;
+        dark-color-scheme ? #141414 : #F0F0F0;
     out property <brush> border:
-        dark-color-scheme ? #605828 : #A09060;
+        dark-color-scheme ? #484848 : #B0B0B0;
 
     out property <brush> secondary-accent-background:
         accent-color-override.alpha > 0 ? accent-color-override.transparentize(10%)
-        : (dark-color-scheme ? #D89818 : #B07010);
+        : (dark-color-scheme ? #909090 : #606060);
     out property <brush> tertiary-accent-background:
         accent-color-override.alpha > 0 ? accent-color-override.transparentize(20%)
-        : (dark-color-scheme ? #C08810 : #986008);
+        : (dark-color-scheme ? #808080 : #707070);
     out property <brush> accent-disabled:
-        dark-color-scheme ? #504820 : #B0A880;
+        dark-color-scheme ? #606060 : #B0B0B0;
     out property <brush> accent-control-border:
         border;
     out property <brush> control-border:
         border;
     out property <brush> text-accent-foreground-secondary:
-        dark-color-scheme ? #A09060 : #5A5030;
+        dark-color-scheme ? #808080 : #606060;
     out property <brush> text-accent-foreground-disabled:
-        dark-color-scheme ? #706840 : #8A8060;
+        dark-color-scheme ? #585858 : #909090;
     out property <brush> text-secondary:
-        dark-color-scheme ? #A09060 : #5A5030;
+        dark-color-scheme ? #808080 : #606060;
     out property <brush> text-tertiary:
-        dark-color-scheme ? #706840 : #8A8060;
+        dark-color-scheme ? #585858 : #909090;
     out property <brush> text-disabled:
-        dark-color-scheme ? #504820 : #B0A880;
+        dark-color-scheme ? #404040 : #B8B8B8;
     out property <brush> text-control-border:
         border;
     out property <brush> control-secondary:
-        dark-color-scheme ? #2A2810 : #E0D8B0;
+        dark-color-scheme ? #1E1E1E : #E4E4E4;
     out property <brush> control-tertiary:
-        dark-color-scheme ? #222008 : #D0C8A0;
+        dark-color-scheme ? #1A1A1A : #D8D8D8;
     out property <brush> control-disabled:
-        dark-color-scheme ? #1A1808 : #C8C098;
+        dark-color-scheme ? #161616 : #D0D0D0;
     out property <brush> control-alt-secondary:
-        dark-color-scheme ? #222008 : #D8D098;
+        dark-color-scheme ? #1A1A1A : #DADADA;
     out property <brush> control-alt-tertiary:
-        dark-color-scheme ? #2A2810 : #D0C8A0;
+        dark-color-scheme ? #1E1E1E : #D8D8D8;
     out property <brush> control-alt-quartiary:
-        dark-color-scheme ? #33301A : #C8C090;
+        dark-color-scheme ? #282828 : #D0D0D0;
     out property <brush> control-alt-disabled: transparent;
     out property <brush> control-strong-stroke:
         border;
     out property <brush> control-strong-stroke-disabled:
-        dark-color-scheme ? #504820 : #B0A880;
+        dark-color-scheme ? #404040 : #B8B8B8;
     out property <brush> control-solid:
-        dark-color-scheme ? #33301A : #D8D098;
+        dark-color-scheme ? #282828 : #DADADA;
     out property <brush> circle-border:
         border;
     out property <brush> control-input-active:
-        dark-color-scheme ? #1A1A08 : #F0E8C8;
+        dark-color-scheme ? #141414 : #F0F0F0;
     out property <brush> focus-stroke-inner:
-        dark-color-scheme ? #1A1A08 : #F0E8C8;
+        dark-color-scheme ? #141414 : #F0F0F0;
     out property <brush> focus-stroke-outer:
-        dark-color-scheme ? #F0A820 : #C88018;
+        dark-color-scheme ? #A0A0A0 : #505050;
     out property <brush> control-background-stroke-flyout:
         border;
     out property <brush> sub-title-secondary:
-        dark-color-scheme ? #222008 : #E0D8B0;
+        dark-color-scheme ? #1A1A1A : #E4E4E4;
     out property <brush> sub-title-tertiary:
-        dark-color-scheme ? #1A1808 : #D8D098;
+        dark-color-scheme ? #161616 : #DADADA;
     out property <brush> shadow: transparent;
     out property <brush> subtle:
-        dark-color-scheme ? #222008 : #E0D8B0;
+        dark-color-scheme ? #1A1A1A : #E4E4E4;
     out property <brush> subtle-secondary:
-        dark-color-scheme ? #222008 : #E0D8B0;
+        dark-color-scheme ? #1A1A1A : #E4E4E4;
     out property <brush> subtle-tertiary:
-        dark-color-scheme ? #1A1808 : #D8D098;
+        dark-color-scheme ? #161616 : #DADADA;
     out property <brush> divider:
-        dark-color-scheme ? #3A3418 : #C8C0A0;
+        dark-color-scheme ? #303030 : #C8C8C8;
     out property <brush> layer-on-mica-base-alt:
-        dark-color-scheme ? #2A2810 : #E0D8B0;
+        dark-color-scheme ? #1E1E1E : #E4E4E4;
     out property <brush> layer-on-mica-base-alt-secondary:
-        dark-color-scheme ? #222008 : #D8D098;
+        dark-color-scheme ? #1A1A1A : #DADADA;
     out property <brush> card-stroke:
         border;
     out property <brush> state:
