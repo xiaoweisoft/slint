@@ -41,6 +41,12 @@ pub enum CustomEvent {
     Accesskit(accesskit_winit::Event),
     #[cfg(muda)]
     Muda(muda::MenuEvent),
+    /// Sent by the layer-shell dispatcher thread (`layer_shell::spawn_dispatcher`)
+    /// after every successful SCTK queue dispatch. The handler walks active
+    /// windows and calls `draw()` on each layer-shell adapter so pending
+    /// compositor configures and frame callbacks are picked up.
+    #[cfg(feature = "layer-shell")]
+    LayerShellWake,
 }
 
 impl std::fmt::Debug for CustomEvent {
@@ -54,6 +60,8 @@ impl std::fmt::Debug for CustomEvent {
             Self::Accesskit(a) => write!(f, "AccessKit({a:?})"),
             #[cfg(muda)]
             Self::Muda(e) => write!(f, "Muda({e:?})"),
+            #[cfg(feature = "layer-shell")]
+            Self::LayerShellWake => write!(f, "LayerShellWake"),
         }
     }
 }
@@ -479,6 +487,27 @@ impl winit::application::ApplicationHandler<SlintEvent> for EventLoopState {
                     window.muda_event(eid, muda_type);
                 };
             }
+            #[cfg(feature = "layer-shell")]
+            CustomEvent::LayerShellWake => {
+                let active: Vec<_> = self
+                    .shared_backend_data
+                    .active_windows
+                    .borrow()
+                    .iter()
+                    .filter_map(|(_, w)| w.upgrade())
+                    .collect();
+                for w in active.into_iter().filter(|w| w.is_layer_shell()) {
+                    // Only redraw if there's an actual configure or a redraw
+                    // was requested. Otherwise the frame-callback storm causes
+                    // wake → draw → commit → frame-cb → wake … at full CPU.
+                    if !w.has_layer_shell_pending_work() {
+                        continue;
+                    }
+                    if let Err(err) = w.draw() {
+                        eprintln!("slint: layer-shell draw failed: {err}");
+                    }
+                }
+            }
         }
     }
 
@@ -505,6 +534,15 @@ impl winit::application::ApplicationHandler<SlintEvent> for EventLoopState {
             EventResult::PreventDefault
         ) {
             return;
+        }
+
+        #[cfg(feature = "layer-shell")]
+        {
+            // Layer-shell side-channel events (configure, frame callback) are
+            // delivered on a separate wayland connection serviced by a
+            // dedicated thread inside `LayerShellManager`. The thread wakes
+            // this loop via `CustomEvent::UserEvent` -> `wake_layer_shell_windows`,
+            // so no polling is needed here.
         }
 
         if let Err(err) = self.shared_backend_data.create_inactive_windows(event_loop) {

@@ -55,6 +55,13 @@ renderer-software = [
 ]
 accessibility = ["dep:accesskit", "dep:accesskit_winit"]
 raw-window-handle-06 = ["i-slint-core/raw-window-handle-06"]
+layer-shell = [
+  "wayland",
+  "renderer-software",
+  "dep:smithay-client-toolkit",
+  "dep:wayland-client",
+  "dep:wayland-protocols-wlr",
+]
 unstable-wgpu-27 = ["i-slint-core/unstable-wgpu-27", "i-slint-renderer-skia?/unstable-wgpu-27"]
 unstable-wgpu-28 = [
   "i-slint-core/unstable-wgpu-28",
@@ -111,6 +118,10 @@ copypasta = { version = "0.10", default-features = false }
 # Use same version and executor as accesskit
 zbus = { version = "5.7.0", default-features = false, features = ["async-io"] }
 futures = { version = "0.3.31" }
+# Layer-shell side-channel (opt-in via `layer-shell` feature)
+smithay-client-toolkit = { version = "=0.19.2", optional = true }
+wayland-client = { version = "0.31", optional = true }
+wayland-protocols-wlr = { version = "0.3", features = ["client"], optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 # For GL rendering

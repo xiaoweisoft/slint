@@ -32,6 +32,10 @@ mod frame_throttle;
 #[cfg(target_os = "ios")]
 mod ios;
 
+#[cfg(feature = "layer-shell")]
+#[allow(missing_docs)]
+pub mod layer_shell;
+
 /// Re-export of the winit crate.
 pub use winit;
 
@@ -40,7 +44,7 @@ pub use winit;
 /// See also [`EventLoopBuilder`]
 #[non_exhaustive]
 #[derive(Debug)]
-pub struct SlintEvent(CustomEvent);
+pub struct SlintEvent(pub(crate) CustomEvent);
 
 #[i_slint_core_macros::slint_doc]
 /// Convenience alias for the event loop builder used by Slint.
@@ -88,6 +92,9 @@ mod renderer {
 
     #[cfg(feature = "renderer-software")]
     pub(crate) mod sw;
+
+    #[cfg(feature = "layer-shell")]
+    pub(crate) mod sw_layer;
 }
 
 #[cfg(enable_accesskit)]
@@ -160,7 +167,7 @@ fn try_create_window_with_fallback_renderer(
             shared_backend_data.clone(),
             renderer_factory(&shared_backend_data).ok()?,
             attrs.clone(),
-            #[cfg(any(enable_accesskit, muda))]
+            #[cfg(any(enable_accesskit, muda, feature = "layer-shell"))]
             _proxy.clone(),
             #[cfg(all(muda, target_os = "macos"))]
             muda_enable_default_menu_bar,
@@ -532,6 +539,8 @@ pub(crate) struct SharedBackendData {
     not_running_event_loop: RefCell<Option<winit::event_loop::EventLoop<SlintEvent>>>,
     event_loop_proxy: winit::event_loop::EventLoopProxy<SlintEvent>,
     is_wayland: bool,
+    #[cfg(feature = "layer-shell")]
+    pub(crate) layer_shell_manager: Option<Rc<layer_shell::LayerShellManager>>,
     #[cfg(target_os = "ios")]
     #[allow(unused)]
     keyboard_notifications: ios::KeyboardNotifications,
@@ -609,8 +618,20 @@ impl SharedBackendData {
             #[cfg(not(target_arch = "wasm32"))]
             clipboard: RefCell::new(clipboard),
             not_running_event_loop: RefCell::new(Some(event_loop)),
-            event_loop_proxy,
+            event_loop_proxy: event_loop_proxy.clone(),
             is_wayland,
+            #[cfg(feature = "layer-shell")]
+            layer_shell_manager: if is_wayland {
+                match layer_shell::LayerShellManager::new(event_loop_proxy.clone()) {
+                    Ok(m) => Some(m),
+                    Err(e) => {
+                        eprintln!("slint: layer-shell unavailable: {e}");
+                        None
+                    }
+                }
+            } else {
+                None
+            },
             #[cfg(target_os = "ios")]
             keyboard_notifications,
         })
@@ -767,7 +788,7 @@ impl i_slint_core::platform::Platform for Backend {
                     self.shared_data.clone(),
                     renderer,
                     attrs.clone(),
-                    #[cfg(any(enable_accesskit, muda))]
+                    #[cfg(any(enable_accesskit, muda, feature = "layer-shell"))]
                     self.shared_data.event_loop_proxy.clone(),
                     #[cfg(all(muda, target_os = "macos"))]
                     self.muda_enable_default_menu_bar_bar,
@@ -1018,6 +1039,33 @@ impl WinitWindowAccessor for i_slint_core::api::Window {
 }
 
 impl private::WinitWindowAccessorSealed for i_slint_core::api::Window {}
+
+/// Extension trait on `slint::Window` for opting a window into the
+/// `zwlr_layer_shell_v1` protocol. Only available with the `layer-shell`
+/// cargo feature on `i-slint-backend-winit`.
+#[cfg(feature = "layer-shell")]
+pub trait LayerShellAccessor {
+    /// Mark the window as a layer-shell surface. Must be called before the
+    /// window is shown for the first time. Returns `true` if the backend was
+    /// the winit backend AND the role was applied; `false` if the window is
+    /// not winit-backed (the call is then a no-op).
+    fn set_layer_shell_role(&self, role: layer_shell::LayerShellRole) -> bool;
+}
+
+#[cfg(feature = "layer-shell")]
+impl LayerShellAccessor for i_slint_core::api::Window {
+    fn set_layer_shell_role(&self, role: layer_shell::LayerShellRole) -> bool {
+        i_slint_core::window::WindowInner::from_pub(self)
+            .window_adapter()
+            .internal(i_slint_core::InternalToken)
+            .and_then(|wa| (wa as &dyn core::any::Any).downcast_ref::<WinitWindowAdapter>())
+            .map(|adapter| {
+                adapter.set_layer_shell_role(role);
+                true
+            })
+            .unwrap_or(false)
+    }
+}
 
 #[cfg(test)]
 mod testui {
