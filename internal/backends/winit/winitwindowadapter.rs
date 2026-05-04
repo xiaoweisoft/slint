@@ -33,7 +33,7 @@ use corelib::items::{ColorScheme, MouseCursor};
 #[cfg(enable_accesskit)]
 use corelib::items::{ItemRc, ItemRef};
 
-#[cfg(any(enable_accesskit, muda, feature = "layer-shell"))]
+#[cfg(any(enable_accesskit, muda))]
 use crate::SlintEvent;
 use crate::{EventResult, SharedBackendData};
 use corelib::Property;
@@ -45,7 +45,7 @@ use corelib::window::{WindowAdapter, WindowAdapterInternal, WindowInner};
 use corelib::{Coord, graphics::*};
 use i_slint_core::{self as corelib};
 use std::cell::OnceCell;
-#[cfg(any(enable_accesskit, muda, feature = "layer-shell"))]
+#[cfg(any(enable_accesskit, muda))]
 use winit::event_loop::EventLoopProxy;
 use winit::window::{WindowAttributes, WindowButtons};
 
@@ -341,7 +341,7 @@ pub struct WinitWindowAdapter {
     #[cfg(target_arch = "wasm32")]
     virtual_keyboard_helper: RefCell<Option<super::wasm_input_helper::WasmInputHelper>>,
 
-    #[cfg(any(enable_accesskit, muda, feature = "layer-shell"))]
+    #[cfg(any(enable_accesskit, muda))]
     event_loop_proxy: EventLoopProxy<SlintEvent>,
 
     pub(crate) window_event_filter: Cell<
@@ -368,20 +368,6 @@ pub struct WinitWindowAdapter {
     window_icon_cache_key: RefCell<Option<ImageCacheKey>>,
 
     frame_throttle: Box<dyn crate::frame_throttle::FrameThrottle>,
-
-    #[cfg(feature = "layer-shell")]
-    layer_shell_state: RefCell<Option<LayerShellState>>,
-}
-
-#[cfg(feature = "layer-shell")]
-struct LayerShellState {
-    role: crate::layer_shell::LayerShellRole,
-    /// Materialized lazily inside `ensure_window`. `None` until the event loop
-    /// is active and the layer surface has been created on the SCTK side.
-    surface: Option<std::rc::Rc<crate::layer_shell::LayerSurfaceHandle>>,
-    /// Software renderer that paints into the SCTK-owned wl_surface.
-    /// Replaces `self.renderer` for this window when set.
-    renderer: Option<crate::renderer::sw_layer::LayerSoftwareRenderer>,
 }
 
 impl WinitWindowAdapter {
@@ -390,9 +376,7 @@ impl WinitWindowAdapter {
         shared_backend_data: Rc<SharedBackendData>,
         renderer: Box<dyn WinitCompatibleRenderer>,
         window_attributes: winit::window::WindowAttributes,
-        #[cfg(any(enable_accesskit, muda, feature = "layer-shell"))] proxy: EventLoopProxy<
-            SlintEvent,
-        >,
+        #[cfg(any(enable_accesskit, muda))] proxy: EventLoopProxy<SlintEvent>,
         #[cfg(all(muda, target_os = "macos"))] muda_enable_default_menu_bar: bool,
     ) -> Rc<Self> {
         let self_rc = Rc::new_cyclic(|self_weak| Self {
@@ -416,7 +400,7 @@ impl WinitWindowAdapter {
             renderer,
             #[cfg(target_arch = "wasm32")]
             virtual_keyboard_helper: Default::default(),
-            #[cfg(any(enable_accesskit, muda, feature = "layer-shell"))]
+            #[cfg(any(enable_accesskit, muda))]
             event_loop_proxy: proxy,
             window_event_filter: Cell::new(None),
             #[cfg(not(use_winit_theme))]
@@ -432,8 +416,6 @@ impl WinitWindowAdapter {
                 self_weak.clone(),
                 shared_backend_data.is_wayland,
             ),
-            #[cfg(feature = "layer-shell")]
-            layer_shell_state: RefCell::new(None),
         });
 
         self_rc.shared_backend_data.register_inactive_window((self_rc.clone()) as _);
@@ -443,37 +425,6 @@ impl WinitWindowAdapter {
 
     pub(crate) fn renderer(&self) -> &dyn WinitCompatibleRenderer {
         self.renderer.as_ref()
-    }
-
-    /// Mark this window as a `zwlr_layer_shell_v1` surface with the given role.
-    /// Must be called before the first `show()` (i.e. before `ensure_window`
-    /// runs). The compositor must support the `layer-shell` feature in this
-    /// backend; otherwise creating the window will fail.
-    #[cfg(feature = "layer-shell")]
-    pub fn set_layer_shell_role(&self, role: crate::layer_shell::LayerShellRole) {
-        *self.layer_shell_state.borrow_mut() =
-            Some(LayerShellState { role, surface: None, renderer: None });
-    }
-
-    /// Returns true if this adapter is configured to host a layer-shell surface.
-    #[cfg(feature = "layer-shell")]
-    pub(crate) fn is_layer_shell(&self) -> bool {
-        self.layer_shell_state.borrow().is_some()
-    }
-
-    /// Returns true if a wake should trigger a draw — there is either a
-    /// pending compositor configure or the slint side requested a redraw.
-    #[cfg(feature = "layer-shell")]
-    pub(crate) fn has_layer_shell_pending_work(&self) -> bool {
-        if self.pending_redraw.get() {
-            return true;
-        }
-        if let Some(state) = self.layer_shell_state.borrow().as_ref() {
-            if let Some(surface) = &state.surface {
-                return surface.has_pending_configure();
-            }
-        }
-        false
     }
 
     pub fn ensure_window(
@@ -521,20 +472,6 @@ impl WinitWindowAdapter {
         #[cfg(all(muda, target_os = "windows"))]
         if self.menubar.borrow().is_some() {
             window_attributes = window_attributes.with_transparent(false);
-        }
-
-        // For layer-shell windows, force winit to allocate a minimal hidden
-        // toplevel — the actual rendering surface comes from SCTK side-channel.
-        // The toplevel exists only to satisfy the rest of the backend
-        // infrastructure (event_loop, accesskit, frame throttle).
-        #[cfg(feature = "layer-shell")]
-        let is_layer_shell = self.layer_shell_state.borrow().is_some();
-        #[cfg(not(feature = "layer-shell"))]
-        let is_layer_shell = false;
-        if is_layer_shell {
-            window_attributes = window_attributes
-                .with_visible(false)
-                .with_inner_size(winit::dpi::PhysicalSize::new(1, 1));
         }
 
         let winit_window = self.renderer.resume(active_event_loop, window_attributes)?;
@@ -627,43 +564,11 @@ impl WinitWindowAdapter {
         self.shared_backend_data
             .register_window(winit_window.id(), (self.self_weak.upgrade().unwrap()) as _);
 
-        #[cfg(feature = "layer-shell")]
-        if is_layer_shell {
-            self.materialize_layer_shell()?;
-        }
-
         for waker in self.window_existence_wakers.take().into_iter() {
             waker.wake();
         }
 
         Ok(winit_window)
-    }
-
-    #[cfg(feature = "layer-shell")]
-    fn materialize_layer_shell(&self) -> Result<(), PlatformError> {
-        let mut state = self.layer_shell_state.borrow_mut();
-        let state = state.as_mut().ok_or_else(|| {
-            PlatformError::from("layer-shell: materialize called without role set")
-        })?;
-        let mgr = self.shared_backend_data.layer_shell_manager.as_ref().ok_or_else(|| {
-            PlatformError::from("layer-shell: zwlr_layer_shell_v1 unavailable on this compositor")
-        })?;
-        let surface =
-            std::rc::Rc::new(mgr.create_surface(&state.role).map_err(PlatformError::from)?);
-        let renderer = crate::renderer::sw_layer::LayerSoftwareRenderer::new();
-        renderer.resume_layer(surface.clone())?;
-        // Register the slint window adapter so the internal SoftwareRenderer
-        // can locate the component tree to render. Without this, render()
-        // returns an empty region and the buffer stays uninitialised (black).
-        let adapter_rc: std::rc::Rc<dyn i_slint_core::window::WindowAdapter> =
-            self.self_weak.upgrade().expect("adapter weak ref dead");
-        i_slint_core::renderer::RendererSealed::set_window_adapter(
-            renderer.as_core_renderer(),
-            &adapter_rc,
-        );
-        state.surface = Some(surface);
-        state.renderer = Some(renderer);
-        Ok(())
     }
 
     pub(crate) fn suspend(&self) -> Result<(), PlatformError> {
@@ -737,37 +642,17 @@ impl WinitWindowAdapter {
         self.pending_redraw.set(false);
 
         if let Some(winit_window) = self.winit_window_or_none.borrow().as_window() {
-            // For layer-shell adapters the winit toplevel is a hidden 1x1
-            // placeholder; its inner_size has nothing to do with the actual
-            // surface the user sees. Skip the macOS-style catch-up resize.
-            #[cfg(feature = "layer-shell")]
-            let skip = self.layer_shell_state.borrow().is_some();
-            #[cfg(not(feature = "layer-shell"))]
-            let skip = false;
-            if !skip && self.pending_resize_event_after_show.take() {
+            // on macOS we sometimes don't get a resize event after calling
+            // request_inner_size(), it returning None (promising a resize event), and then delivering RedrawRequested. To work around this,
+            // catch up here to ensure the renderer can resize the surface correctly.
+            // Note: On displays with a scale factor != 1, we get a scale factor change
+            // event and a resize event, so all is good.
+            if self.pending_resize_event_after_show.take() {
                 self.resize_event(winit_window.inner_size())?;
             }
         }
 
         let renderer = self.renderer();
-        #[cfg(feature = "layer-shell")]
-        if let Some(state) = self.layer_shell_state.borrow().as_ref() {
-            if let (Some(layer_renderer), Some(surface)) = (&state.renderer, &state.surface) {
-                let pending = surface.take_pending_configure();
-                // Use the layer surface's last configured size as the source of
-                // truth — winit's hidden 1x1 toplevel is irrelevant to what the
-                // compositor actually allocated for the layer surface.
-                let target = pending.unwrap_or_else(|| surface.current_size());
-                if target.0 > 0 && target.1 > 0 {
-                    // resize_event also updates self.size cache that window.size()
-                    // reads; dispatching a bare Resized event does not.
-                    self.resize_event(winit::dpi::PhysicalSize::new(target.0, target.1))?;
-                }
-                layer_renderer.render(self.window())?;
-                surface.commit();
-                return Ok(());
-            }
-        }
         renderer.render(self.window())?;
 
         Ok(())
@@ -1119,15 +1004,6 @@ impl WinitWindowAdapter {
 
             winit_window.set_visible(true);
 
-            // Layer-shell windows have no winit-driven RedrawRequested signal —
-            // their visible toplevel is a hidden 1x1. After visibility flips to
-            // Shown, kick a draw so the first paint (and any pending configure
-            // from the SCTK side-channel) lands on screen.
-            #[cfg(feature = "layer-shell")]
-            if self.layer_shell_state.borrow().is_some() {
-                self.draw()?;
-            }
-
             // Make sure the dark color scheme property is up-to-date, as it may have been queried earlier when
             // the window wasn't mapped yet.
             if let Some(color_scheme_prop) = self.color_scheme.get() {
@@ -1272,16 +1148,6 @@ impl WindowAdapter for WinitWindowAdapter {
 
     fn request_redraw(&self) {
         if !self.pending_redraw.replace(true) {
-            // Layer-shell windows don't get winit RedrawRequested for the
-            // hidden 1x1 toplevel — wake the event loop directly so the wake
-            // handler walks adapters and calls draw().
-            #[cfg(feature = "layer-shell")]
-            if self.layer_shell_state.borrow().is_some() {
-                let _ = self
-                    .event_loop_proxy
-                    .send_event(crate::SlintEvent(crate::event_loop::CustomEvent::LayerShellWake));
-                return;
-            }
             self.frame_throttle.request_throttled_redraw();
         }
     }
@@ -1399,15 +1265,6 @@ impl WindowAdapter for WinitWindowAdapter {
         // windowing system. Weston/Wayland don't like it when we create a
         // surface that's bigger than the screen due to constraints (#532).
         if winit_window_or_none.fullscreen().is_some() {
-            return;
-        }
-
-        // Layer-shell windows render into an SCTK-owned wl_surface. The winit
-        // window is only a hidden 1x1 sidecar, so applying Slint layout
-        // constraints to it can make the xdg toplevel send invalid min/max
-        // sizes and get the whole client disconnected by strict compositors.
-        #[cfg(feature = "layer-shell")]
-        if self.layer_shell_state.borrow().is_some() {
             return;
         }
 
