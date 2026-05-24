@@ -24,6 +24,24 @@ use std::cell::Cell;
 use std::rc::Rc;
 use std::sync::Arc;
 
+fn android_backend_log(message: &str) {
+    use std::ffi::CString;
+    use std::os::raw::{c_char, c_int};
+
+    unsafe extern "C" {
+        fn __android_log_write(prio: c_int, tag: *const c_char, text: *const c_char) -> c_int;
+    }
+
+    const ANDROID_LOG_INFO: c_int = 4;
+    if let (Ok(tag), Ok(text)) =
+        (CString::new("SlintAndroidBackend"), CString::new(message.replace('\0', " ")))
+    {
+        unsafe {
+            __android_log_write(ANDROID_LOG_INFO, tag.as_ptr(), text.as_ptr());
+        }
+    }
+}
+
 struct LongPressDetection {
     _timer: Timer,
     position: LogicalPosition,
@@ -66,6 +84,7 @@ impl WindowAdapter for AndroidWindowAdapter {
 
     fn request_redraw(&self) {
         self.pending_redraw.set(true);
+        android_backend_log("request_redraw pending=true");
     }
 
     fn update_window_properties(&self, properties: WindowProperties<'_>) {
@@ -223,6 +242,10 @@ impl AndroidWindowAdapter {
             PollEvent::Main(MainEvent::InitWindow { .. }) => {
                 if let Some(w) = self.app.native_window() {
                     let size = PhysicalSize { width: w.width() as u32, height: w.height() as u32 };
+                    android_backend_log(&format!(
+                        "InitWindow native_size={}x{}",
+                        size.width, size.height
+                    ));
 
                     let scale_factor =
                         self.app.config().density().map(|dpi| dpi as f32 / 160.0).unwrap_or(1.0);
@@ -238,6 +261,7 @@ impl AndroidWindowAdapter {
                         size,
                         self.requested_graphics_api.borrow().clone(),
                     )?;
+                    android_backend_log("set_window_handle ok");
                     self.resize()?;
 
                     // Fixes a problem for old Android versions: the soft input always prompt out on startup.
@@ -251,6 +275,7 @@ impl AndroidWindowAdapter {
                 MainEvent::WindowResized { .. } | MainEvent::ContentRectChanged { .. },
             ) => self.resize()?,
             PollEvent::Main(MainEvent::RedrawNeeded { .. }) => {
+                android_backend_log("RedrawNeeded");
                 self.pending_redraw.set(false);
                 self.do_render()?;
             }
@@ -318,18 +343,32 @@ impl AndroidWindowAdapter {
         loop {
             let mut result = Ok(());
             let read_input = iter.next(|event| match event {
-                InputEvent::KeyEvent(key_event) => match map_key_event(key_event) {
-                    Some(ev) => {
-                        if self.try_dispatch_key_event(ev)
-                            == i_slint_core::input::KeyEventResult::EventAccepted
-                        {
-                            InputStatus::Handled
-                        } else {
+                InputEvent::KeyEvent(key_event) => {
+                    android_backend_log(&format!(
+                        "input key raw code={:?} action={:?} repeat={}",
+                        key_event.key_code(),
+                        key_event.action(),
+                        key_event.repeat_count()
+                    ));
+                    match map_key_event(key_event) {
+                        Some(ev) => {
+                            android_backend_log(&format!("input key mapped event={ev:?}"));
+                            if self.try_dispatch_key_event(ev)
+                                == i_slint_core::input::KeyEventResult::EventAccepted
+                            {
+                                android_backend_log("input key dispatch accepted");
+                                InputStatus::Handled
+                            } else {
+                                android_backend_log("input key dispatch unhandled");
+                                InputStatus::Unhandled
+                            }
+                        }
+                        None => {
+                            android_backend_log("input key unmapped");
                             InputStatus::Unhandled
                         }
                     }
-                    None => InputStatus::Unhandled,
-                },
+                }
                 InputEvent::MotionEvent(motion_event) => match motion_event.action() {
                     MotionAction::ButtonPress => {
                         result = self.window.try_dispatch_event(WindowEvent::PointerPressed {
@@ -481,6 +520,16 @@ impl AndroidWindowAdapter {
         } else {
             self.java_helper.get_view_rect().unwrap_or_else(|e| print_jni_error(&self.app, e))
         };
+        android_backend_log(&format!(
+            "resize fullscreen={} offset={}x{} size={}x{} native={}x{}",
+            self.fullscreen.get(),
+            offset.x,
+            offset.y,
+            size.width,
+            size.height,
+            win.width(),
+            win.height()
+        ));
 
         let scale_factor = self.window.scale_factor();
         self.window
@@ -497,12 +546,22 @@ impl AndroidWindowAdapter {
     pub fn do_render(&self) -> Result<(), PlatformError> {
         if let Some(win) = self.app.native_window() {
             let o = self.offset.get();
+            android_backend_log(&format!(
+                "do_render offset={}x{} native={}x{}",
+                o.x,
+                o.y,
+                win.width(),
+                win.height()
+            ));
             self.renderer.render_transformed_with_post_callback(
                 0.,
                 (o.x as f32, o.y as f32),
                 PhysicalSize { width: win.width() as _, height: win.height() as _ },
                 None,
             )?;
+            android_backend_log("do_render ok");
+        } else {
+            android_backend_log("do_render skipped no native window");
         }
         Ok(())
     }
