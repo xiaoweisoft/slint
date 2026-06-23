@@ -37,6 +37,7 @@ let EDITOR_WIDGET: EditorWidget | null = null;
 
 const FILESYSTEM_PROVIDER: RegisteredFileSystemProvider =
     new RegisteredFileSystemProvider(false);
+const LIVE_RELOAD_INTERVAL_MS = 750;
 
 export function initialize(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -371,6 +372,11 @@ export class EditorWidget extends Widget {
 
     #url_mapper: UrlMapper | null = null;
     #extra_file_urls: { [key: string]: string } = {};
+    #live_reload_enabled = false;
+    #live_reload_timer: number | null = null;
+    #live_reload_files: Map<string, { uri: monaco.Uri; content: string }> =
+        new Map();
+    #live_reload_busy = false;
 
     constructor(lsp: Lsp) {
         super({});
@@ -410,6 +416,7 @@ export class EditorWidget extends Widget {
         }
         const load_url = params.get("load_url");
         const load_demo = params.get("load_demo");
+        this.#live_reload_enabled = params.get("live_reload") === "1";
 
         if (code) {
             this.clear_editors();
@@ -430,6 +437,8 @@ export class EditorWidget extends Widget {
     private clear_editors() {
         this.#edit_era += 1;
         this.#url_mapper = null;
+        this.stop_live_reload();
+        this.#live_reload_files.clear();
 
         if (this.#tab_panel !== null) {
             this.#tab_panel.dispose();
@@ -465,6 +474,20 @@ export class EditorWidget extends Widget {
         monaco.editor
             .createModelReference(uri)
             .then((model_ref) => this.open_model_ref(model_ref));
+    }
+
+    private replace_file_content(uri: monaco.Uri, content: string) {
+        const model = monaco.editor.getModel(uri);
+        if (model) {
+            model.pushEditOperations(
+                [],
+                [{ range: model.getFullModelRange(), text: content }],
+                () => null,
+            );
+            return;
+        }
+
+        this.open_file_with_content(uri, content);
     }
 
     public async open_model_ref(
@@ -552,11 +575,13 @@ export class EditorWidget extends Widget {
         const output_url = monaco.Uri.parse(url ?? input_url.toString());
         this.#url_mapper = mapper ?? new RelativeUrlMapper(output_url);
 
-        return this.safely_open_editor_with_url_content(
+        const result = await this.safely_open_editor_with_url_content(
             output_url,
             internal_file_uri(file_name ?? output_url.path),
             true,
         );
+        this.maybe_start_live_reload();
+        return result;
     }
 
     public add_empty_file_to_project(name: string) {
@@ -625,13 +650,13 @@ export class EditorWidget extends Widget {
                 return Promise.resolve("Error: Can not map URL.");
             }
 
-            return (
-                await this.safely_open_editor_with_url_content(
-                    uri,
-                    internal_uri,
-                    false,
-                )
-            )[1];
+            const result = await this.safely_open_editor_with_url_content(
+                uri,
+                internal_uri,
+                false,
+            );
+            this.maybe_start_live_reload();
+            return result[1];
         }
         const r = await fetch(url);
         return await r.text();
@@ -672,8 +697,66 @@ export class EditorWidget extends Widget {
         }
 
         this.open_file_with_content(internal_uri, doc);
+        if (this.#live_reload_enabled) {
+            this.#live_reload_files.set(internal_uri.toString(), {
+                uri: uri,
+                content: doc,
+            });
+        }
 
         return [internal_uri, doc];
+    }
+
+    private maybe_start_live_reload() {
+        if (!this.#live_reload_enabled || this.#live_reload_timer !== null) {
+            return;
+        }
+
+        this.#live_reload_timer = window.setInterval(
+            () => void this.reload_live_files(),
+            LIVE_RELOAD_INTERVAL_MS,
+        );
+    }
+
+    private stop_live_reload() {
+        if (this.#live_reload_timer === null) {
+            return;
+        }
+
+        window.clearInterval(this.#live_reload_timer);
+        this.#live_reload_timer = null;
+    }
+
+    private async reload_live_files() {
+        if (this.#live_reload_busy) {
+            return;
+        }
+
+        this.#live_reload_busy = true;
+        try {
+            for (const [internal_uri_string, live_file] of this
+                .#live_reload_files) {
+                const response = await fetch(live_file.uri.toString(), {
+                    cache: "no-store",
+                });
+                if (!response.ok) {
+                    continue;
+                }
+
+                const content = await response.text();
+                if (content === live_file.content) {
+                    continue;
+                }
+
+                live_file.content = content;
+                this.replace_file_content(
+                    monaco.Uri.parse(internal_uri_string),
+                    content,
+                );
+            }
+        } finally {
+            this.#live_reload_busy = false;
+        }
     }
 
     public async copy_permalink_to_clipboard() {

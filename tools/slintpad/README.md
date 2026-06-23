@@ -35,6 +35,11 @@ The `preview.html` page contains only the preview and the code must be given via
     that slint file. That way it is possible to load code from github (via raw.githubusercontent)
     or gists.
 
+-   `?live_reload=1` can be combined with `?load_url=` for local repo-backed
+    iteration. SlintPad polls the loaded file and imported files and updates the
+    editor model when the served source changes, so edits made in an external
+    editor are reflected in the preview without reloading the browser tab.
+
     Example: this loads the printerdemo.slint file from the github URL
 
     -   https://slint.dev/editor?load_url=https://raw.githubusercontent.com/slint-ui/slint/master/demos/printerdemo/ui/printerdemo.slint
