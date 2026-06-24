@@ -889,7 +889,7 @@ fn map_key_code(code: android_activity::input::Keycode) -> Option<SharedString> 
         Keycode::NumpadAdd => Some("+".into()),
         Keycode::NumpadDot => Some(".".into()),
         Keycode::NumpadComma => Some(",".into()),
-        Keycode::NumpadEnter => Some("\n".into()),
+        Keycode::NumpadEnter => Some(Key::Return.into()),
         Keycode::NumpadEquals => Some("=".into()),
         Keycode::NumpadLeftParen => Some("(".into()),
         Keycode::NumpadRightParen => Some(")".into()),
