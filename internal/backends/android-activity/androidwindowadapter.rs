@@ -84,7 +84,6 @@ impl WindowAdapter for AndroidWindowAdapter {
 
     fn request_redraw(&self) {
         self.pending_redraw.set(true);
-        android_backend_log("request_redraw pending=true");
     }
 
     fn update_window_properties(&self, properties: WindowProperties<'_>) {
@@ -546,20 +545,12 @@ impl AndroidWindowAdapter {
     pub fn do_render(&self) -> Result<(), PlatformError> {
         if let Some(win) = self.app.native_window() {
             let o = self.offset.get();
-            android_backend_log(&format!(
-                "do_render offset={}x{} native={}x{}",
-                o.x,
-                o.y,
-                win.width(),
-                win.height()
-            ));
             self.renderer.render_transformed_with_post_callback(
                 0.,
                 (o.x as f32, o.y as f32),
                 PhysicalSize { width: win.width() as _, height: win.height() as _ },
                 None,
             )?;
-            android_backend_log("do_render ok");
         } else {
             android_backend_log("do_render skipped no native window");
         }
