@@ -763,6 +763,14 @@ impl SkiaRenderer {
                         callback.notify(RenderingState::BeforeRendering, &api)
                     })
                 }
+
+                // The BeforeRendering notifier may issue native OpenGL calls
+                // through GraphicsAPI::NativeOpenGL. Skia caches GL state, so
+                // make it re-query state before rendering Slint items such as
+                // glyph atlas text after the callback returns.
+                if let Some(ctx) = gr_context.as_mut() {
+                    ctx.reset(None);
+                }
             }
 
             for (component, origin) in components {
@@ -827,6 +835,22 @@ impl SkiaRenderer {
         } else {
             self.partial_rendering_state.as_ref()
         }
+    }
+}
+
+#[cfg(test)]
+mod native_opengl_notifier_tests {
+    #[test]
+    fn before_rendering_notifier_resets_skia_gpu_context_after_external_gl() {
+        let source = include_str!("lib.rs");
+        let notify = source
+            .find("callback.notify(RenderingState::BeforeRendering, &api)")
+            .expect("BeforeRendering notifier call should remain explicit");
+        let reset = source[notify..]
+            .find("ctx.reset(None);")
+            .expect("Skia context should reset after external GL notifier drawing");
+
+        assert!(reset < 800, "reset should happen immediately after the notifier callback");
     }
 }
 
