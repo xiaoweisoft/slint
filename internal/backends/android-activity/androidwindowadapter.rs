@@ -4,7 +4,7 @@
 use super::*;
 use crate::javahelper::{JavaHelper, print_jni_error};
 use android_activity::input::{
-    ButtonState, InputEvent, KeyAction, Keycode, MotionAction, MotionEvent,
+    Axis, ButtonState, InputEvent, KeyAction, Keycode, MotionAction, MotionEvent, Source,
 };
 use android_activity::{InputStatus, MainEvent, PollEvent};
 use i_slint_core::api::{
@@ -47,6 +47,34 @@ struct LongPressDetection {
     position: LogicalPosition,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ControllerAxisKey {
+    Left,
+    Right,
+    Up,
+    Down,
+}
+
+impl ControllerAxisKey {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Left => "left",
+            Self::Right => "right",
+            Self::Up => "up",
+            Self::Down => "down",
+        }
+    }
+
+    fn text(self) -> SharedString {
+        match self {
+            Self::Left => Key::LeftArrow.into(),
+            Self::Right => Key::RightArrow.into(),
+            Self::Up => Key::UpArrow.into(),
+            Self::Down => Key::DownArrow.into(),
+        }
+    }
+}
+
 pub struct AndroidWindowAdapter {
     app: AndroidApp,
     pub(crate) window: Window,
@@ -66,6 +94,10 @@ pub struct AndroidWindowAdapter {
 
     long_press: RefCell<Option<LongPressDetection>>,
     last_pressed_state: Cell<ButtonState>,
+    controller_axis_x: Cell<Option<ControllerAxisKey>>,
+    controller_axis_y: Cell<Option<ControllerAxisKey>>,
+    controller_axis_hat_x: Cell<Option<ControllerAxisKey>>,
+    controller_axis_hat_y: Cell<Option<ControllerAxisKey>>,
 }
 
 impl WindowAdapter for AndroidWindowAdapter {
@@ -224,6 +256,10 @@ impl AndroidWindowAdapter {
             show_cursor_handles: Cell::new(false),
             long_press: RefCell::default(),
             last_pressed_state: Cell::new(ButtonState(0)),
+            controller_axis_x: Cell::new(None),
+            controller_axis_y: Cell::new(None),
+            controller_axis_hat_x: Cell::new(None),
+            controller_axis_hat_y: Cell::new(None),
         })
     }
 
@@ -427,6 +463,10 @@ impl AndroidWindowAdapter {
                         InputStatus::Handled
                     }
                     MotionAction::Move => {
+                        if self.process_controller_motion_event(motion_event) {
+                            return InputStatus::Handled;
+                        }
+
                         let position = position_for_event(motion_event, self.offset.get())
                             .to_logical(self.window.scale_factor());
 
@@ -507,6 +547,67 @@ impl AndroidWindowAdapter {
                 return Ok(());
             }
         }
+    }
+
+    fn process_controller_motion_event(&self, motion_event: &MotionEvent<'_>) -> bool {
+        if !is_controller_motion_source(motion_event.source()) {
+            return false;
+        }
+
+        let Some(pointer) = motion_event.pointers().next() else {
+            return true;
+        };
+
+        let source_bits: u32 = motion_event.source().into();
+        let x = pointer.axis_value(Axis::X);
+        let y = pointer.axis_value(Axis::Y);
+        let hat_x = pointer.axis_value(Axis::HatX);
+        let hat_y = pointer.axis_value(Axis::HatY);
+        android_backend_log(&format!(
+            "input controller motion source=0x{source_bits:x} x={x:.3} y={y:.3} hat_x={hat_x:.3} hat_y={hat_y:.3}"
+        ));
+
+        self.update_controller_axis(&self.controller_axis_x, axis_key_horizontal(x));
+        self.update_controller_axis(&self.controller_axis_y, axis_key_vertical(y));
+        self.update_controller_axis(&self.controller_axis_hat_x, axis_key_horizontal(hat_x));
+        self.update_controller_axis(&self.controller_axis_hat_y, axis_key_vertical(hat_y));
+        true
+    }
+
+    fn update_controller_axis(
+        &self,
+        slot: &Cell<Option<ControllerAxisKey>>,
+        next: Option<ControllerAxisKey>,
+    ) {
+        let previous = slot.replace(next);
+        if previous == next {
+            return;
+        }
+        if let Some(previous) = previous {
+            self.dispatch_controller_axis_key(previous, "released");
+        }
+        if let Some(next) = next {
+            self.dispatch_controller_axis_key(next, "pressed");
+        }
+    }
+
+    fn dispatch_controller_axis_key(&self, key: ControllerAxisKey, phase: &str) {
+        let event = match phase {
+            "pressed" => WindowEvent::KeyPressed { text: key.text() },
+            "released" => WindowEvent::KeyReleased { text: key.text() },
+            _ => return,
+        };
+        let result = self.try_dispatch_key_event(event);
+        let result_label = match result {
+            i_slint_core::input::KeyEventResult::EventAccepted => "accepted",
+            i_slint_core::input::KeyEventResult::EventIgnored => "ignored",
+        };
+        android_backend_log(&format!(
+            "input controller nav key={} phase={} result={}",
+            key.label(),
+            phase,
+            result_label
+        ));
     }
 
     fn resize(&self) -> Result<(), PlatformError> {
@@ -718,13 +819,36 @@ fn map_key_event(key_event: &android_activity::input::KeyEvent) -> Option<Window
     }
 }
 
+fn is_controller_motion_source(source: Source) -> bool {
+    source.is_joystick_class() || matches!(source, Source::Gamepad | Source::Dpad)
+}
+
+fn axis_key_horizontal(value: f32) -> Option<ControllerAxisKey> {
+    if !value.is_finite() || value.abs() < 0.5 {
+        return None;
+    }
+    if value < 0.0 { Some(ControllerAxisKey::Left) } else { Some(ControllerAxisKey::Right) }
+}
+
+fn axis_key_vertical(value: f32) -> Option<ControllerAxisKey> {
+    if !value.is_finite() || value.abs() < 0.5 {
+        return None;
+    }
+    if value < 0.0 { Some(ControllerAxisKey::Up) } else { Some(ControllerAxisKey::Down) }
+}
+
 fn map_key_code(code: android_activity::input::Keycode) -> Option<SharedString> {
     match code {
         Keycode::Unknown => None,
         Keycode::SoftLeft => None,
         Keycode::SoftRight => None,
         Keycode::Home => None,
-        Keycode::Back => Some(Key::Back.into()),
+        // XiaoweiOS handles controller/DPAD semantics at the Activity/JNI
+        // boundary so shared UI receives ControllerKey identity instead of
+        // backend-local Slint key text. Leave these Android keys unhandled here
+        // so the Activity bridge can route them consistently with gamepad
+        // button and trigger keys.
+        Keycode::Back => None,
         Keycode::Call => None,
         Keycode::Endcall => None,
         Keycode::Keycode0 => Some("0".into()),
@@ -739,11 +863,11 @@ fn map_key_code(code: android_activity::input::Keycode) -> Option<SharedString> 
         Keycode::Keycode9 => Some("9".into()),
         Keycode::Star => Some("*".into()),
         Keycode::Pound => Some("#".into()),
-        Keycode::DpadUp => Some(Key::UpArrow.into()),
-        Keycode::DpadDown => Some(Key::DownArrow.into()),
-        Keycode::DpadLeft => Some(Key::LeftArrow.into()),
-        Keycode::DpadRight => Some(Key::RightArrow.into()),
-        Keycode::DpadCenter => Some(Key::Return.into()),
+        Keycode::DpadUp => None,
+        Keycode::DpadDown => None,
+        Keycode::DpadLeft => None,
+        Keycode::DpadRight => None,
+        Keycode::DpadCenter => None,
         Keycode::VolumeUp => None,
         Keycode::VolumeDown => None,
         Keycode::Power => None,
