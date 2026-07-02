@@ -1363,11 +1363,20 @@ fn test_fluent2_text_input_focus_indicator_geometry_uses_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for token in ["input-focus-indicator-height", "text-input-focus-indicator-horizontal-inset"] {
+    for token in [
+        "input-focus-indicator-height",
+        "text-input-focus-indicator-height",
+        "spinbox-focus-indicator-height",
+        "text-input-focus-indicator-horizontal-inset",
+    ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
-    for control in ["lineedit.slint", "textedit.slint", "spinbox.slint"] {
+    for (control, expected_height) in [
+        ("lineedit.slint", "Fluent2SizeSettings.text-input-focus-indicator-height"),
+        ("textedit.slint", "Fluent2SizeSettings.text-input-focus-indicator-height"),
+        ("spinbox.slint", "Fluent2SizeSettings.spinbox-focus-indicator-height"),
+    ] {
         let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{control}")))
             .unwrap_or_else(|| panic!("fluent2 should embed {control}"));
         let source_contents = source.read();
@@ -1376,6 +1385,14 @@ fn test_fluent2_text_input_focus_indicator_geometry_uses_tokens() {
         assert!(
             source.contains("Fluent2SizeSettings.text-input-focus-indicator-horizontal-inset"),
             "fluent2 {control} focus indicator should use the horizontal inset token"
+        );
+        assert!(
+            source.contains(expected_height),
+            "fluent2 {control} focus indicator height should use semantic component token {expected_height}"
+        );
+        assert!(
+            !source.contains("Fluent2SizeSettings.input-focus-indicator-height"),
+            "fluent2 {control} focus indicator should not bind directly to the broad input focus height token"
         );
         assert!(
             !source.contains("x: parent.border-radius")
