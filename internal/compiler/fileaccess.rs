@@ -889,6 +889,7 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
         "combobox-disabled-background: control-disabled",
         "combobox-disabled-border: control-strong-stroke-disabled",
         "combobox-hover-background: control-secondary",
+        "combobox-pressed-background: control-alt-tertiary",
         "combobox-foreground: control-foreground",
         "combobox-disabled-foreground: text-disabled",
         "combobox-pressed-foreground: text-secondary",
@@ -930,6 +931,12 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
     ] {
         assert!(combobox.contains(expected), "fluent2 ComboBox should use {expected}");
     }
+
+    assert!(
+        styling.lines().any(|line| line.trim()
+            == "out property <brush> combobox-pressed-background: control-alt-fill-tertiary;"),
+        "fluent2 combobox pressed background should bind directly to the Fluent2 control-alt fill primitive"
+    );
 
     for copied_literal in [
         "background.background: Fluent2Palette.control-secondary",
@@ -1053,9 +1060,9 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
     }
 
     for expected in [
-        "checkbox-background: control-alt-secondary",
-        "checkbox-hover-background: control-alt-tertiary",
-        "checkbox-pressed-background: control-alt-quaternary",
+        "checkbox-background: control-alt-fill-secondary",
+        "checkbox-hover-background: control-alt-fill-tertiary",
+        "checkbox-pressed-background: control-alt-fill-quaternary",
     ] {
         let expected_line = format!("out property <brush> {expected};");
         assert!(
@@ -1065,6 +1072,9 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
     }
 
     for copied_literal in [
+        "checkbox-background: control-alt-secondary",
+        "checkbox-hover-background: control-alt-tertiary",
+        "checkbox-pressed-background: control-alt-quaternary",
         "checkbox-background: dark-color-scheme ? #0000001A : #00000005",
         "checkbox-hover-background: dark-color-scheme ? #FFFFFF0A : #0000000F",
         "checkbox-pressed-background: dark-color-scheme ? #FFFFFF12 : #00000017",
