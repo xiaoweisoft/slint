@@ -546,6 +546,8 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
         "combobox-disabled-foreground",
         "combobox-pressed-foreground",
         "combobox-disabled-icon-foreground",
+        "combobox-horizontal-padding",
+        "combobox-content-spacing",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -582,6 +584,9 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
         "text.color: Fluent2Palette.combobox-disabled-foreground",
         "icon.colorize: Fluent2Palette.combobox-disabled-icon-foreground",
         "text.color: Fluent2Palette.combobox-pressed-foreground",
+        "padding-left: Fluent2SizeSettings.combobox-horizontal-padding",
+        "padding-right: Fluent2SizeSettings.combobox-horizontal-padding",
+        "spacing: Fluent2SizeSettings.combobox-content-spacing",
     ] {
         assert!(combobox.contains(expected), "fluent2 ComboBox should use {expected}");
     }
@@ -594,6 +599,9 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
         "icon.colorize: Fluent2Palette.text-disabled",
         "text.color: Fluent2Palette.text-secondary",
         "color: Fluent2Palette.control-foreground",
+        "padding-left: Fluent2SizeSettings.control-horizontal-padding",
+        "padding-right: Fluent2SizeSettings.control-horizontal-padding",
+        "spacing: Fluent2SizeSettings.control-spacing",
     ] {
         assert!(
             !combobox.contains(copied_literal),
@@ -745,6 +753,48 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
 }
 
 #[test]
+fn test_fluent2_checkbox_and_switch_label_spacing_use_tokens() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for token in ["checkbox-label-spacing", "switch-label-spacing"] {
+        assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    let checkbox = load_file(&std::path::PathBuf::from("builtin:/fluent2/checkbox.slint"))
+        .expect("fluent2 should embed checkbox.slint");
+    let checkbox_contents = checkbox.read();
+    let checkbox = std::str::from_utf8(&checkbox_contents).unwrap();
+    let checkbox =
+        checkbox.split("export component CheckBox").nth(1).expect("fluent2 should define CheckBox");
+
+    let switch = load_file(&std::path::PathBuf::from("builtin:/fluent2/switch.slint"))
+        .expect("fluent2 should embed switch.slint");
+    let switch_contents = switch.read();
+    let switch = std::str::from_utf8(&switch_contents).unwrap();
+    let switch =
+        switch.split("export component Switch").nth(1).expect("fluent2 should define Switch");
+
+    assert!(
+        checkbox.contains("spacing: Fluent2SizeSettings.checkbox-label-spacing"),
+        "fluent2 CheckBox label spacing should use its own token"
+    );
+    assert!(
+        switch.contains("spacing: Fluent2SizeSettings.switch-label-spacing"),
+        "fluent2 Switch label spacing should use its own token"
+    );
+
+    for (control_name, source) in [("CheckBox", checkbox), ("Switch", switch)] {
+        assert!(
+            !source.contains("spacing: Fluent2SizeSettings.control-label-spacing"),
+            "fluent2 {control_name} should not use copied generic control label spacing"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_focused_text_inputs_keep_text_control_border_token() {
     for (control, component_marker, focused_marker, expected_border) in [
         (
@@ -809,6 +859,8 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
         "text-input-selection-background",
         "text-input-selection-foreground",
         "text-input-disabled-selection-foreground",
+        "text-input-horizontal-padding",
+        "text-input-vertical-padding",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -849,6 +901,8 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
                 "text-color: Fluent2Palette.text-input-foreground",
                 "placeholder-color: Fluent2Palette.text-input-placeholder-foreground",
                 "base.selection-foreground-color: Fluent2Palette.text-input-disabled-selection-foreground",
+                "padding-left: Fluent2SizeSettings.text-input-horizontal-padding",
+                "padding-right: Fluent2SizeSettings.text-input-horizontal-padding",
             ],
             vec![
                 "background: Fluent2Palette.control-background",
@@ -862,6 +916,8 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
                 "text-color: Fluent2Palette.foreground",
                 "placeholder-color: Fluent2Palette.text-secondary",
                 "base.selection-foreground-color: Fluent2Palette.text-accent-foreground-disabled",
+                "padding-left: Fluent2SizeSettings.control-horizontal-padding",
+                "padding-right: Fluent2SizeSettings.control-horizontal-padding",
             ],
         ),
         (
@@ -876,6 +932,8 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
                 "selection-background-color: Fluent2Palette.text-input-selection-background",
                 "selection-foreground-color: Fluent2Palette.text-input-selection-foreground",
                 "base.selection-foreground-color: Fluent2Palette.text-input-disabled-selection-foreground",
+                "scroll-view-padding: Fluent2SizeSettings.text-input-horizontal-padding",
+                "cursor-margin: Fluent2SizeSettings.text-input-horizontal-padding",
             ],
             vec![
                 "background: Fluent2Palette.control-background",
@@ -887,6 +945,8 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
                 "selection-background-color: Fluent2Palette.selection-background",
                 "selection-foreground-color: Fluent2Palette.selection-foreground",
                 "base.selection-foreground-color: Fluent2Palette.text-accent-foreground-disabled",
+                "scroll-view-padding: Fluent2SizeSettings.control-horizontal-padding",
+                "cursor-margin: Fluent2SizeSettings.control-horizontal-padding",
             ],
         ),
     ] {
@@ -924,6 +984,9 @@ fn test_fluent2_spinbox_input_colors_use_semantic_tokens() {
         "spinbox-selection-background",
         "spinbox-selection-foreground",
         "spinbox-disabled-selection-foreground",
+        "spinbox-horizontal-padding",
+        "spinbox-button-column-padding",
+        "spinbox-vertical-padding",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -963,6 +1026,10 @@ fn test_fluent2_spinbox_input_colors_use_semantic_tokens() {
         "selection-background-color: Fluent2Palette.spinbox-selection-background",
         "selection-foreground-color: Fluent2Palette.spinbox-selection-foreground",
         "base.selection-foreground-color: Fluent2Palette.spinbox-disabled-selection-foreground",
+        "padding-left: Fluent2SizeSettings.spinbox-horizontal-padding",
+        "padding-right: Fluent2SizeSettings.spinbox-button-column-padding",
+        "padding-top: Fluent2SizeSettings.spinbox-vertical-padding",
+        "padding-bottom: Fluent2SizeSettings.spinbox-vertical-padding",
     ] {
         assert!(spinbox.contains(expected), "fluent2 SpinBox should use {expected}");
     }
@@ -976,6 +1043,10 @@ fn test_fluent2_spinbox_input_colors_use_semantic_tokens() {
         "selection-background-color: Fluent2Palette.selection-background",
         "selection-foreground-color: Fluent2Palette.accent-foreground",
         "base.selection-foreground-color: Fluent2Palette.text-accent-foreground-disabled",
+        "padding-left: Fluent2SizeSettings.control-horizontal-padding",
+        "padding-right: Fluent2SizeSettings.control-tight-horizontal-padding",
+        "padding-top: Fluent2SizeSettings.control-vertical-padding",
+        "padding-bottom: Fluent2SizeSettings.control-vertical-padding",
     ] {
         assert!(
             !spinbox.contains(copied_literal),
@@ -1613,6 +1684,16 @@ fn test_fluent2_control_icons_use_semantic_foreground_tokens() {
 
 #[test]
 fn test_fluent2_scrollbar_buttons_use_focus_touch_area() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains("scrollbar-button-pressed-icon-inset"),
+        "fluent2 styling should expose a scrollbar-specific pressed icon inset token"
+    );
+
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/scrollview.slint"))
         .expect("fluent2 should embed scrollview.slint");
     let source_contents = source.read();
@@ -1636,10 +1717,18 @@ fn test_fluent2_scrollbar_buttons_use_focus_touch_area() {
         "touch-area := FocusTouchArea",
         "enabled: true",
         "pressed when root.pressed",
+        "icon.width: root.width - Fluent2SizeSettings.scrollbar-button-pressed-icon-inset",
         "hover when root.has-hover",
     ] {
         assert!(block.contains(expected), "fluent2 ScrollViewButton should use {expected}");
     }
+
+    assert!(
+        !block.contains(
+            "icon.width: root.width - Fluent2SizeSettings.control-tight-horizontal-padding"
+        ),
+        "fluent2 ScrollViewButton pressed icon sizing should not use the generic control padding token"
+    );
 
     assert!(
         !source.contains("component ScrollViewButton inherits TouchArea"),
@@ -1868,6 +1957,15 @@ fn test_fluent2_table_header_colors_use_semantic_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
+    assert!(
+        styling.contains("table-header-sort-icon-spacing"),
+        "fluent2 styling should expose a table-header sort icon spacing token"
+    );
+
+    for token in ["table-header-horizontal-padding", "table-cell-horizontal-padding"] {
+        assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
     for token in [
         "table-header-background",
         "table-header-hover-background",
@@ -1907,8 +2005,24 @@ fn test_fluent2_table_header_colors_use_semantic_tokens() {
         "background: Fluent2Palette.table-header-hover-background",
         "colorize: Fluent2Palette.table-header-sort-icon-foreground",
         "background: Fluent2Palette.table-header-resize-hover-background",
+        "spacing: Fluent2SizeSettings.table-header-sort-icon-spacing",
+        "width: parent.width - Fluent2SizeSettings.table-header-horizontal-padding",
+        "padding-left: Fluent2SizeSettings.table-header-horizontal-padding",
+        "padding-right: Fluent2SizeSettings.table-header-horizontal-padding",
     ] {
         assert!(column.contains(expected), "fluent2 TableViewColumn should use {expected}");
+    }
+
+    let cell = source
+        .split("component TableViewCell")
+        .nth(1)
+        .and_then(|after| after.split("component TableViewRow").next())
+        .expect("fluent2 should define TableViewCell before TableViewRow");
+    for expected in [
+        "padding-left: Fluent2SizeSettings.table-cell-horizontal-padding",
+        "padding-right: Fluent2SizeSettings.table-cell-horizontal-padding",
+    ] {
+        assert!(cell.contains(expected), "fluent2 TableViewCell should use {expected}");
     }
 
     let header_delegate = source
@@ -1927,6 +2041,10 @@ fn test_fluent2_table_header_colors_use_semantic_tokens() {
         "background: Fluent2Palette.sub-title-tertiary",
         "colorize: Fluent2Palette.table-sort-icon-foreground",
         "color: Fluent2Palette.text-secondary",
+        "spacing: Fluent2SizeSettings.control-tight-horizontal-padding",
+        "width: parent.width - Fluent2SizeSettings.control-horizontal-padding",
+        "padding-left: Fluent2SizeSettings.control-horizontal-padding",
+        "padding-right: Fluent2SizeSettings.control-horizontal-padding",
     ] {
         assert!(
             !source.contains(copied_literal),
@@ -2062,6 +2180,11 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         "menu-item-foreground",
         "menu-item-current-foreground",
         "menu-item-current-background",
+        "menu-bar-item-horizontal-padding",
+        "menu-bar-item-top-padding",
+        "menu-bar-spacing",
+        "menu-item-horizontal-padding",
+        "menu-item-spacing",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -2099,9 +2222,21 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         "pressed-foreground: Fluent2Palette.menu-bar-item-pressed-foreground",
         "hover-background: Fluent2Palette.menu-bar-item-hover-background",
         "pressed-background: Fluent2Palette.menu-bar-item-pressed-background",
+        "horizontal-padding: Fluent2SizeSettings.menu-bar-item-horizontal-padding",
+        "top-padding: Fluent2SizeSettings.menu-bar-item-top-padding",
     ] {
         assert!(menu_bar_item.contains(expected), "fluent2 MenuBarItem should use {expected}");
     }
+
+    let menu_bar = source
+        .split("export component MenuBar inherits MenuBarBase")
+        .nth(1)
+        .and_then(|after| after.split("export component MenuFrame").next())
+        .expect("fluent2 menu.slint should define MenuBar before MenuFrame");
+    assert!(
+        menu_bar.contains("spacing: Fluent2SizeSettings.menu-bar-spacing"),
+        "fluent2 MenuBar should use menu-bar-spacing"
+    );
 
     for copied_literal in [
         "default-foreground: Fluent2Palette.foreground",
@@ -2109,10 +2244,13 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         "pressed-foreground: Fluent2Palette.text-secondary",
         "hover-background: Fluent2Palette.subtle-secondary",
         "pressed-background: Fluent2Palette.control-alt-tertiary",
+        "horizontal-padding: Fluent2SizeSettings.control-horizontal-padding",
+        "top-padding: Fluent2SizeSettings.control-vertical-padding",
+        "spacing: Fluent2SizeSettings.control-spacing",
     ] {
         assert!(
-            !menu_bar_item.contains(copied_literal),
-            "fluent2 MenuBarItem should not bind colors directly to copied generic token {copied_literal}"
+            !source.contains(copied_literal),
+            "fluent2 menu controls should not bind directly to copied generic token {copied_literal}"
         );
     }
 
@@ -2125,6 +2263,8 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         "default-foreground: Fluent2Palette.menu-item-foreground",
         "current-foreground: Fluent2Palette.menu-item-current-foreground",
         "current-background: Fluent2Palette.menu-item-current-background",
+        "horizontal-padding: Fluent2SizeSettings.menu-item-horizontal-padding",
+        "spacing: Fluent2SizeSettings.menu-item-spacing",
     ] {
         assert!(menu_item.contains(expected), "fluent2 MenuItem should use {expected}");
     }
@@ -2469,6 +2609,7 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
         "tab-border",
         "tab-foreground",
         "tab-selected-foreground",
+        "tab-horizontal-padding",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -2517,6 +2658,15 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
         "fluent2 TabImpl border should use the semantic tab border token"
     );
 
+    assert!(
+        tab_impl.contains("padding-left: Fluent2SizeSettings.tab-horizontal-padding"),
+        "fluent2 TabImpl should use a tab-specific left padding token"
+    );
+    assert!(
+        tab_impl.contains("padding-right: Fluent2SizeSettings.tab-horizontal-padding"),
+        "fluent2 TabImpl should use a tab-specific right padding token"
+    );
+
     for copied_literal in [
         "Fluent2Palette.control-foreground",
         "Fluent2Palette.text-secondary",
@@ -2524,6 +2674,8 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
         "Fluent2Palette.layer-on-mica-base-alt-secondary",
         "Fluent2Palette.control-fill-transparent",
         "Fluent2Palette.card-stroke",
+        "padding-left: Fluent2SizeSettings.control-horizontal-padding",
+        "padding-right: Fluent2SizeSettings.control-horizontal-padding",
     ] {
         assert!(
             !tab_impl.contains(copied_literal),
@@ -2896,6 +3048,24 @@ fn test_fluent2_text_controls_use_font_family_token() {
             "fluent2 {control} {label} text should use the theme font-family token"
         );
     }
+
+    let about = load_file(&std::path::PathBuf::from("builtin:/fluent2/about-slint.slint"))
+        .expect("fluent2 should embed about-slint.slint");
+    let about_contents = about.read();
+    let about = std::str::from_utf8(&about_contents).unwrap();
+
+    assert!(
+        about.contains("about-layout-spacing"),
+        "fluent2 styling should expose an AboutSlint-specific spacing token"
+    );
+    assert!(
+        about.contains("spacing: Fluent2SizeSettings.about-layout-spacing"),
+        "fluent2 AboutSlint should use its own layout spacing token"
+    );
+    assert!(
+        !about.contains("spacing: Fluent2SizeSettings.control-spacing"),
+        "fluent2 AboutSlint should not use generic control spacing"
+    );
 
     for base in ["lineedit-base.slint", "textedit-base.slint"] {
         let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{base}")))
@@ -3841,10 +4011,15 @@ fn test_fluent2_table_headers_use_focus_touch_area() {
         "enabled: true",
         "pressed when touch-area.pressed",
         "hover when touch-area.has-hover",
-        "width: parent.width - Fluent2SizeSettings.control-horizontal-padding",
+        "width: parent.width - Fluent2SizeSettings.table-header-horizontal-padding",
     ] {
         assert!(block.contains(expected), "fluent2 TableViewColumn should use {expected}");
     }
+
+    assert!(
+        !block.contains("width: parent.width - Fluent2SizeSettings.control-horizontal-padding"),
+        "fluent2 TableViewColumn focus receiver should not use the generic control padding token"
+    );
 
     assert!(
         !block.lines().any(|line| line.trim_start().starts_with("touch-area := TouchArea")),
@@ -3958,6 +4133,8 @@ fn test_fluent2_button_colors_use_semantic_tokens() {
         "button-primary-border",
         "button-primary-disabled-border",
         "button-icon-transparent-foreground",
+        "button-horizontal-padding",
+        "button-vertical-padding",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -4011,6 +4188,10 @@ fn test_fluent2_button_colors_use_semantic_tokens() {
         "background: root.primary ? Fluent2Palette.button-primary-background : Fluent2Palette.button-background",
         "border-color: root.primary ? Fluent2Palette.button-primary-border : Fluent2Palette.button-border",
         "colorize: root.colorize-icon ? root.text-color : Fluent2Palette.button-icon-transparent-foreground",
+        "padding-left: Fluent2SizeSettings.button-horizontal-padding",
+        "padding-right: Fluent2SizeSettings.button-horizontal-padding",
+        "padding-top: Fluent2SizeSettings.button-vertical-padding",
+        "padding-bottom: Fluent2SizeSettings.button-vertical-padding",
     ] {
         assert!(button.contains(expected), "fluent2 Button should use {expected}");
     }
@@ -4032,6 +4213,10 @@ fn test_fluent2_button_colors_use_semantic_tokens() {
         "Fluent2Palette.accent-control-border",
         "Fluent2Palette.control-background",
         "Fluent2Palette.control-fill-transparent",
+        "padding-left: Fluent2SizeSettings.control-horizontal-padding",
+        "padding-right: Fluent2SizeSettings.control-horizontal-padding",
+        "padding-top: Fluent2SizeSettings.control-vertical-padding",
+        "padding-bottom: Fluent2SizeSettings.control-vertical-padding",
     ] {
         assert!(
             !button.contains(copied_literal),

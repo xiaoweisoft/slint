@@ -24,14 +24,14 @@ component TableViewColumn inherits Rectangle {
     ]
 
     touch-area := FocusTouchArea {
-        width: parent.width - Fluent2SizeSettings.control-horizontal-padding;
+        width: parent.width - Fluent2SizeSettings.table-header-horizontal-padding;
         enabled: true;
     }
 
     HorizontalLayout {
-        padding-left: Fluent2SizeSettings.control-horizontal-padding;
-        padding-right: Fluent2SizeSettings.control-horizontal-padding;
-        spacing: Fluent2SizeSettings.control-tight-horizontal-padding;
+        padding-left: Fluent2SizeSettings.table-header-horizontal-padding;
+        padding-right: Fluent2SizeSettings.table-header-horizontal-padding;
+        spacing: Fluent2SizeSettings.table-header-sort-icon-spacing;
 
         HorizontalLayout {
             @children
@@ -87,8 +87,8 @@ component TableViewCell inherits Rectangle {
     clip: true;
 
     HorizontalLayout {
-        padding-left: Fluent2SizeSettings.control-horizontal-padding;
-        padding-right: Fluent2SizeSettings.control-horizontal-padding;
+        padding-left: Fluent2SizeSettings.table-cell-horizontal-padding;
+        padding-right: Fluent2SizeSettings.table-cell-horizontal-padding;
         padding-top: Fluent2SizeSettings.table-cell-vertical-padding;
         padding-bottom: Fluent2SizeSettings.table-cell-vertical-padding;
 

@@ -14,8 +14,8 @@ export component MenuBarItem {
     min-height: base.min-height;
 
     base := MenuBarItemBase {
-        horizontal-padding: Fluent2SizeSettings.control-horizontal-padding;
-        top-padding: Fluent2SizeSettings.control-vertical-padding;
+        horizontal-padding: Fluent2SizeSettings.menu-bar-item-horizontal-padding;
+        top-padding: Fluent2SizeSettings.menu-bar-item-top-padding;
         bottom-padding: Fluent2SizeSettings.menu-bar-item-bottom-padding;
         default-foreground: Fluent2Palette.menu-bar-item-foreground;
         hover-foreground: Fluent2Palette.menu-bar-item-foreground;
@@ -30,7 +30,7 @@ export component MenuBarItem {
 }
 
 export component MenuBar inherits MenuBarBase {
-    spacing: Fluent2SizeSettings.control-spacing;
+    spacing: Fluent2SizeSettings.menu-bar-spacing;
     min-layout-height: Fluent2SizeSettings.menu-bar-height;
 }
 
@@ -71,9 +71,9 @@ export component MenuItem {
             font-weight: Fluent2FontSettings.body.font-weight;
             font-family: Fluent2Palette.font-family;
             border-radius: Fluent2SizeSettings.control-radius;
-            horizontal-padding: Fluent2SizeSettings.control-horizontal-padding;
+            horizontal-padding: Fluent2SizeSettings.menu-item-horizontal-padding;
             vertical-padding: Fluent2SizeSettings.menu-item-vertical-padding;
-            spacing: Fluent2SizeSettings.control-spacing;
+            spacing: Fluent2SizeSettings.menu-item-spacing;
             content-spacing: Fluent2SizeSettings.menu-item-content-spacing;
             check-icon: @image-url("_check-mark.svg");
             sub-menu-icon: @image-url("_arrow_forward.svg");

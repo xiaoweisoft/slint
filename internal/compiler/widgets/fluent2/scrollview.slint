@@ -30,7 +30,7 @@ component ScrollViewButton {
     states [
         pressed when root.pressed : {
             opacity: Fluent2SizeSettings.scrollbar-button-visible-opacity;
-            icon.width: root.width - Fluent2SizeSettings.control-tight-horizontal-padding;
+            icon.width: root.width - Fluent2SizeSettings.scrollbar-button-pressed-icon-inset;
         }
         hover when root.has-hover : {
             opacity: Fluent2SizeSettings.scrollbar-button-visible-opacity;
