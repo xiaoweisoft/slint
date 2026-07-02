@@ -259,6 +259,31 @@ fn test_fluent2_render_fixture_covers_representative_controls() {
 }
 
 #[test]
+fn test_fluent2_render_fixture_covers_menu_chrome() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    let menu_path = fixture_root.join("fluent2-menu.md");
+    let menu = std::fs::read_to_string(&menu_path)
+        .unwrap_or_else(|err| panic!("failed to read {menu_path:?}: {err}"));
+
+    for expected in [
+        "imagePath=\"../assets/generated/fluent2-render-fixtures/fluent2-menu.png\"",
+        "MenuBar {",
+        "MenuItem { title: \"Open\"; }",
+        "MenuItem { title: \"Pinned\"; checkable: true; checked: true; }",
+        "MenuSeparator { }",
+        "MenuItem { title: \"One\"; }",
+    ] {
+        assert!(menu.contains(expected), "fluent2 menu render fixture should include {expected}");
+    }
+}
+
+#[test]
 fn test_fluent2_alias_render_fixtures_cover_light_and_dark_schemes() {
     let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let fixture_root = manifest_dir
