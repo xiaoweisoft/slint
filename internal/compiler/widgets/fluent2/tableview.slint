@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 
 import { Fluent2Palette, Fluent2FontSettings, Fluent2SizeSettings, Icons } from "styling.slint";
+import { FocusBorder } from "components.slint";
 import { ListView } from "listview.slint";
 import { FocusTouchArea } from "internal-components.slint";
 
@@ -98,6 +99,7 @@ component TableViewCell inherits Rectangle {
 component TableViewRow inherits Rectangle {
     in property <bool> selected;
     in property <bool> even;
+    in property <bool> has-focus;
 
     callback clicked <=> touch-area.clicked;
     callback pointer-event(event: PointerEvent, position: Point);
@@ -130,6 +132,10 @@ component TableViewRow inherits Rectangle {
                 y: self.absolute-position.y + self.mouse-y,
             });
         }
+    }
+
+    if root.has-focus : FocusBorder {
+        border-radius: Fluent2SizeSettings.control-radius;
     }
 
     layout := HorizontalLayout {
@@ -257,6 +263,7 @@ export component StandardTableView {
             for row[idx] in root.rows : TableViewRow {
                 selected: idx == root.current-row;
                 even: mod(idx, 2) == 0;
+                has-focus: root.has-focus && idx == root.current-row;
 
                 pointer-event(pe, pos) => {
                     root.row-pointer-event(idx, pe, {

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 
 import { Fluent2Palette, Fluent2SizeSettings } from "styling.slint";
+import { FocusBorder } from "components.slint";
 import { SliderBase } from "slider-base.slint";
 
 export component Slider {
@@ -95,6 +96,10 @@ export component Slider {
             background: Fluent2Palette.slider-thumb-active-background;
 
             animate background, width { duration: Fluent2SizeSettings.control-motion-duration; }
+        }
+
+        if root.has-focus && root.enabled : FocusBorder {
+            border-radius: Fluent2SizeSettings.slider-thumb-radius;
         }
     }
 

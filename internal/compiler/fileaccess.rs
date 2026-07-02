@@ -3780,6 +3780,42 @@ fn test_fluent2_table_rows_use_focus_touch_area() {
 }
 
 #[test]
+fn test_fluent2_table_rows_use_focus_border() {
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/tableview.slint"))
+        .expect("fluent2 should embed tableview.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+
+    assert!(
+        source.contains("import { FocusBorder } from \"components.slint\""),
+        "fluent2 table rows should import the shared Fluent2 focus border"
+    );
+
+    let row_block = source
+        .split("component TableViewRow")
+        .nth(1)
+        .and_then(|after| after.split("export component StandardTableView").next())
+        .expect("fluent2 should define TableViewRow");
+
+    for expected in [
+        "in property <bool> has-focus",
+        "if root.has-focus : FocusBorder",
+        "border-radius: Fluent2SizeSettings.control-radius",
+    ] {
+        assert!(row_block.contains(expected), "fluent2 TableViewRow should use {expected}");
+    }
+
+    let table_block = source
+        .split("export component StandardTableView")
+        .nth(1)
+        .expect("fluent2 should define StandardTableView");
+    assert!(
+        table_block.contains("has-focus: root.has-focus && idx == root.current-row"),
+        "fluent2 StandardTableView should pass keyboard focus to the current row"
+    );
+}
+
+#[test]
 fn test_fluent2_table_headers_use_focus_touch_area() {
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/tableview.slint"))
         .expect("fluent2 should embed tableview.slint");
@@ -4227,6 +4263,27 @@ fn test_fluent2_slider_pressed_state_tracks_pointer_state() {
     assert!(
         !base.contains("out property <bool> pressed <=> touch-area.enabled"),
         "fluent2 slider pressed state should not be true merely because the slider is enabled"
+    );
+}
+
+#[test]
+fn test_fluent2_slider_uses_focus_border() {
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/slider.slint"))
+        .expect("fluent2 should embed slider.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+
+    assert!(
+        source.contains("import { FocusBorder } from \"components.slint\""),
+        "fluent2 Slider should import the shared Fluent2 focus border"
+    );
+    assert!(
+        source.contains("if root.has-focus && root.enabled : FocusBorder"),
+        "fluent2 Slider should render the shared focus border when keyboard-focused"
+    );
+    assert!(
+        source.contains("border-radius: Fluent2SizeSettings.slider-thumb-radius"),
+        "fluent2 Slider focus border should follow the thumb radius token"
     );
 }
 
