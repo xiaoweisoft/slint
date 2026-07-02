@@ -42,8 +42,8 @@ export component TabImpl inherits Rectangle {
     in-out property <int> current;
     private property <bool> hide-right-border: root.tab-index == root.num-tabs - 1 || tab-index + 1 == current;
     private property <bool> is-current: root.tab-index == root.current;
-    min-width: max(Fluent2SizeSettings.compact-item-height, i-text.min-width);
-    min-height: max(Fluent2SizeSettings.compact-item-height, i-text.min-height);
+    min-width: max(Fluent2SizeSettings.tab-min-width, i-text.min-width);
+    min-height: max(Fluent2SizeSettings.tab-height, i-text.min-height);
     horizontal-stretch: 0;
     vertical-stretch: 0;
     accessible-role: tab;
@@ -61,11 +61,11 @@ export component TabImpl inherits Rectangle {
         width: 100%;
         height: 100%;
         i-background := Rectangle {
-            y: Fluent2SizeSettings.stroke-width;
+            y: Fluent2SizeSettings.tab-border-width;
             width: 100%;
             height: parent.height + self.border-radius;
-            border-radius: Fluent2SizeSettings.overlay-radius;
-            border-width: root.is-current ? Fluent2SizeSettings.stroke-width : Fluent2SizeSettings.control-hidden-stroke-width;
+            border-radius: Fluent2SizeSettings.tab-radius;
+            border-width: root.is-current ? Fluent2SizeSettings.tab-border-width : Fluent2SizeSettings.control-hidden-stroke-width;
             border-color: Fluent2Palette.tab-border;
             background: i-touch-area.pressed ? Fluent2Palette.tab-pressed-background : root.is-current ? Fluent2Palette.tab-selected-background : i-touch-area.has-hover ? Fluent2Palette.tab-hover-background : Fluent2Palette.tab-background;
         }
@@ -94,14 +94,14 @@ export component TabImpl inherits Rectangle {
 
     if (!root.is-current && !root.hide-right-border && !i-touch-area.has-hover && !i-touch-area.pressed): Rectangle {
         x: (parent.width - self.width);
-        width: Fluent2SizeSettings.separator-thickness;
+        width: Fluent2SizeSettings.tab-separator-thickness;
         height: Fluent2SizeSettings.selection-indicator-height;
         background: Fluent2Palette.tab-separator;
     }
     if (!root.is-current && !i-touch-area.has-hover && !i-touch-area.pressed): Rectangle {
         y: (parent.height - self.height);
         width: 100%;
-        height: Fluent2SizeSettings.separator-thickness;
+        height: Fluent2SizeSettings.tab-separator-thickness;
         background: Fluent2Palette.tab-separator;
     }
 

@@ -53,8 +53,8 @@ export component LineEdit {
 
     vertical-stretch: 0;
     horizontal-stretch: 1;
-    min-width: max(Fluent2SizeSettings.input-min-width, layout.min-width);
-    min-height: max(Fluent2SizeSettings.control-height, layout.min-height);
+    min-width: max(Fluent2SizeSettings.text-input-min-width, layout.min-width);
+    min-height: max(Fluent2SizeSettings.text-input-height, layout.min-height);
     forward-focus: base;
 
     states [
@@ -74,9 +74,9 @@ export component LineEdit {
     ]
 
     background := Rectangle {
-        border-radius: Fluent2SizeSettings.button-radius;
+        border-radius: Fluent2SizeSettings.text-input-radius;
         background: Fluent2Palette.text-input-background;
-        border-width: Fluent2SizeSettings.stroke-width;
+        border-width: Fluent2SizeSettings.text-input-border-width;
         border-color: Fluent2Palette.text-control-border;
 
         layout := HorizontalLayout {

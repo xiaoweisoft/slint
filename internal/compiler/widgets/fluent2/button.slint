@@ -21,8 +21,8 @@ export component Button {
 
     private property <brush> text-color: primary || checked ? Fluent2Palette.button-primary-foreground : Fluent2Palette.button-foreground;
 
-    min-width: max(Fluent2SizeSettings.control-min-width, i-layout.min-width);
-    min-height: max(Fluent2SizeSettings.control-height, i-layout.min-height);
+    min-width: max(Fluent2SizeSettings.button-min-width, i-layout.min-width);
+    min-height: max(Fluent2SizeSettings.button-height, i-layout.min-height);
     horizontal-stretch: 0;
     vertical-stretch: 0;
     forward-focus: i-touch-area;
@@ -57,15 +57,17 @@ export component Button {
     ]
 
     i-background := Rectangle {
-        border-radius: Fluent2SizeSettings.button-radius;
+        border-radius: Fluent2SizeSettings.button-container-radius;
         background: root.primary ? Fluent2Palette.button-primary-background : Fluent2Palette.button-background;
 
-        animate background, border-color { duration: Fluent2SizeSettings.control-motion-duration; }
+        animate background { duration: Fluent2SizeSettings.button-motion-duration; }
 
         i-border := Rectangle {
             border-radius: parent.border-radius;
-            border-width: Fluent2SizeSettings.stroke-width;
+            border-width: Fluent2SizeSettings.button-border-width;
             border-color: root.primary ? Fluent2Palette.button-primary-border : Fluent2Palette.button-border;
+
+            animate border-color { duration: Fluent2SizeSettings.button-motion-duration; }
         }
 
         i-layout := HorizontalLayout {
@@ -73,7 +75,7 @@ export component Button {
             padding-right: Fluent2SizeSettings.button-horizontal-padding;
             padding-top: Fluent2SizeSettings.button-vertical-padding;
             padding-bottom: Fluent2SizeSettings.button-vertical-padding;
-            spacing: Fluent2SizeSettings.overlay-padding;
+            spacing: Fluent2SizeSettings.button-content-spacing;
             alignment: center;
 
             if (root.icon.width > 0 && root.icon.height > 0) : Image {
@@ -92,7 +94,7 @@ export component Button {
                 vertical-alignment: center;
                 text: root.text;
                 color: root.text-color;
-                animate color { duration: Fluent2SizeSettings.control-motion-duration; }
+                animate color { duration: Fluent2SizeSettings.button-motion-duration; }
                 accessible-role: none;
             }
         }

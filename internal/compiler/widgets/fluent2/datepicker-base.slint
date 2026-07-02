@@ -105,7 +105,7 @@ component CalendarDelegate {
         }
         today when root.today : {
             background-layer.border-color: root.style.border-color-today;
-            background-layer.border-width: Fluent2SizeSettings.stroke-width;
+            background-layer.border-width: Fluent2SizeSettings.date-picker-day-today-border-width;
             state-layer.state-brush: root.style.state-brush-today;
         }
     ]
@@ -339,7 +339,7 @@ export component DatePickerBase {
         }
 
         Rectangle {
-            height: Fluent2SizeSettings.separator-thickness;
+            height: Fluent2SizeSettings.date-picker-separator-thickness;
             background: root.style.border-brush;
         }
 
@@ -424,7 +424,7 @@ export component DatePickerBase {
         }
 
         Rectangle {
-            height: Fluent2SizeSettings.separator-thickness;
+            height: Fluent2SizeSettings.date-picker-separator-thickness;
             background: root.style.border-brush;
             visible: root.year-selection;
         }

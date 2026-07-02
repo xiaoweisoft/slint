@@ -52,18 +52,18 @@ export component Switch {
             rail.background: root.checked ? Fluent2Palette.switch-rail-checked-pressed-background : Fluent2Palette.switch-rail-pressed-background;
             thumb.width: Fluent2SizeSettings.switch-thumb-pressed-width;
             thumb.height: Fluent2SizeSettings.switch-thumb-pressed-height;
-            thumb.border-width: root.checked ? Fluent2SizeSettings.stroke-width : Fluent2SizeSettings.control-hidden-stroke-width;
+            thumb.border-width: root.checked ? Fluent2SizeSettings.switch-thumb-border-width : Fluent2SizeSettings.control-hidden-stroke-width;
             thumb.background: root.checked ? Fluent2Palette.switch-thumb-checked-pressed-background : Fluent2Palette.switch-thumb-pressed-background;
         }
         hover when touch-area.has-hover : {
             rail.background:  root.checked ? Fluent2Palette.switch-rail-checked-hover-background : Fluent2Palette.switch-rail-hover-background;
             thumb.width: Fluent2SizeSettings.switch-thumb-hover-size;
-            thumb.border-width: root.checked ? Fluent2SizeSettings.stroke-width : Fluent2SizeSettings.control-hidden-stroke-width;
+            thumb.border-width: root.checked ? Fluent2SizeSettings.switch-thumb-border-width : Fluent2SizeSettings.control-hidden-stroke-width;
             thumb.background: root.checked ? Fluent2Palette.switch-thumb-checked-hover-background : Fluent2Palette.switch-thumb-hover-background;
         }
         selected when root.checked : {
             rail.background: Fluent2Palette.switch-rail-checked-background;
-            thumb.border-width: Fluent2SizeSettings.stroke-width;
+            thumb.border-width: Fluent2SizeSettings.switch-thumb-border-width;
             thumb.border-color: Fluent2Palette.switch-thumb-border;
             thumb.background: Fluent2Palette.switch-thumb-checked-background;
         }
@@ -81,9 +81,11 @@ export component Switch {
 
                 rail := Rectangle {
                     border-radius: Fluent2SizeSettings.switch-rail-radius;
-                    border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.stroke-width;
+                    border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.switch-rail-border-width;
                     border-color: Fluent2Palette.switch-rail-border;
                     background: Fluent2Palette.switch-rail-background;
+
+                    animate background, border-color { duration: Fluent2SizeSettings.switch-motion-duration; easing: linear; }
                 }
 
                 thumb := Rectangle {
@@ -95,7 +97,7 @@ export component Switch {
                     background: Fluent2Palette.switch-thumb-background;
                     border-color: Fluent2Palette.switch-thumb-border;
 
-                    animate background, x, y, width, height { duration: Fluent2SizeSettings.control-motion-duration; easing: linear; }
+                    animate background, border-color, border-width, x, y, width, height { duration: Fluent2SizeSettings.switch-motion-duration; easing: linear; }
                 }
 
                 // focus border

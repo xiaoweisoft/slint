@@ -23,8 +23,8 @@ component ScrollViewButton {
         colorize: Fluent2Palette.scrollbar-button-foreground;
         accessible-role: none;
 
-        animate colorize, opacity { duration: Fluent2SizeSettings.control-motion-duration; }
-        animate width, height { duration: Fluent2SizeSettings.control-motion-duration; easing: ease-out; }
+        animate colorize, opacity { duration: Fluent2SizeSettings.scrollbar-motion-duration; }
+        animate width, height { duration: Fluent2SizeSettings.scrollbar-motion-duration; easing: ease-out; }
     }
 
     states [
@@ -58,8 +58,8 @@ component ScrollBar inherits Rectangle {
     property <length> track-size: root.horizontal ? root.width - 2 * root.offset : root.height - 2 * offset;
     property <length> step-size: Fluent2SizeSettings.scrollbar-step-size;
 
-    border-width: Fluent2SizeSettings.stroke-width;
-    border-radius: Fluent2SizeSettings.overlay-radius;
+    border-width: Fluent2SizeSettings.scrollbar-track-border-width;
+    border-radius: Fluent2SizeSettings.scrollbar-track-radius;
     visible: (self.policy == ScrollBarPolicy.always-on) || (self.policy == ScrollBarPolicy.as-needed && self.maximum > 0);
     clip: true;
 
@@ -72,7 +72,7 @@ component ScrollBar inherits Rectangle {
         }
     ]
 
-    animate size { duration: Fluent2SizeSettings.control-motion-duration; easing: ease-out; }
+    animate size { duration: Fluent2SizeSettings.scrollbar-motion-duration; easing: ease-out; }
 
     thumb := Rectangle {
         width: !root.horizontal ? root.size : root.maximum <= 0phx ? 0phx : max(min(Fluent2SizeSettings.scrollbar-min-thumb-size, root.width), root.track-size * root.page-size / (root.maximum + root.page-size));
@@ -82,7 +82,7 @@ component ScrollBar inherits Rectangle {
         border-radius: Fluent2SizeSettings.scrollbar-thumb-radius;
         background: Fluent2Palette.scrollbar-thumb-background;
 
-        animate width, height { duration: Fluent2SizeSettings.control-motion-duration; easing: ease-out; }
+        animate width, height { duration: Fluent2SizeSettings.scrollbar-motion-duration; easing: ease-out; }
     }
 
     touch-area := TouchArea {

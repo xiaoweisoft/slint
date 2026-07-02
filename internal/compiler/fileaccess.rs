@@ -429,6 +429,233 @@ fn test_fluent2_disabled_input_borders_use_disabled_stroke_token() {
 }
 
 #[test]
+fn test_fluent2_disabled_border_tokens_use_disabled_stroke_primitive() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains(
+            "property <brush> neutral-stroke-disabled: dark-color-scheme ? #FFFFFF29 : #00000038"
+        ),
+        "fluent2 styling should centralize disabled stroke color in a neutral-stroke-disabled primitive"
+    );
+
+    for expected in [
+        "combobox-disabled-border: neutral-stroke-disabled",
+        "switch-rail-disabled-border: neutral-stroke-disabled",
+        "text-input-disabled-border: neutral-stroke-disabled",
+        "spinbox-disabled-border: neutral-stroke-disabled",
+        "control-strong-stroke-disabled: neutral-stroke-disabled",
+        "checkbox-disabled-border: neutral-stroke-disabled",
+    ] {
+        let expected_line = format!("out property <brush> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 disabled border semantic token should use neutral-stroke-disabled: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "combobox-disabled-border: dark-color-scheme ? #FFFFFF29 : #00000038",
+        "switch-rail-disabled-border: dark-color-scheme ? #FFFFFF29 : #00000038",
+        "text-input-disabled-border: dark-color-scheme ? #FFFFFF29 : #00000038",
+        "spinbox-disabled-border: dark-color-scheme ? #FFFFFF29 : #00000038",
+        "control-strong-stroke-disabled: dark-color-scheme ? #FFFFFF29 : #00000038",
+        "checkbox-disabled-border: dark-color-scheme ? #FFFFFF29 : #00000038",
+    ] {
+        let copied_literal_line = format!("out property <brush> {copied_literal};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_literal_line),
+            "fluent2 disabled border semantic token should not repeat disabled stroke literals: {copied_literal}"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_strong_border_tokens_use_strong_stroke_primitive() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains(
+            "property <brush> neutral-stroke-strong: dark-color-scheme ? #FFFFFF99 : #00000099"
+        ),
+        "fluent2 styling should centralize strong neutral stroke color in neutral-stroke-strong"
+    );
+
+    for expected in [
+        "switch-rail-border: neutral-stroke-strong",
+        "control-strong-stroke: neutral-stroke-strong",
+        "checkbox-border: neutral-stroke-strong",
+    ] {
+        let expected_line = format!("out property <brush> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 strong border semantic token should use neutral-stroke-strong: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "switch-rail-border: dark-color-scheme ? #FFFFFF99 : #00000099",
+        "control-strong-stroke: dark-color-scheme ? #FFFFFF99 : #00000099",
+        "checkbox-border: dark-color-scheme ? #FFFFFF99 : #00000099",
+    ] {
+        let copied_literal_line = format!("out property <brush> {copied_literal};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_literal_line),
+            "fluent2 strong border semantic token should not repeat strong stroke literals: {copied_literal}"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_circle_border_tokens_use_circle_stroke_primitive() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains(
+            "property <brush> neutral-stroke-circle: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF17 0%, #FFFFFF12 100%) : @linear-gradient(180deg, #0000000F 0%, #00000029 100%)"
+        ),
+        "fluent2 styling should centralize circular neutral stroke gradients in neutral-stroke-circle"
+    );
+
+    for expected in [
+        "switch-thumb-border: neutral-stroke-circle",
+        "slider-thumb-border: neutral-stroke-circle",
+        "circle-border: neutral-stroke-circle",
+    ] {
+        let expected_line = format!("out property <brush> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 circular border semantic token should use neutral-stroke-circle: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "switch-thumb-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF17 0%, #FFFFFF12 100%) : @linear-gradient(180deg, #0000000F 0%, #00000029 100%)",
+        "slider-thumb-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF17 0%, #FFFFFF12 100%) : @linear-gradient(180deg, #0000000F 0%, #00000029 100%)",
+        "circle-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF17 0%, #FFFFFF12 100%) : @linear-gradient(180deg, #0000000F 0%, #00000029 100%)",
+    ] {
+        let copied_literal_line = format!("out property <brush> {copied_literal};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_literal_line),
+            "fluent2 circular border semantic token should not repeat circular stroke gradients: {copied_literal}"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_pressed_accent_foregrounds_use_pressed_accent_primitive() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains(
+            "property <brush> accent-foreground-pressed: dark-color-scheme ? #00000080 : #FFFFFFB3"
+        ),
+        "fluent2 styling should centralize pressed accent foreground color in accent-foreground-pressed"
+    );
+
+    for expected in [
+        "button-primary-pressed-foreground: accent-foreground-pressed",
+        "text-accent-foreground-secondary: accent-foreground-pressed",
+        "checkbox-checkmark-pressed-foreground: accent-foreground-pressed",
+    ] {
+        let expected_line = format!("out property <brush> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 pressed accent foreground semantic token should use accent-foreground-pressed: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "button-primary-pressed-foreground: dark-color-scheme ? #00000080 : #FFFFFFB3",
+        "text-accent-foreground-secondary: dark-color-scheme ? #00000080 : #FFFFFFB3",
+        "checkbox-checkmark-pressed-foreground: dark-color-scheme ? #00000080 : #FFFFFFB3",
+    ] {
+        let copied_literal_line = format!("out property <brush> {copied_literal};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_literal_line),
+            "fluent2 pressed accent foreground semantic token should not repeat pressed accent foreground literals: {copied_literal}"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_surface_bridge_tokens_use_surface_primitives() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for expected in [
+        "property <brush> surface-layer-fill-alt: dark-color-scheme ? #3A3A3A73 : #FFFFFFB3;",
+        "property <brush> surface-card-stroke: dark-color-scheme ? #0000001A : #0000000F;",
+        "out property <brush> layer-on-mica-base-alt: surface-layer-fill-alt;",
+        "out property <brush> card-stroke: surface-card-stroke;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 surface bridge token should use a surface primitive: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "out property <brush> layer-on-mica-base-alt: dark-color-scheme ? #3A3A3A73 : #FFFFFFB3",
+        "out property <brush> card-stroke: dark-color-scheme ? #0000001A : #0000000F",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_literal),
+            "fluent2 surface bridge token should not repeat surface primitive literals: {copied_literal}"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_gradient_border_tokens_use_border_primitives() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for expected in [
+        "property <brush> accent-stroke-control: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF14 90.67%, #00000024 100%) : @linear-gradient(180deg, #FFFFFF14 90.67%, #00000066 100%);",
+        "property <brush> neutral-stroke-control: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF17 0%, #00000012 8.33%) : @linear-gradient(180deg, #0000000F 90.58%, #00000029 100%);",
+        "property <brush> neutral-stroke-control-active: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF14 99.98%, #FFFFFF8A 100%, #FFFFFF8A 100%) : @linear-gradient(180deg, #0000000F 99.99%, #00000073 100%, #00000073 100%);",
+        "out property <brush> accent-control-border: accent-stroke-control;",
+        "out property <brush> button-primary-border: accent-stroke-control;",
+        "out property <brush> control-border: neutral-stroke-control;",
+        "out property <brush> text-control-border: neutral-stroke-control-active;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 gradient border token should use a named border primitive: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "out property <brush> accent-control-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF14 90.67%, #00000024 100%) : @linear-gradient(180deg, #FFFFFF14 90.67%, #00000066 100%)",
+        "out property <brush> button-primary-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF14 90.67%, #00000024 100%) : @linear-gradient(180deg, #FFFFFF14 90.67%, #00000066 100%)",
+        "out property <brush> control-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF17 0%, #00000012 8.33%) : @linear-gradient(180deg, #0000000F 90.58%, #00000029 100%)",
+        "out property <brush> text-control-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF14 99.98%, #FFFFFF8A 100%, #FFFFFF8A 100%) : @linear-gradient(180deg, #0000000F 99.99%, #00000073 100%, #00000073 100%)",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_literal),
+            "fluent2 gradient border token should not repeat border primitive gradients: {copied_literal}"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_disabled_input_surfaces_use_semantic_tokens() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");
@@ -505,6 +732,10 @@ fn test_fluent2_combobox_border_uses_semantic_token() {
         styling.contains("combobox-border"),
         "fluent2 styling should expose a combobox border token"
     );
+    assert!(
+        styling.contains("combobox-border-width"),
+        "fluent2 styling should expose a combobox border width token"
+    );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/combobox.slint"))
         .expect("fluent2 should embed combobox.slint");
@@ -522,12 +753,20 @@ fn test_fluent2_combobox_border_uses_semantic_token() {
         "fluent2 ComboBox resting border should use the semantic combobox border token"
     );
     assert!(
+        combobox.contains("border-width: Fluent2SizeSettings.combobox-border-width"),
+        "fluent2 ComboBox resting border should use the semantic combobox border width token"
+    );
+    assert!(
         !combobox.contains("Fluent2Palette.border"),
         "fluent2 ComboBox should not use the generic border bridge token for combobox-specific state borders"
     );
     assert!(
         !combobox.contains("Fluent2Palette.control-border"),
         "fluent2 ComboBox should not bind state borders directly to the generic control-border token"
+    );
+    assert!(
+        !combobox.contains("border-width: Fluent2SizeSettings.stroke-width"),
+        "fluent2 ComboBox should not bind border width directly to the generic stroke-width token"
     );
 }
 
@@ -546,8 +785,15 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
         "combobox-disabled-foreground",
         "combobox-pressed-foreground",
         "combobox-disabled-icon-foreground",
+        "combobox-radius",
+        "combobox-icon-size",
+        "combobox-min-width",
+        "combobox-height",
         "combobox-horizontal-padding",
         "combobox-content-spacing",
+        "combobox-popup-padding",
+        "combobox-popup-item-height",
+        "combobox-motion-duration",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -584,9 +830,17 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
         "text.color: Fluent2Palette.combobox-disabled-foreground",
         "icon.colorize: Fluent2Palette.combobox-disabled-icon-foreground",
         "text.color: Fluent2Palette.combobox-pressed-foreground",
+        "border-radius: Fluent2SizeSettings.combobox-radius",
+        "width: Fluent2SizeSettings.combobox-icon-size",
+        "min-width: max(Fluent2SizeSettings.combobox-min-width, layout.min-width)",
+        "min-height: max(Fluent2SizeSettings.combobox-height, layout.min-height)",
         "padding-left: Fluent2SizeSettings.combobox-horizontal-padding",
         "padding-right: Fluent2SizeSettings.combobox-horizontal-padding",
         "spacing: Fluent2SizeSettings.combobox-content-spacing",
+        "property <length> popup-padding: Fluent2SizeSettings.combobox-popup-padding",
+        "height: root.visible-items * Fluent2SizeSettings.combobox-popup-item-height +  2 * root.popup-padding",
+        "animate border-color { duration: Fluent2SizeSettings.combobox-motion-duration",
+        "animate colorize { duration: Fluent2SizeSettings.combobox-motion-duration",
     ] {
         assert!(combobox.contains(expected), "fluent2 ComboBox should use {expected}");
     }
@@ -599,9 +853,16 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
         "icon.colorize: Fluent2Palette.text-disabled",
         "text.color: Fluent2Palette.text-secondary",
         "color: Fluent2Palette.control-foreground",
+        "border-radius: Fluent2SizeSettings.control-radius",
+        "width: Fluent2SizeSettings.icon-size",
+        "min-width: max(Fluent2SizeSettings.input-min-width, layout.min-height)",
+        "min-height: max(Fluent2SizeSettings.control-height, layout.min-height)",
         "padding-left: Fluent2SizeSettings.control-horizontal-padding",
         "padding-right: Fluent2SizeSettings.control-horizontal-padding",
         "spacing: Fluent2SizeSettings.control-spacing",
+        "property <length> popup-padding: Fluent2SizeSettings.overlay-padding",
+        "height: root.visible-items * Fluent2SizeSettings.item-height +  2 * root.popup-padding",
+        "duration: Fluent2SizeSettings.control-motion-duration",
     ] {
         assert!(
             !combobox.contains(copied_literal),
@@ -675,6 +936,7 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
         "checkbox-hover-background",
         "checkbox-pressed-background",
         "checkbox-border",
+        "checkbox-border-width",
         "checkbox-disabled-border",
         "checkbox-checkmark-foreground",
         "checkbox-checkmark-disabled-foreground",
@@ -686,14 +948,11 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
     for copied_alias in [
         "checkbox-foreground: foreground",
         "checkbox-disabled-foreground: text-disabled",
-        "checkbox-background: control-alt-secondary",
         "checkbox-checked-background: accent-background",
         "checkbox-checked-hover-background: secondary-accent-background",
         "checkbox-checked-pressed-background: tertiary-accent-background",
         "checkbox-disabled-background: control-alt-disabled",
         "checkbox-checked-disabled-background: accent-disabled",
-        "checkbox-hover-background: control-alt-tertiary",
-        "checkbox-pressed-background: control-alt-quaternary",
         "checkbox-border: control-strong-stroke",
         "checkbox-disabled-border: control-strong-stroke-disabled",
         "checkbox-checkmark-foreground: accent-foreground",
@@ -704,6 +963,30 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
         assert!(
             !styling.lines().any(|line| line.trim() == copied_alias_line),
             "fluent2 styling should bind checkbox semantic tokens directly, not through copied generic alias {copied_alias}"
+        );
+    }
+
+    for expected in [
+        "checkbox-background: control-alt-secondary",
+        "checkbox-hover-background: control-alt-tertiary",
+        "checkbox-pressed-background: control-alt-quaternary",
+    ] {
+        let expected_line = format!("out property <brush> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 checkbox alternate fills should use the corrected control-alt primitive path: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "checkbox-background: dark-color-scheme ? #0000001A : #00000005",
+        "checkbox-hover-background: dark-color-scheme ? #FFFFFF0A : #0000000F",
+        "checkbox-pressed-background: dark-color-scheme ? #FFFFFF12 : #00000017",
+    ] {
+        let copied_literal_line = format!("out property <brush> {copied_literal};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_literal_line),
+            "fluent2 checkbox alternate fills should not repeat copied raw light/dark alpha branches: {copied_literal}"
         );
     }
 
@@ -726,6 +1009,7 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
         "background.background: Fluent2Palette.checkbox-checked-background",
         "background: Fluent2Palette.checkbox-background",
         "border-color: Fluent2Palette.checkbox-border",
+        "border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.checkbox-border-width",
         "colorize: Fluent2Palette.checkbox-checkmark-foreground",
     ] {
         assert!(checkbox.contains(expected), "fluent2 CheckBox should use {expected}");
@@ -743,6 +1027,7 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
         "background.background: Fluent2Palette.accent-background",
         "background: Fluent2Palette.control-alt-secondary",
         "border-color: Fluent2Palette.control-strong-stroke",
+        "border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.stroke-width",
         "colorize: Fluent2Palette.accent-foreground",
     ] {
         assert!(
@@ -792,6 +1077,98 @@ fn test_fluent2_checkbox_and_switch_label_spacing_use_tokens() {
             "fluent2 {control_name} should not use copied generic control label spacing"
         );
     }
+}
+
+#[test]
+fn test_fluent2_checkbox_checkmark_size_uses_semantic_token() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains("checkbox-checkmark-size"),
+        "fluent2 styling should expose checkbox-checkmark-size"
+    );
+
+    let checkbox = load_file(&std::path::PathBuf::from("builtin:/fluent2/checkbox.slint"))
+        .expect("fluent2 should embed checkbox.slint");
+    let checkbox_contents = checkbox.read();
+    let checkbox = std::str::from_utf8(&checkbox_contents).unwrap();
+    let checkbox =
+        checkbox.split("export component CheckBox").nth(1).expect("fluent2 should define CheckBox");
+
+    assert!(
+        checkbox.contains("width: Fluent2SizeSettings.checkbox-checkmark-size"),
+        "fluent2 CheckBox checkmark width should use its own semantic size token"
+    );
+    assert!(
+        !checkbox.contains("width: Fluent2SizeSettings.icon-size"),
+        "fluent2 CheckBox checkmark should not use the generic icon-size token"
+    );
+}
+
+#[test]
+fn test_fluent2_checkbox_focus_radius_uses_semantic_token() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains("checkbox-focus-radius"),
+        "fluent2 styling should expose checkbox-focus-radius"
+    );
+
+    let checkbox = load_file(&std::path::PathBuf::from("builtin:/fluent2/checkbox.slint"))
+        .expect("fluent2 should embed checkbox.slint");
+    let checkbox_contents = checkbox.read();
+    let checkbox = std::str::from_utf8(&checkbox_contents).unwrap();
+    let checkbox =
+        checkbox.split("export component CheckBox").nth(1).expect("fluent2 should define CheckBox");
+
+    assert!(
+        checkbox.contains("border-radius: Fluent2SizeSettings.checkbox-focus-radius"),
+        "fluent2 CheckBox focus border should use its own semantic radius token"
+    );
+    assert!(
+        !checkbox.contains("border-radius: Fluent2SizeSettings.button-radius"),
+        "fluent2 CheckBox focus border should not borrow the button radius token"
+    );
+}
+
+#[test]
+fn test_fluent2_checkbox_motion_uses_checkbox_token() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains("checkbox-motion-duration"),
+        "fluent2 styling should expose checkbox-motion-duration"
+    );
+
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/checkbox.slint"))
+        .expect("fluent2 should embed checkbox.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+    let checkbox =
+        source.split("export component CheckBox").nth(1).expect("fluent2 should define CheckBox");
+
+    for expected in [
+        "animate text-color { duration: Fluent2SizeSettings.checkbox-motion-duration",
+        "animate background { duration: Fluent2SizeSettings.checkbox-motion-duration",
+        "animate border-color { duration: Fluent2SizeSettings.checkbox-motion-duration",
+        "animate colorize { duration: Fluent2SizeSettings.checkbox-motion-duration",
+    ] {
+        assert!(checkbox.contains(expected), "fluent2 CheckBox should use {expected}");
+    }
+
+    assert!(
+        !checkbox.contains("duration: Fluent2SizeSettings.control-motion-duration"),
+        "fluent2 CheckBox should not use the generic control motion token"
+    );
 }
 
 #[test]
@@ -859,8 +1236,11 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
         "text-input-selection-background",
         "text-input-selection-foreground",
         "text-input-disabled-selection-foreground",
+        "text-input-min-width",
+        "text-input-height",
         "text-input-horizontal-padding",
         "text-input-vertical-padding",
+        "text-input-border-width",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -901,8 +1281,11 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
                 "text-color: Fluent2Palette.text-input-foreground",
                 "placeholder-color: Fluent2Palette.text-input-placeholder-foreground",
                 "base.selection-foreground-color: Fluent2Palette.text-input-disabled-selection-foreground",
+                "min-width: max(Fluent2SizeSettings.text-input-min-width, layout.min-width)",
+                "min-height: max(Fluent2SizeSettings.text-input-height, layout.min-height)",
                 "padding-left: Fluent2SizeSettings.text-input-horizontal-padding",
                 "padding-right: Fluent2SizeSettings.text-input-horizontal-padding",
+                "border-width: Fluent2SizeSettings.text-input-border-width",
             ],
             vec![
                 "background: Fluent2Palette.control-background",
@@ -916,8 +1299,11 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
                 "text-color: Fluent2Palette.foreground",
                 "placeholder-color: Fluent2Palette.text-secondary",
                 "base.selection-foreground-color: Fluent2Palette.text-accent-foreground-disabled",
+                "min-width: max(Fluent2SizeSettings.input-min-width, layout.min-width)",
+                "min-height: max(Fluent2SizeSettings.control-height, layout.min-height)",
                 "padding-left: Fluent2SizeSettings.control-horizontal-padding",
                 "padding-right: Fluent2SizeSettings.control-horizontal-padding",
+                "border-width: Fluent2SizeSettings.stroke-width",
             ],
         ),
         (
@@ -934,6 +1320,7 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
                 "base.selection-foreground-color: Fluent2Palette.text-input-disabled-selection-foreground",
                 "scroll-view-padding: Fluent2SizeSettings.text-input-horizontal-padding",
                 "cursor-margin: Fluent2SizeSettings.text-input-horizontal-padding",
+                "border-width: Fluent2SizeSettings.text-input-border-width",
             ],
             vec![
                 "background: Fluent2Palette.control-background",
@@ -947,6 +1334,7 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
                 "base.selection-foreground-color: Fluent2Palette.text-accent-foreground-disabled",
                 "scroll-view-padding: Fluent2SizeSettings.control-horizontal-padding",
                 "cursor-margin: Fluent2SizeSettings.control-horizontal-padding",
+                "border-width: Fluent2SizeSettings.stroke-width",
             ],
         ),
     ] {
@@ -998,6 +1386,58 @@ fn test_fluent2_text_input_focus_indicator_geometry_uses_tokens() {
 }
 
 #[test]
+fn test_fluent2_text_entry_radius_uses_semantic_tokens() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for token in ["text-input-radius", "spinbox-radius"] {
+        assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    for (control, surface_marker, end_marker, expected, copied_literal) in [
+        (
+            "lineedit.slint",
+            "export component LineEdit",
+            "layout := HorizontalLayout",
+            "border-radius: Fluent2SizeSettings.text-input-radius",
+            "border-radius: Fluent2SizeSettings.button-radius",
+        ),
+        (
+            "textedit.slint",
+            "base := TextEditBase",
+            "i-focus-border := Rectangle",
+            "border-radius: Fluent2SizeSettings.text-input-radius",
+            "border-radius: Fluent2SizeSettings.button-radius",
+        ),
+        (
+            "spinbox.slint",
+            "export component SpinBox",
+            "layout := HorizontalLayout",
+            "border-radius: Fluent2SizeSettings.spinbox-radius",
+            "border-radius: Fluent2SizeSettings.control-radius",
+        ),
+    ] {
+        let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{control}")))
+            .unwrap_or_else(|| panic!("fluent2 should embed {control}"));
+        let source_contents = source.read();
+        let source = std::str::from_utf8(&source_contents).unwrap();
+        let surface_block = source
+            .split(surface_marker)
+            .nth(1)
+            .and_then(|after| after.split(end_marker).next())
+            .unwrap_or_else(|| panic!("fluent2 {control} should define {surface_marker}"));
+
+        assert!(surface_block.contains(expected), "fluent2 {control} should use {expected}");
+        assert!(
+            !surface_block.contains(copied_literal),
+            "fluent2 {control} text-entry surface should not borrow copied radius token {copied_literal}"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_spinbox_input_colors_use_semantic_tokens() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");
@@ -1013,9 +1453,11 @@ fn test_fluent2_spinbox_input_colors_use_semantic_tokens() {
         "spinbox-selection-background",
         "spinbox-selection-foreground",
         "spinbox-disabled-selection-foreground",
+        "spinbox-height",
         "spinbox-horizontal-padding",
         "spinbox-button-column-padding",
         "spinbox-vertical-padding",
+        "spinbox-border-width",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -1055,10 +1497,12 @@ fn test_fluent2_spinbox_input_colors_use_semantic_tokens() {
         "selection-background-color: Fluent2Palette.spinbox-selection-background",
         "selection-foreground-color: Fluent2Palette.spinbox-selection-foreground",
         "base.selection-foreground-color: Fluent2Palette.spinbox-disabled-selection-foreground",
+        "min-height: max(Fluent2SizeSettings.spinbox-height, layout.min-height)",
         "padding-left: Fluent2SizeSettings.spinbox-horizontal-padding",
         "padding-right: Fluent2SizeSettings.spinbox-button-column-padding",
         "padding-top: Fluent2SizeSettings.spinbox-vertical-padding",
         "padding-bottom: Fluent2SizeSettings.spinbox-vertical-padding",
+        "border-width: Fluent2SizeSettings.spinbox-border-width",
     ] {
         assert!(spinbox.contains(expected), "fluent2 SpinBox should use {expected}");
     }
@@ -1072,10 +1516,12 @@ fn test_fluent2_spinbox_input_colors_use_semantic_tokens() {
         "selection-background-color: Fluent2Palette.selection-background",
         "selection-foreground-color: Fluent2Palette.accent-foreground",
         "base.selection-foreground-color: Fluent2Palette.text-accent-foreground-disabled",
+        "min-height: max(Fluent2SizeSettings.control-height, layout.min-height)",
         "padding-left: Fluent2SizeSettings.control-horizontal-padding",
         "padding-right: Fluent2SizeSettings.control-tight-horizontal-padding",
         "padding-top: Fluent2SizeSettings.control-vertical-padding",
         "padding-bottom: Fluent2SizeSettings.control-vertical-padding",
+        "border-width: Fluent2SizeSettings.stroke-width",
     ] {
         assert!(
             !spinbox.contains(copied_literal),
@@ -1302,6 +1748,25 @@ fn test_fluent2_surface_elevation_uses_semantic_tokens() {
 }
 
 #[test]
+fn test_fluent2_shadow_bridge_uses_rest_elevation_token() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <brush> shadow: elevation-shadow-rest-color;"),
+        "fluent2 legacy shadow bridge should use the semantic rest elevation color token"
+    );
+    assert!(
+        !styling.lines().any(|line| line.trim() == "out property <brush> shadow: shadow-ambient;"),
+        "fluent2 legacy shadow bridge should not bypass semantic elevation tokens"
+    );
+}
+
+#[test]
 fn test_fluent2_focus_ring_geometry_uses_tokens() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");
@@ -1380,6 +1845,125 @@ fn test_fluent2_state_layer_opacity_uses_tokens() {
 }
 
 #[test]
+fn test_fluent2_state_layer_motion_uses_tokens() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains("state-layer-motion-duration"),
+        "fluent2 styling should expose a semantic state layer motion duration token"
+    );
+
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/internal-components.slint"))
+        .expect("fluent2 should embed internal-components.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+    let state_layer = source
+        .split("export component StateLayer")
+        .nth(1)
+        .and_then(|after| after.split("export struct IconButtonStyle").next())
+        .expect("fluent2 should define StateLayer before IconButtonStyle");
+
+    assert!(
+        state_layer.contains(
+            "animate background { duration: Fluent2SizeSettings.state-layer-motion-duration; }"
+        ),
+        "fluent2 StateLayer should animate background with the semantic state layer motion token"
+    );
+    assert!(
+        !state_layer.contains("duration: Fluent2SizeSettings.control-motion-duration"),
+        "fluent2 StateLayer should not borrow the generic control motion token"
+    );
+}
+
+#[test]
+fn test_fluent2_picker_state_brushes_use_state_layer_tokens() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for expected in [
+        "property <brush> state-layer-brush: dark-color-scheme ? #FFFFFF : #000000",
+        "property <brush> state-layer-on-accent-brush: dark-color-scheme ? #000000 : #FFFFFF",
+    ] {
+        assert!(styling.contains(expected), "fluent2 styling should define {expected}");
+    }
+
+    for expected in [
+        "date-picker-day-state-brush: state-layer-brush",
+        "date-picker-day-selected-state-brush: state-layer-on-accent-brush",
+        "date-picker-day-today-state-brush: state-layer-brush",
+        "date-picker-icon-state-brush: state-layer-brush",
+        "date-picker-selection-button-state-brush: state-layer-brush",
+        "time-picker-selector-state-brush: state-layer-brush",
+        "time-picker-selector-selected-state-brush: state-layer-on-accent-brush",
+        "time-picker-input-state-brush: state-layer-brush",
+        "time-picker-input-selected-state-brush: state-layer-on-accent-brush",
+        "time-picker-period-item-state-brush: state-layer-brush",
+        "time-picker-period-item-selected-state-brush: state-layer-on-accent-brush",
+        "lineedit-icon-state-brush: state-layer-brush",
+    ] {
+        let expected_line = format!("out property <brush> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 picker and icon state brushes should use shared Fluent2 state-layer tokens: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "date-picker-day-state-brush: dark-color-scheme ? #FFFFFF : #000000",
+        "date-picker-day-selected-state-brush: dark-color-scheme ? #000000 : #FFFFFF",
+        "date-picker-day-today-state-brush: dark-color-scheme ? #FFFFFF : #000000",
+        "date-picker-icon-state-brush: dark-color-scheme ? #FFFFFF : #000000",
+        "date-picker-selection-button-state-brush: dark-color-scheme ? #FFFFFF : #000000",
+        "time-picker-selector-state-brush: dark-color-scheme ? #FFFFFF : #000000",
+        "time-picker-selector-selected-state-brush: dark-color-scheme ? #000000 : #FFFFFF",
+        "time-picker-input-state-brush: dark-color-scheme ? #FFFFFF : #000000",
+        "time-picker-input-selected-state-brush: dark-color-scheme ? #000000 : #FFFFFF",
+        "time-picker-period-item-state-brush: dark-color-scheme ? #FFFFFF : #000000",
+        "time-picker-period-item-selected-state-brush: dark-color-scheme ? #000000 : #FFFFFF",
+        "lineedit-icon-state-brush: dark-color-scheme ? #FFFFFF : #000000",
+    ] {
+        let copied_literal_line = format!("out property <brush> {copied_literal};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_literal_line),
+            "fluent2 semantic state brush should not repeat copied light/dark literals: {copied_literal}"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_public_state_bridges_use_state_layer_primitives() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for expected in [
+        "out property <brush> state: state-layer-brush;",
+        "out property <brush> state-secondary: state-layer-on-accent-brush;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 public state bridge should use state-layer primitive: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "out property <brush> state: dark-color-scheme ? #FFFFFF : #000000",
+        "out property <brush> state-secondary: dark-color-scheme ? #000000 : #FFFFFF",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_literal),
+            "fluent2 public state bridge should not repeat state-layer primitive literals: {copied_literal}"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_transparent_visuals_use_palette_token() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");
@@ -1443,6 +2027,60 @@ fn test_fluent2_transparent_visuals_use_palette_token() {
         ),
         "fluent2 PopupMenuImpl window background should stay backed by the transparent control fill token"
     );
+    assert!(
+        styling
+            .contains("property <brush> neutral-background-transparent: control-fill-transparent"),
+        "fluent2 transparent neutral backgrounds should stay backed by the transparent control fill token"
+    );
+
+    for expected in [
+        "out property <brush> list-item-background: neutral-background-transparent",
+        "out property <brush> table-row-alternate-background: neutral-background-transparent",
+    ] {
+        assert!(
+            styling.contains(expected),
+            "fluent2 semantic transparent visual token should use the Fluent2 transparent neutral background token: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "out property <brush> list-item-background: transparent",
+        "out property <brush> table-row-alternate-background: transparent",
+    ] {
+        assert!(
+            !styling.contains(copied_literal),
+            "fluent2 semantic transparent visual token should not bypass control-fill-transparent with {copied_literal}"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_transparent_strokes_use_transparent_stroke_primitive() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for expected in [
+        "property <brush> neutral-stroke-transparent: control-fill-transparent;",
+        "out property <brush> button-primary-disabled-border: neutral-stroke-transparent;",
+        "out property <brush> tab-background: neutral-stroke-transparent;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 transparent stroke/background token should use the transparent stroke primitive: {expected}"
+        );
+    }
+
+    for copied_literal in [
+        "button-primary-disabled-border: neutral-background-1.transparentize(100%)",
+        "tab-background: neutral-background-1.transparentize(100%)",
+    ] {
+        assert!(
+            !styling.contains(copied_literal),
+            "fluent2 transparent stroke/background token should not derive transparency from a live background: {copied_literal}"
+        );
+    }
 }
 
 #[test]
@@ -1478,13 +2116,21 @@ fn test_fluent2_control_alt_quaternary_token_uses_fluent2_name() {
     }
 
     for expected in [
-        "out property <brush> switch-rail-pressed-background: dark-color-scheme ? #FFFFFF12 : #00000017",
+        "property <brush> switch-rail-pressed-fill: control-alt-quaternary;",
+        "out property <brush> switch-rail-pressed-background: switch-rail-pressed-fill;",
     ] {
         assert!(
             styling.contains(expected),
             "fluent2 semantic pressed tokens should use the expected Fluent2 pressed treatment through {expected}"
         );
     }
+
+    assert!(
+        !styling.contains(
+            "out property <brush> switch-rail-pressed-background: dark-color-scheme ? #FFFFFF12 : #00000017"
+        ),
+        "fluent2 switch pressed rail token should not repeat the copied raw alpha branch"
+    );
 }
 
 #[test]
@@ -1515,7 +2161,11 @@ fn test_fluent2_scrollbar_opacity_uses_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for token in ["scrollbar-button-hidden-opacity", "scrollbar-button-visible-opacity"] {
+    for token in [
+        "scrollbar-button-hidden-opacity",
+        "scrollbar-button-visible-opacity",
+        "scrollbar-motion-duration",
+    ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
@@ -1529,6 +2179,7 @@ fn test_fluent2_scrollbar_opacity_uses_tokens() {
         "up-scroll-button.opacity: Fluent2SizeSettings.scrollbar-button-visible-opacity",
         "down-scroll-button.opacity: Fluent2SizeSettings.scrollbar-button-visible-opacity",
         "opacity: Fluent2SizeSettings.scrollbar-button-hidden-opacity",
+        "duration: Fluent2SizeSettings.scrollbar-motion-duration",
     ] {
         assert!(source.contains(expected), "fluent2 scrollview should use {expected}");
     }
@@ -1541,6 +2192,11 @@ fn test_fluent2_scrollbar_opacity_uses_tokens() {
             "fluent2 scrollview should not hardcode scrollbar opacity as {copied_literal}"
         );
     }
+
+    assert!(
+        !source.contains("duration: Fluent2SizeSettings.control-motion-duration"),
+        "fluent2 scrollview should not borrow the generic control motion token for scrollbar motion"
+    );
 }
 
 #[test]
@@ -1550,10 +2206,11 @@ fn test_fluent2_scrollbar_thumb_radius_uses_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    assert!(
-        styling.contains("scrollbar-thumb-radius"),
-        "fluent2 styling should expose a scrollbar thumb radius token"
-    );
+    for token in
+        ["scrollbar-track-radius", "scrollbar-track-border-width", "scrollbar-thumb-radius"]
+    {
+        assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/scrollview.slint"))
         .expect("fluent2 should embed scrollview.slint");
@@ -1561,8 +2218,24 @@ fn test_fluent2_scrollbar_thumb_radius_uses_tokens() {
     let source = std::str::from_utf8(&source_contents).unwrap();
 
     assert!(
+        source.contains("border-radius: Fluent2SizeSettings.scrollbar-track-radius"),
+        "fluent2 scrollbar track should use the track radius token"
+    );
+    assert!(
+        source.contains("border-width: Fluent2SizeSettings.scrollbar-track-border-width"),
+        "fluent2 scrollbar track should use the track border width token"
+    );
+    assert!(
         source.contains("border-radius: Fluent2SizeSettings.scrollbar-thumb-radius"),
         "fluent2 scrollbar thumb should use the thumb radius token"
+    );
+    assert!(
+        !source.contains("border-radius: Fluent2SizeSettings.overlay-radius"),
+        "fluent2 scrollbar track should not borrow the generic overlay radius token"
+    );
+    assert!(
+        !source.contains("border-width: Fluent2SizeSettings.stroke-width"),
+        "fluent2 scrollbar track should not bind border width directly to the generic stroke-width token"
     );
     assert!(
         !source.contains("border-radius: (root.horizontal ? self.height : self.width) / 2"),
@@ -1912,6 +2585,9 @@ fn test_fluent2_list_and_table_row_colors_use_semantic_tokens() {
         "i-text.color: Fluent2Palette.list-item-hover-foreground",
         "i-background.background: is-selected ? Fluent2Palette.list-item-selected-hover-background : Fluent2Palette.list-item-hover-background",
         "i-background.background: Fluent2Palette.list-item-selected-background",
+        "min-height: max(Fluent2SizeSettings.list-item-height, i-layout.min-height)",
+        "border-radius: Fluent2SizeSettings.list-item-radius",
+        "spacing: Fluent2SizeSettings.list-item-content-spacing",
         "background: Fluent2Palette.list-item-background",
         "color: Fluent2Palette.list-item-foreground",
         "background: Fluent2Palette.list-item-selection-indicator-background",
@@ -1924,6 +2600,9 @@ fn test_fluent2_list_and_table_row_colors_use_semantic_tokens() {
         "i-text.color: Fluent2Palette.text-secondary",
         "i-background.background: is-selected ? Fluent2Palette.subtle-tertiary : Fluent2Palette.subtle-secondary",
         "i-background.background: Fluent2Palette.subtle-secondary",
+        "min-height: max(Fluent2SizeSettings.item-height, i-layout.min-height)",
+        "border-radius: Fluent2SizeSettings.control-radius",
+        "spacing: Fluent2SizeSettings.overlay-padding",
         "background: Fluent2Palette.control-fill-transparent",
         "color: Fluent2Palette.control-foreground",
         "background: Fluent2Palette.accent-background",
@@ -1980,16 +2659,58 @@ fn test_fluent2_list_and_table_row_colors_use_semantic_tokens() {
 }
 
 #[test]
-fn test_fluent2_table_header_colors_use_semantic_tokens() {
+fn test_fluent2_list_item_motion_uses_list_duration_token() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
     assert!(
-        styling.contains("table-header-sort-icon-spacing"),
-        "fluent2 styling should expose a table-header sort icon spacing token"
+        styling.contains("list-item-motion-duration"),
+        "fluent2 styling should expose a semantic list item motion duration token"
     );
+
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/components.slint"))
+        .expect("fluent2 should embed components.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+    let list_item = source
+        .split("export component ListItem")
+        .nth(1)
+        .and_then(|after| after.split("@children").next())
+        .expect("fluent2 components should define ListItem before @children");
+
+    for expected in [
+        "animate background { duration: Fluent2SizeSettings.list-item-motion-duration; }",
+        "animate color { duration: Fluent2SizeSettings.list-item-motion-duration; }",
+        "animate height { duration: Fluent2SizeSettings.list-item-motion-duration; easing: ease-out; }",
+    ] {
+        assert!(list_item.contains(expected), "fluent2 ListItem should use {expected}");
+    }
+
+    assert!(
+        !list_item.contains("duration: Fluent2SizeSettings.control-motion-duration"),
+        "fluent2 ListItem should not borrow the generic control motion token"
+    );
+}
+
+#[test]
+fn test_fluent2_table_header_colors_use_semantic_tokens() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for token in [
+        "table-header-sort-icon-spacing",
+        "table-header-sort-icon-size",
+        "table-header-separator-thickness",
+        "table-header-resize-separator-thickness",
+        "table-row-height",
+        "table-row-radius",
+    ] {
+        assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
 
     for token in ["table-header-horizontal-padding", "table-cell-horizontal-padding"] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
@@ -2033,7 +2754,11 @@ fn test_fluent2_table_header_colors_use_semantic_tokens() {
         "background: Fluent2Palette.table-header-pressed-background",
         "background: Fluent2Palette.table-header-hover-background",
         "colorize: Fluent2Palette.table-header-sort-icon-foreground",
+        "width: Fluent2SizeSettings.table-header-sort-icon-size",
         "background: Fluent2Palette.table-header-resize-hover-background",
+        "height: Fluent2SizeSettings.table-header-separator-thickness",
+        "x: parent.width - Fluent2SizeSettings.table-header-resize-separator-thickness",
+        "width: Fluent2SizeSettings.table-header-resize-separator-thickness",
         "spacing: Fluent2SizeSettings.table-header-sort-icon-spacing",
         "width: parent.width - Fluent2SizeSettings.table-header-horizontal-padding",
         "padding-left: Fluent2SizeSettings.table-header-horizontal-padding",
@@ -2070,6 +2795,9 @@ fn test_fluent2_table_header_colors_use_semantic_tokens() {
         "background: Fluent2Palette.sub-title-tertiary",
         "colorize: Fluent2Palette.table-sort-icon-foreground",
         "color: Fluent2Palette.text-secondary",
+        "width: Fluent2SizeSettings.icon-size",
+        "height: Fluent2SizeSettings.separator-thickness",
+        "width: Fluent2SizeSettings.separator-thickness",
         "spacing: Fluent2SizeSettings.control-tight-horizontal-padding",
         "width: parent.width - Fluent2SizeSettings.control-horizontal-padding",
         "padding-left: Fluent2SizeSettings.control-horizontal-padding",
@@ -2083,13 +2811,68 @@ fn test_fluent2_table_header_colors_use_semantic_tokens() {
 }
 
 #[test]
+fn test_fluent2_table_motion_uses_table_token() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains("table-motion-duration"),
+        "fluent2 styling should expose table-motion-duration"
+    );
+
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/tableview.slint"))
+        .expect("fluent2 should embed tableview.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+
+    let column = source
+        .split("component TableViewColumn")
+        .nth(1)
+        .and_then(|after| after.split("component TableViewCell").next())
+        .expect("fluent2 should define TableViewColumn before TableViewCell");
+
+    for expected in [
+        "animate colorize { duration: Fluent2SizeSettings.table-motion-duration",
+        "animate background { duration: Fluent2SizeSettings.table-motion-duration",
+    ] {
+        assert!(column.contains(expected), "fluent2 TableViewColumn should use {expected}");
+    }
+
+    assert!(
+        !column.contains("duration: Fluent2SizeSettings.control-motion-duration"),
+        "fluent2 TableViewColumn should not use the generic control motion token"
+    );
+
+    let row = source
+        .split("component TableViewRow")
+        .nth(1)
+        .and_then(|after| after.split("export component StandardTableView").next())
+        .expect("fluent2 should define TableViewRow before StandardTableView");
+
+    assert!(
+        row.contains("animate height { duration: Fluent2SizeSettings.table-motion-duration"),
+        "fluent2 TableViewRow selection indicator should use table-motion-duration"
+    );
+    assert!(
+        !row.contains("duration: Fluent2SizeSettings.control-motion-duration"),
+        "fluent2 TableViewRow should not use the generic control motion token"
+    );
+}
+
+#[test]
 fn test_fluent2_menu_separator_insets_use_tokens() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for expected in ["menu-separator-horizontal-inset", "menu-separator-vertical-padding"] {
+    for expected in [
+        "menu-separator-horizontal-inset",
+        "menu-separator-vertical-padding",
+        "menu-separator-thickness",
+    ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
@@ -2106,6 +2889,7 @@ fn test_fluent2_menu_separator_insets_use_tokens() {
         "padding: entry.is-separator ? Fluent2SizeSettings.menu-separator-vertical-padding : Fluent2SizeSettings.menu-item-outer-padding",
         "padding-left: entry.is-separator ? Fluent2SizeSettings.menu-separator-horizontal-inset : Fluent2SizeSettings.menu-item-outer-padding",
         "padding-right: entry.is-separator ? Fluent2SizeSettings.menu-separator-horizontal-inset : Fluent2SizeSettings.menu-item-outer-padding",
+        "separator-height: Fluent2SizeSettings.menu-separator-thickness",
     ] {
         assert!(block.contains(expected), "fluent2 MenuItem should use {expected}");
     }
@@ -2114,6 +2898,7 @@ fn test_fluent2_menu_separator_insets_use_tokens() {
         "padding-left: entry.is-separator ? 0px",
         "padding-right: entry.is-separator ? 0px",
         "padding: entry.is-separator ? Fluent2SizeSettings.overlay-padding",
+        "separator-height: Fluent2SizeSettings.separator-thickness",
     ] {
         assert!(
             !block.contains(copied_literal),
@@ -2129,7 +2914,15 @@ fn test_fluent2_menu_border_colors_use_semantic_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for expected in ["menu-frame-border", "menu-flyout-border", "menu-separator-color"] {
+    for expected in [
+        "menu-frame-border",
+        "menu-flyout-border",
+        "menu-separator-color",
+        "menu-frame-radius",
+        "menu-flyout-radius",
+        "menu-frame-border-width",
+        "menu-flyout-border-width",
+    ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
@@ -2161,6 +2954,14 @@ fn test_fluent2_menu_border_colors_use_semantic_tokens() {
         "fluent2 MenuFrame should use the semantic menu frame border token"
     );
     assert!(
+        frame_block.contains("border-radius: Fluent2SizeSettings.menu-frame-radius"),
+        "fluent2 MenuFrame should use the semantic menu frame radius token"
+    );
+    assert!(
+        frame_block.contains("border-width: Fluent2SizeSettings.menu-frame-border-width"),
+        "fluent2 MenuFrame should use the semantic menu frame border width token"
+    );
+    assert!(
         item_block.contains("separator-color: Fluent2Palette.menu-separator-color"),
         "fluent2 MenuItem separators should use the semantic separator color token"
     );
@@ -2168,6 +2969,14 @@ fn test_fluent2_menu_border_colors_use_semantic_tokens() {
     assert!(
         !frame_block.contains("Fluent2Palette.border"),
         "fluent2 MenuFrame should not use the generic border token"
+    );
+    assert!(
+        !frame_block.contains("Fluent2SizeSettings.overlay-radius"),
+        "fluent2 MenuFrame should not borrow the generic overlay radius token"
+    );
+    assert!(
+        !frame_block.contains("border-width: Fluent2SizeSettings.stroke-width"),
+        "fluent2 MenuFrame should not bind border width directly to the generic stroke-width token"
     );
     assert!(
         !item_block.contains("separator-color: Fluent2Palette.border"),
@@ -2189,8 +2998,24 @@ fn test_fluent2_menu_border_colors_use_semantic_tokens() {
         "fluent2 MenuBorder should use the semantic menu flyout border token"
     );
     assert!(
+        menu_border.contains("border-radius: Fluent2SizeSettings.menu-flyout-radius"),
+        "fluent2 MenuBorder should use the semantic menu flyout radius token"
+    );
+    assert!(
+        menu_border.contains("border-width: Fluent2SizeSettings.menu-flyout-border-width"),
+        "fluent2 MenuBorder should use the semantic menu flyout border width token"
+    );
+    assert!(
         !menu_border.contains("Fluent2Palette.control-background-stroke-flyout"),
         "fluent2 MenuBorder should not bind directly to the generic flyout stroke token"
+    );
+    assert!(
+        !menu_border.contains("Fluent2SizeSettings.overlay-radius"),
+        "fluent2 MenuBorder should not borrow the generic overlay radius token"
+    );
+    assert!(
+        !menu_border.contains("border-width: Fluent2SizeSettings.stroke-width"),
+        "fluent2 MenuBorder should not bind border width directly to the generic stroke-width token"
     );
 }
 
@@ -2211,9 +3036,13 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         "menu-item-current-background",
         "menu-bar-item-horizontal-padding",
         "menu-bar-item-top-padding",
+        "menu-bar-item-radius",
         "menu-bar-spacing",
         "menu-item-horizontal-padding",
         "menu-item-spacing",
+        "menu-item-radius",
+        "menu-item-icon-size",
+        "menu-item-height",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -2234,6 +3063,19 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         );
     }
 
+    assert!(
+        styling.contains(
+            "menu-bar-item-pressed-background: state-layer-brush.with_alpha(Fluent2SizeSettings.state-layer-active-opacity)"
+        ),
+        "fluent2 menu bar pressed background should use the shared state-layer active opacity token"
+    );
+    assert!(
+        !styling.contains(
+            "menu-bar-item-pressed-background: dark-color-scheme ? #FFFFFF0A : #0000000F"
+        ),
+        "fluent2 menu bar pressed background should not hardcode copied light/dark alpha colors"
+    );
+
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/menu.slint"))
         .expect("fluent2 should embed menu.slint");
     let source_contents = source.read();
@@ -2253,6 +3095,7 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         "pressed-background: Fluent2Palette.menu-bar-item-pressed-background",
         "horizontal-padding: Fluent2SizeSettings.menu-bar-item-horizontal-padding",
         "top-padding: Fluent2SizeSettings.menu-bar-item-top-padding",
+        "border-radius: Fluent2SizeSettings.menu-bar-item-radius",
     ] {
         assert!(menu_bar_item.contains(expected), "fluent2 MenuBarItem should use {expected}");
     }
@@ -2276,6 +3119,7 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         "horizontal-padding: Fluent2SizeSettings.control-horizontal-padding",
         "top-padding: Fluent2SizeSettings.control-vertical-padding",
         "spacing: Fluent2SizeSettings.control-spacing",
+        "border-radius: Fluent2SizeSettings.control-radius",
     ] {
         assert!(
             !source.contains(copied_literal),
@@ -2294,6 +3138,9 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         "current-background: Fluent2Palette.menu-item-current-background",
         "horizontal-padding: Fluent2SizeSettings.menu-item-horizontal-padding",
         "spacing: Fluent2SizeSettings.menu-item-spacing",
+        "border-radius: Fluent2SizeSettings.menu-item-radius",
+        "icon-size: Fluent2SizeSettings.menu-item-icon-size",
+        "min-height: entry.is-separator ? Fluent2SizeSettings.menu-separator-height : max(Fluent2SizeSettings.menu-item-height, base.min-height)",
     ] {
         assert!(menu_item.contains(expected), "fluent2 MenuItem should use {expected}");
     }
@@ -2302,6 +3149,9 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         "default-foreground: Fluent2Palette.foreground",
         "current-foreground: Fluent2Palette.foreground",
         "current-background: Fluent2Palette.subtle-secondary",
+        "border-radius: Fluent2SizeSettings.control-radius",
+        "icon-size: Fluent2SizeSettings.icon-size",
+        "Fluent2SizeSettings.compact-item-height",
     ] {
         assert!(
             !menu_item.contains(copied_literal),
@@ -2317,7 +3167,14 @@ fn test_fluent2_picker_borders_use_semantic_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for expected in ["date-picker-border", "time-picker-period-border"] {
+    for expected in [
+        "date-picker-border",
+        "date-picker-day-today-border-width",
+        "date-picker-separator-thickness",
+        "time-picker-period-border",
+        "time-picker-period-border-width",
+        "time-picker-period-separator-thickness",
+    ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
@@ -2336,6 +3193,60 @@ fn test_fluent2_picker_borders_use_semantic_tokens() {
             "fluent2 {file} should not use the generic border token for picker borders"
         );
     }
+
+    for (file, expected, copied_literal) in [
+        (
+            "datepicker-base.slint",
+            "height: Fluent2SizeSettings.date-picker-separator-thickness",
+            "height: Fluent2SizeSettings.separator-thickness",
+        ),
+        (
+            "time-picker-base.slint",
+            "height: Fluent2SizeSettings.time-picker-period-separator-thickness",
+            "height: Fluent2SizeSettings.separator-thickness",
+        ),
+    ] {
+        let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{file}")))
+            .unwrap_or_else(|| panic!("fluent2 should embed {file}"));
+        let source_contents = source.read();
+        let source = std::str::from_utf8(&source_contents).unwrap();
+
+        assert!(source.contains(expected), "fluent2 {file} should use {expected}");
+        assert!(
+            !source.contains(copied_literal),
+            "fluent2 {file} should not borrow the generic separator thickness token"
+        );
+    }
+
+    let datepicker_base =
+        load_file(&std::path::PathBuf::from("builtin:/fluent2/datepicker-base.slint"))
+            .expect("fluent2 should embed datepicker-base.slint");
+    let datepicker_base_contents = datepicker_base.read();
+    let datepicker_base = std::str::from_utf8(&datepicker_base_contents).unwrap();
+    assert!(
+        datepicker_base.contains(
+            "background-layer.border-width: Fluent2SizeSettings.date-picker-day-today-border-width"
+        ),
+        "fluent2 DatePicker today delegate should use the semantic today border width token"
+    );
+    assert!(
+        !datepicker_base
+            .contains("background-layer.border-width: Fluent2SizeSettings.stroke-width"),
+        "fluent2 DatePicker today delegate should not bind border width directly to generic stroke-width"
+    );
+
+    let time_picker = load_file(&std::path::PathBuf::from("builtin:/fluent2/time-picker.slint"))
+        .expect("fluent2 should embed time-picker.slint");
+    let time_picker_contents = time_picker.read();
+    let time_picker = std::str::from_utf8(&time_picker_contents).unwrap();
+    assert!(
+        time_picker.contains("border-width: Fluent2SizeSettings.time-picker-period-border-width"),
+        "fluent2 TimePicker period selector should use the semantic period border width token"
+    );
+    assert!(
+        !time_picker.contains("border-width: Fluent2SizeSettings.stroke-width,"),
+        "fluent2 TimePicker period selector should not bind border width directly to generic stroke-width"
+    );
 }
 
 #[test]
@@ -2441,8 +3352,9 @@ fn test_fluent2_date_picker_popup_controls_use_semantic_tokens() {
         "date-picker-selection-button-foreground: foreground",
         "date-picker-selection-button-state-brush: state",
     ] {
+        let copied_alias_line = format!("out property <brush> {copied_alias};");
         assert!(
-            !styling.contains(copied_alias),
+            !styling.lines().any(|line| line.trim() == copied_alias_line),
             "fluent2 styling should bind date picker popup semantic tokens directly, not through copied generic alias {copied_alias}"
         );
     }
@@ -2639,6 +3551,11 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
         "tab-foreground",
         "tab-selected-foreground",
         "tab-horizontal-padding",
+        "tab-min-width",
+        "tab-height",
+        "tab-radius",
+        "tab-separator-thickness",
+        "tab-border-width",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -2686,6 +3603,18 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
         tab_impl.contains("border-color: Fluent2Palette.tab-border"),
         "fluent2 TabImpl border should use the semantic tab border token"
     );
+    assert!(
+        tab_impl.contains("y: Fluent2SizeSettings.tab-border-width"),
+        "fluent2 TabImpl selected surface offset should use the semantic tab border width token"
+    );
+    assert!(
+        tab_impl.contains("border-width: root.is-current ? Fluent2SizeSettings.tab-border-width : Fluent2SizeSettings.control-hidden-stroke-width"),
+        "fluent2 TabImpl selected border should use the semantic tab border width token"
+    );
+    assert!(
+        tab_impl.contains("border-radius: Fluent2SizeSettings.tab-radius"),
+        "fluent2 TabImpl should use a semantic tab radius token"
+    );
 
     assert!(
         tab_impl.contains("padding-left: Fluent2SizeSettings.tab-horizontal-padding"),
@@ -2694,6 +3623,22 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
     assert!(
         tab_impl.contains("padding-right: Fluent2SizeSettings.tab-horizontal-padding"),
         "fluent2 TabImpl should use a tab-specific right padding token"
+    );
+    assert!(
+        tab_impl.contains("min-width: max(Fluent2SizeSettings.tab-min-width, i-text.min-width)"),
+        "fluent2 TabImpl should use a tab-specific min-width token"
+    );
+    assert!(
+        tab_impl.contains("min-height: max(Fluent2SizeSettings.tab-height, i-text.min-height)"),
+        "fluent2 TabImpl should use a tab-specific height token"
+    );
+    assert!(
+        tab_impl.contains("width: Fluent2SizeSettings.tab-separator-thickness"),
+        "fluent2 TabImpl right separator should use a tab-specific separator thickness token"
+    );
+    assert!(
+        tab_impl.contains("height: Fluent2SizeSettings.tab-separator-thickness"),
+        "fluent2 TabImpl bottom separator should use a tab-specific separator thickness token"
     );
 
     for copied_literal in [
@@ -2705,6 +3650,11 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
         "Fluent2Palette.card-stroke",
         "padding-left: Fluent2SizeSettings.control-horizontal-padding",
         "padding-right: Fluent2SizeSettings.control-horizontal-padding",
+        "Fluent2SizeSettings.compact-item-height",
+        "Fluent2SizeSettings.overlay-radius",
+        "Fluent2SizeSettings.separator-thickness",
+        "y: Fluent2SizeSettings.stroke-width",
+        "border-width: root.is-current ? Fluent2SizeSettings.stroke-width : Fluent2SizeSettings.control-hidden-stroke-width",
     ] {
         assert!(
             !tab_impl.contains(copied_literal),
@@ -2759,6 +3709,11 @@ fn test_fluent2_spinbox_buttons_use_state_tokens() {
         "spinbox-button-hover-background",
         "spinbox-button-pressed-background",
         "spinbox-button-disabled-icon-foreground",
+        "spinbox-button-radius",
+        "spinbox-button-icon-size",
+        "spinbox-button-width",
+        "spinbox-button-spacing",
+        "spinbox-button-motion-duration",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -2796,21 +3751,36 @@ fn test_fluent2_spinbox_buttons_use_state_tokens() {
         "out property <bool> has-focus: touch-area.has-focus",
         "FocusTouchArea",
         "if root.has-focus && root.enabled : FocusBorder",
-        "border-radius: Fluent2SizeSettings.control-radius",
+        "border-radius: Fluent2SizeSettings.spinbox-button-radius",
+        "min-width: Fluent2SizeSettings.spinbox-button-width",
+        "width: Fluent2SizeSettings.spinbox-button-icon-size",
         "disabled when !root.enabled",
         "hover when touch-area.has-hover",
         "background.background: Fluent2Palette.spinbox-button-hover-background",
         "background.background: Fluent2Palette.spinbox-button-pressed-background",
         "icon.colorize: Fluent2Palette.spinbox-button-disabled-icon-foreground",
-        "animate background, border-color",
+        "animate background { duration: Fluent2SizeSettings.spinbox-button-motion-duration",
+        "animate colorize { duration: Fluent2SizeSettings.spinbox-button-motion-duration",
     ] {
         assert!(button.contains(expected), "fluent2 SpinBoxButton should use {expected}");
     }
+
+    assert!(
+        !button.contains("animate background, border-color"),
+        "fluent2 SpinBoxButton should not animate border-color on a background-only layer"
+    );
+    assert!(
+        !button.contains("duration: Fluent2SizeSettings.control-motion-duration"),
+        "fluent2 SpinBoxButton should not use the generic control motion token"
+    );
 
     for copied_literal in [
         "Fluent2Palette.subtle-secondary",
         "Fluent2Palette.subtle-tertiary",
         "Fluent2Palette.text-disabled",
+        "border-radius: Fluent2SizeSettings.control-radius",
+        "width: Fluent2SizeSettings.icon-size",
+        "min-width: Fluent2SizeSettings.compact-control-height",
     ] {
         assert!(
             !button.contains(copied_literal),
@@ -2834,6 +3804,14 @@ fn test_fluent2_spinbox_buttons_use_state_tokens() {
     assert!(
         !source.contains("visible: self.enabled"),
         "fluent2 SpinBox buttons should not hide their disabled state"
+    );
+    assert!(
+        source.contains("spacing: Fluent2SizeSettings.spinbox-button-spacing"),
+        "fluent2 SpinBox should use a semantic button spacing token"
+    );
+    assert!(
+        !source.contains("spacing: Fluent2SizeSettings.overlay-padding"),
+        "fluent2 SpinBox should not borrow generic overlay padding for button spacing"
     );
 }
 
@@ -2931,6 +3909,7 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
         "switch-rail-disabled-background",
         "switch-rail-checked-disabled-background",
         "switch-rail-border",
+        "switch-rail-border-width",
         "switch-rail-disabled-border",
         "switch-thumb-background",
         "switch-thumb-hover-background",
@@ -2939,6 +3918,7 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
         "switch-thumb-checked-hover-background",
         "switch-thumb-checked-pressed-background",
         "switch-thumb-border",
+        "switch-thumb-border-width",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -2946,9 +3926,6 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
     for copied_bridge in [
         "switch-foreground: foreground",
         "switch-disabled-foreground: text-disabled",
-        "switch-rail-background: control-alt-secondary",
-        "switch-rail-hover-background: control-alt-tertiary",
-        "switch-rail-pressed-background: control-alt-quaternary",
         "switch-rail-checked-background: accent-background",
         "switch-rail-checked-hover-background: secondary-accent-background",
         "switch-rail-checked-pressed-background: tertiary-accent-background",
@@ -2970,6 +3947,45 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
         );
     }
 
+    for expected in [
+        "property <brush> switch-rail-rest-fill: control-alt-secondary;",
+        "property <brush> switch-rail-hover-fill: control-alt-tertiary;",
+        "property <brush> switch-rail-pressed-fill: control-alt-quaternary;",
+        "switch-rail-background: switch-rail-rest-fill",
+        "switch-rail-hover-background: switch-rail-hover-fill",
+        "switch-rail-pressed-background: switch-rail-pressed-fill",
+    ] {
+        let expected_line = format!("out property <brush> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected || line.trim() == expected_line),
+            "fluent2 switch rail fills should route through switch-specific Fluent2 primitives: {expected}"
+        );
+    }
+
+    for copied_bridge in [
+        "switch-rail-background: control-alt-secondary",
+        "switch-rail-hover-background: control-alt-tertiary",
+        "switch-rail-pressed-background: control-alt-quaternary",
+    ] {
+        let copied_bridge_line = format!("out property <brush> {copied_bridge};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_bridge_line),
+            "fluent2 switch rail semantic tokens should not alias through copied generic control-alt bridge {copied_bridge}"
+        );
+    }
+
+    for copied_literal in [
+        "switch-rail-background: dark-color-scheme ? #0000001A : #00000005",
+        "switch-rail-hover-background: dark-color-scheme ? #FFFFFF0A : #0000000F",
+        "switch-rail-pressed-background: dark-color-scheme ? #FFFFFF12 : #00000017",
+    ] {
+        let copied_literal_line = format!("out property <brush> {copied_literal};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_literal_line),
+            "fluent2 switch rail alternate fills should not repeat copied raw light/dark alpha branches: {copied_literal}"
+        );
+    }
+
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/switch.slint"))
         .expect("fluent2 should embed switch.slint");
     let source_contents = source.read();
@@ -2986,12 +4002,25 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
         "thumb.background: root.checked ? Fluent2Palette.switch-thumb-checked-hover-background : Fluent2Palette.switch-thumb-hover-background",
         "rail.background: Fluent2Palette.switch-rail-checked-background",
         "thumb.border-color: Fluent2Palette.switch-thumb-border",
+        "thumb.border-width: Fluent2SizeSettings.switch-thumb-border-width",
         "thumb.background: Fluent2Palette.switch-thumb-checked-background",
+        "border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.switch-rail-border-width",
         "border-color: Fluent2Palette.switch-rail-border",
         "background: Fluent2Palette.switch-rail-background",
         "background: Fluent2Palette.switch-thumb-background",
     ] {
         assert!(source.contains(expected), "fluent2 Switch should use {expected}");
+    }
+
+    for copied_literal in [
+        "thumb.border-width: root.checked ? Fluent2SizeSettings.stroke-width : Fluent2SizeSettings.control-hidden-stroke-width",
+        "thumb.border-width: Fluent2SizeSettings.stroke-width",
+        "border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.stroke-width",
+    ] {
+        assert!(
+            !source.contains(copied_literal),
+            "fluent2 Switch should not bind stroke widths directly to copied generic token {copied_literal}"
+        );
     }
 }
 
@@ -3025,11 +4054,26 @@ fn test_fluent2_switch_radius_geometry_uses_tokens() {
 }
 
 #[test]
-fn test_fluent2_switch_thumb_motion_uses_control_duration() {
+fn test_fluent2_switch_motion_uses_switch_duration_token() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains("switch-motion-duration"),
+        "fluent2 styling should expose a semantic switch motion duration token"
+    );
+
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/switch.slint"))
         .expect("fluent2 should embed switch.slint");
     let source_contents = source.read();
     let source = std::str::from_utf8(&source_contents).unwrap();
+    let rail_block = source
+        .split("rail := Rectangle")
+        .nth(1)
+        .and_then(|after| after.split("thumb := Rectangle").next())
+        .expect("fluent2 Switch should define a rail rectangle before thumb");
     let thumb_block = source
         .split("thumb := Rectangle")
         .nth(1)
@@ -3037,12 +4081,51 @@ fn test_fluent2_switch_thumb_motion_uses_control_duration() {
         .expect("fluent2 Switch should define a thumb rectangle before focus border");
 
     assert!(
-        thumb_block.contains("animate background, x, y, width, height"),
+        thumb_block.contains("animate background, border-color, border-width, x, y, width, height"),
         "fluent2 Switch thumb should animate movement and size changes, not only color/width"
     );
     assert!(
-        thumb_block.contains("duration: Fluent2SizeSettings.control-motion-duration"),
-        "fluent2 Switch thumb motion should use the shared Fluent2 control motion token"
+        rail_block.contains("duration: Fluent2SizeSettings.switch-motion-duration"),
+        "fluent2 Switch rail motion should use the semantic switch motion token"
+    );
+    assert!(
+        thumb_block.contains("duration: Fluent2SizeSettings.switch-motion-duration"),
+        "fluent2 Switch thumb motion should use the semantic switch motion token"
+    );
+    assert!(
+        !rail_block.contains("duration: Fluent2SizeSettings.control-motion-duration")
+            && !thumb_block.contains("duration: Fluent2SizeSettings.control-motion-duration"),
+        "fluent2 Switch rail/thumb motion should not borrow the generic control motion token"
+    );
+}
+
+#[test]
+fn test_fluent2_switch_stroke_motion_is_on_stroke_elements() {
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/switch.slint"))
+        .expect("fluent2 should embed switch.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+    let rail_block = source
+        .split("rail := Rectangle")
+        .nth(1)
+        .and_then(|after| after.split("thumb := Rectangle").next())
+        .expect("fluent2 Switch should define a rail rectangle before thumb");
+    let thumb_block = source
+        .split("thumb := Rectangle")
+        .nth(1)
+        .and_then(|after| after.split("// focus border").next())
+        .expect("fluent2 Switch should define a thumb rectangle before focus border");
+
+    assert!(
+        rail_block
+            .contains("animate background, border-color { duration: Fluent2SizeSettings.switch-motion-duration"),
+        "fluent2 Switch rail should animate border-color on the element that owns the rail stroke"
+    );
+    assert!(
+        thumb_block.contains(
+            "animate background, border-color, border-width, x, y, width, height { duration: Fluent2SizeSettings.switch-motion-duration"
+        ),
+        "fluent2 Switch thumb should animate border-color and border-width on the element that owns the thumb stroke"
     );
 }
 
@@ -3265,7 +4348,9 @@ fn test_fluent2_lineedit_icon_state_brush_uses_semantic_token() {
         "fluent2 styling should expose a semantic line edit icon state brush token"
     );
     assert!(
-        !styling.contains("lineedit-icon-state-brush: state"),
+        !styling
+            .lines()
+            .any(|line| line.trim() == "out property <brush> lineedit-icon-state-brush: state;"),
         "fluent2 line edit icon state brush should not alias through the copied generic state token"
     );
 
@@ -3543,6 +4628,8 @@ fn test_fluent2_time_picker_popup_colors_use_semantic_tokens() {
         "time-picker-popup-foreground",
         "time-picker-clock-foreground",
         "time-picker-title-foreground",
+        "time-input-radius",
+        "time-period-selector-radius",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -3582,6 +4669,18 @@ fn test_fluent2_time_picker_popup_colors_use_semantic_tokens() {
             "};",
             "foreground: Fluent2Palette.time-picker-title-foreground",
             "foreground: Fluent2Palette.foreground",
+        ),
+        (
+            "input-style:",
+            "period-selector-style:",
+            "border-radius: Fluent2SizeSettings.time-input-radius",
+            "border-radius: Fluent2SizeSettings.overlay-radius",
+        ),
+        (
+            "period-selector-style:",
+            "item-style:",
+            "border-radius: Fluent2SizeSettings.time-period-selector-radius",
+            "border-radius: Fluent2SizeSettings.overlay-radius",
         ),
     ] {
         let block = source
@@ -3855,6 +4954,10 @@ fn test_fluent2_picker_icon_state_layer_radius_uses_tokens() {
         styling.contains("picker-selection-state-layer-radius"),
         "fluent2 styling should expose a picker selection state layer radius token"
     );
+    assert!(
+        styling.contains("picker-selection-motion-duration"),
+        "fluent2 styling should expose a picker selection motion duration token"
+    );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/internal-components.slint"))
         .expect("fluent2 should embed internal-components.slint");
@@ -3884,6 +4987,14 @@ fn test_fluent2_picker_icon_state_layer_radius_uses_tokens() {
     assert!(
         block.contains("border-radius: Fluent2SizeSettings.picker-selection-state-layer-radius"),
         "fluent2 SelectionButton state layer should use the picker selection radius token"
+    );
+    assert!(
+        block.contains("animate transform-rotation { duration: Fluent2SizeSettings.picker-selection-motion-duration; }"),
+        "fluent2 SelectionButton icon rotation should use the picker selection motion token"
+    );
+    assert!(
+        !block.contains("duration: Fluent2SizeSettings.control-motion-duration"),
+        "fluent2 SelectionButton should not borrow the generic control motion token"
     );
 }
 
@@ -4005,10 +5116,21 @@ fn test_fluent2_table_rows_use_focus_border() {
 
     for expected in [
         "in property <bool> has-focus",
+        "min-height: max(Fluent2SizeSettings.table-row-height, layout.min-height)",
+        "border-radius: Fluent2SizeSettings.table-row-radius",
         "if root.has-focus : FocusBorder",
-        "border-radius: Fluent2SizeSettings.control-radius",
     ] {
         assert!(row_block.contains(expected), "fluent2 TableViewRow should use {expected}");
+    }
+
+    for copied_literal in [
+        "min-height: max(Fluent2SizeSettings.item-height, layout.min-height)",
+        "border-radius: Fluent2SizeSettings.control-radius",
+    ] {
+        assert!(
+            !row_block.contains(copied_literal),
+            "fluent2 TableViewRow should not borrow copied generic geometry token {copied_literal}"
+        );
     }
 
     let table_block = source
@@ -4109,6 +5231,10 @@ fn test_fluent2_button_border_uses_semantic_token() {
         styling.contains("button-border"),
         "fluent2 styling should expose a button border token"
     );
+    assert!(
+        styling.contains("button-border-width"),
+        "fluent2 styling should expose a button border width token"
+    );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/button.slint"))
         .expect("fluent2 should embed button.slint");
@@ -4126,6 +5252,10 @@ fn test_fluent2_button_border_uses_semantic_token() {
         "fluent2 Button resting border should use semantic button border tokens"
     );
     assert!(
+        button.contains("border-width: Fluent2SizeSettings.button-border-width"),
+        "fluent2 Button resting border should use the semantic button border width token"
+    );
+    assert!(
         !button.contains("Fluent2Palette.border"),
         "fluent2 Button should not use the generic border bridge token for button-specific state borders"
     );
@@ -4133,6 +5263,102 @@ fn test_fluent2_button_border_uses_semantic_token() {
         !button.contains("Fluent2Palette.control-border"),
         "fluent2 Button should not bind state borders directly to the generic control-border token"
     );
+    assert!(
+        !button.contains("border-width: Fluent2SizeSettings.stroke-width"),
+        "fluent2 Button should not bind border width directly to the generic stroke-width token"
+    );
+}
+
+#[test]
+fn test_fluent2_button_motion_uses_button_token() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling.contains("button-motion-duration"),
+        "fluent2 styling should expose button-motion-duration"
+    );
+
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/button.slint"))
+        .expect("fluent2 should embed button.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+    let button =
+        source.split("export component Button").nth(1).expect("fluent2 should define Button");
+
+    for expected in [
+        "animate background { duration: Fluent2SizeSettings.button-motion-duration",
+        "animate border-color { duration: Fluent2SizeSettings.button-motion-duration",
+        "animate color { duration: Fluent2SizeSettings.button-motion-duration",
+    ] {
+        assert!(button.contains(expected), "fluent2 Button should use {expected}");
+    }
+
+    assert!(
+        !button.contains("duration: Fluent2SizeSettings.control-motion-duration"),
+        "fluent2 Button should not use the generic control motion token"
+    );
+}
+
+#[test]
+fn test_fluent2_state_border_motion_is_on_stroke_elements() {
+    for (control, component_marker, border_marker, duration_token) in [
+        (
+            "button.slint",
+            "export component Button",
+            "i-border := Rectangle",
+            "button-motion-duration",
+        ),
+        (
+            "checkbox.slint",
+            "export component CheckBox",
+            "border := Rectangle",
+            "checkbox-motion-duration",
+        ),
+    ] {
+        let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{control}")))
+            .unwrap_or_else(|| panic!("fluent2 should embed {control}"));
+        let source_contents = source.read();
+        let source = std::str::from_utf8(&source_contents).unwrap();
+        let component = source
+            .split(component_marker)
+            .nth(1)
+            .unwrap_or_else(|| panic!("fluent2 {control} should define {component_marker}"));
+        let border_block = component
+            .split(border_marker)
+            .nth(1)
+            .and_then(|after| after.split("}").next())
+            .unwrap_or_else(|| panic!("fluent2 {control} should define {border_marker}"));
+
+        assert!(
+            border_block.contains(&format!(
+                "animate border-color {{ duration: Fluent2SizeSettings.{duration_token}"
+            )),
+            "fluent2 {control} should animate border-color on the element that owns the stroke"
+        );
+    }
+
+    for (control, component_marker) in [
+        ("button.slint", "export component Button"),
+        ("checkbox.slint", "export component CheckBox"),
+        ("spinbox.slint", "component SpinBoxButton"),
+    ] {
+        let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{control}")))
+            .unwrap_or_else(|| panic!("fluent2 should embed {control}"));
+        let source_contents = source.read();
+        let source = std::str::from_utf8(&source_contents).unwrap();
+        let component = source
+            .split(component_marker)
+            .nth(1)
+            .unwrap_or_else(|| panic!("fluent2 {control} should define {component_marker}"));
+
+        assert!(
+            !component.contains("animate background, border-color"),
+            "fluent2 {control} should not animate border-color on a parent background layer"
+        );
+    }
 }
 
 #[test]
@@ -4162,8 +5388,12 @@ fn test_fluent2_button_colors_use_semantic_tokens() {
         "button-primary-border",
         "button-primary-disabled-border",
         "button-icon-transparent-foreground",
+        "button-min-width",
+        "button-height",
+        "button-container-radius",
         "button-horizontal-padding",
         "button-vertical-padding",
+        "button-content-spacing",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
@@ -4217,10 +5447,14 @@ fn test_fluent2_button_colors_use_semantic_tokens() {
         "background: root.primary ? Fluent2Palette.button-primary-background : Fluent2Palette.button-background",
         "border-color: root.primary ? Fluent2Palette.button-primary-border : Fluent2Palette.button-border",
         "colorize: root.colorize-icon ? root.text-color : Fluent2Palette.button-icon-transparent-foreground",
+        "min-width: max(Fluent2SizeSettings.button-min-width, i-layout.min-width)",
+        "min-height: max(Fluent2SizeSettings.button-height, i-layout.min-height)",
+        "border-radius: Fluent2SizeSettings.button-container-radius",
         "padding-left: Fluent2SizeSettings.button-horizontal-padding",
         "padding-right: Fluent2SizeSettings.button-horizontal-padding",
         "padding-top: Fluent2SizeSettings.button-vertical-padding",
         "padding-bottom: Fluent2SizeSettings.button-vertical-padding",
+        "spacing: Fluent2SizeSettings.button-content-spacing",
     ] {
         assert!(button.contains(expected), "fluent2 Button should use {expected}");
     }
@@ -4242,10 +5476,14 @@ fn test_fluent2_button_colors_use_semantic_tokens() {
         "Fluent2Palette.accent-control-border",
         "Fluent2Palette.control-background",
         "Fluent2Palette.control-fill-transparent",
+        "min-width: max(Fluent2SizeSettings.control-min-width, i-layout.min-width)",
+        "min-height: max(Fluent2SizeSettings.control-height, i-layout.min-height)",
+        "border-radius: Fluent2SizeSettings.button-radius",
         "padding-left: Fluent2SizeSettings.control-horizontal-padding",
         "padding-right: Fluent2SizeSettings.control-horizontal-padding",
         "padding-top: Fluent2SizeSettings.control-vertical-padding",
         "padding-bottom: Fluent2SizeSettings.control-vertical-padding",
+        "spacing: Fluent2SizeSettings.overlay-padding",
     ] {
         assert!(
             !button.contains(copied_literal),
@@ -4515,9 +5753,13 @@ fn test_fluent2_slider_track_geometry_uses_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for expected in
-        ["slider-track-radius", "slider-track-active-radius", "slider-thumb-inner-radius"]
-    {
+    for expected in [
+        "slider-track-radius",
+        "slider-track-active-radius",
+        "slider-thumb-inner-size",
+        "slider-thumb-inner-radius",
+        "slider-cross-axis-min-size",
+    ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
@@ -4529,7 +5771,10 @@ fn test_fluent2_slider_track_geometry_uses_tokens() {
     for expected in [
         "border-radius: Fluent2SizeSettings.slider-track-radius",
         "border-radius: Fluent2SizeSettings.slider-track-active-radius",
+        "width: Fluent2SizeSettings.slider-thumb-inner-size",
         "border-radius: Fluent2SizeSettings.slider-thumb-inner-radius",
+        "min-width: base.vertical ? Fluent2SizeSettings.slider-thumb-size : Fluent2SizeSettings.slider-cross-axis-min-size",
+        "min-height: base.vertical ? Fluent2SizeSettings.slider-cross-axis-min-size : Fluent2SizeSettings.slider-thumb-size",
     ] {
         assert!(source.contains(expected), "fluent2 Slider should use {expected}");
     }
@@ -4542,6 +5787,18 @@ fn test_fluent2_slider_track_geometry_uses_tokens() {
         !source.contains("border-radius: self.width / 2"),
         "fluent2 Slider thumb inner radius should not be derived from live element width"
     );
+    assert!(
+        !source.contains("width: Fluent2SizeSettings.icon-size"),
+        "fluent2 Slider inner thumb width should not use the generic icon-size token"
+    );
+    assert!(
+        !source.contains("min-width: base.vertical ? Fluent2SizeSettings.slider-thumb-size : 0px"),
+        "fluent2 Slider horizontal cross-axis minimum should use a semantic token"
+    );
+    assert!(
+        !source.contains("min-height: base.vertical ? 0px : Fluent2SizeSettings.slider-thumb-size"),
+        "fluent2 Slider vertical cross-axis minimum should use a semantic token"
+    );
 }
 
 #[test]
@@ -4551,7 +5808,7 @@ fn test_fluent2_slider_rail_and_thumb_stroke_use_semantic_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for expected in ["slider-rail-background", "slider-thumb-stroke"] {
+    for expected in ["slider-rail-background", "slider-thumb-stroke", "slider-thumb-border-width"] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
@@ -4570,6 +5827,7 @@ fn test_fluent2_slider_rail_and_thumb_stroke_use_semantic_tokens() {
 
     for expected in [
         "thumb.border-color: Fluent2Palette.slider-thumb-stroke",
+        "border-width: Fluent2SizeSettings.slider-thumb-border-width",
         "background: Fluent2Palette.slider-rail-background",
     ] {
         assert!(source.contains(expected), "fluent2 Slider should use {expected}");
@@ -4578,6 +5836,10 @@ fn test_fluent2_slider_rail_and_thumb_stroke_use_semantic_tokens() {
     assert!(
         !source.contains("Fluent2Palette.border"),
         "fluent2 Slider should not use the generic border token for slider-specific rail or thumb visuals"
+    );
+    assert!(
+        !source.contains("border-width: Fluent2SizeSettings.stroke-width"),
+        "fluent2 Slider should not bind thumb border width directly to the generic stroke-width token"
     );
 }
 
@@ -4593,6 +5855,7 @@ fn test_fluent2_slider_active_colors_use_semantic_tokens() {
         "slider-thumb-active-background",
         "slider-thumb-hover-background",
         "slider-thumb-pressed-background",
+        "slider-motion-duration",
     ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
@@ -4620,6 +5883,7 @@ fn test_fluent2_slider_active_colors_use_semantic_tokens() {
         "thumb-inner.background: Fluent2Palette.slider-thumb-hover-background",
         "background: Fluent2Palette.slider-track-active-background",
         "background: Fluent2Palette.slider-thumb-active-background",
+        "animate background, width { duration: Fluent2SizeSettings.slider-motion-duration",
     ] {
         assert!(source.contains(expected), "fluent2 Slider should use {expected}");
     }
@@ -4629,6 +5893,7 @@ fn test_fluent2_slider_active_colors_use_semantic_tokens() {
         "thumb-inner.background: Fluent2Palette.tertiary-accent-background",
         "thumb-inner.background: Fluent2Palette.secondary-accent-background",
         "background: Fluent2Palette.accent-background",
+        "duration: Fluent2SizeSettings.control-motion-duration",
     ] {
         assert!(
             !source.contains(copied_literal),

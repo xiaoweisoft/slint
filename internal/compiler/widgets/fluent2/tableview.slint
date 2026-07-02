@@ -41,12 +41,12 @@ component TableViewColumn inherits Rectangle {
             image-fit: contain;
             colorize: Fluent2Palette.table-header-sort-icon-foreground;
             visible: root.sort-order != SortOrder.unsorted;
-            width: Fluent2SizeSettings.icon-size;
+            width: Fluent2SizeSettings.table-header-sort-icon-size;
             y: (parent.height - self.height) / 2;
             source: root.sort-order == SortOrder.ascending ? Icons.arrow-down : Icons.arrow-up;
             accessible-role: none;
 
-            animate colorize { duration: Fluent2SizeSettings.control-motion-duration; }
+            animate colorize { duration: Fluent2SizeSettings.table-motion-duration; }
         }
     }
 
@@ -54,13 +54,13 @@ component TableViewColumn inherits Rectangle {
     Rectangle {
         y: parent.height - self.height;
         width: 100%;
-        height: Fluent2SizeSettings.separator-thickness;
+        height: Fluent2SizeSettings.table-header-separator-thickness;
         background: Fluent2Palette.table-header-separator;
     }
 
     Rectangle {
-        x: parent.width - Fluent2SizeSettings.separator-thickness;
-        width: Fluent2SizeSettings.separator-thickness;
+        x: parent.width - Fluent2SizeSettings.table-header-resize-separator-thickness;
+        width: Fluent2SizeSettings.table-header-resize-separator-thickness;
 
         states [
             hover when movable-touch-area.has-hover : {
@@ -68,7 +68,7 @@ component TableViewColumn inherits Rectangle {
             }
         ]
 
-        animate background { duration: Fluent2SizeSettings.control-motion-duration; }
+        animate background { duration: Fluent2SizeSettings.table-motion-duration; }
 
         movable-touch-area := TouchArea {
             width: Fluent2SizeSettings.table-resize-grip-width;
@@ -105,8 +105,8 @@ component TableViewRow inherits Rectangle {
     callback pointer-event(event: PointerEvent, position: Point);
 
     min-width: layout.min-width;
-    min-height: max(Fluent2SizeSettings.item-height, layout.min-height);
-    border-radius: Fluent2SizeSettings.control-radius;
+    min-height: max(Fluent2SizeSettings.table-row-height, layout.min-height);
+    border-radius: Fluent2SizeSettings.table-row-radius;
     background: root.even ? Fluent2Palette.table-row-background : Fluent2Palette.table-row-alternate-background;
 
     states [
@@ -135,7 +135,7 @@ component TableViewRow inherits Rectangle {
     }
 
     if root.has-focus : FocusBorder {
-        border-radius: Fluent2SizeSettings.control-radius;
+        border-radius: Fluent2SizeSettings.table-row-radius;
     }
 
     layout := HorizontalLayout {
@@ -150,7 +150,7 @@ component TableViewRow inherits Rectangle {
         background: Fluent2Palette.table-row-selection-indicator-background;
         border-radius: Fluent2SizeSettings.selection-indicator-radius;
 
-        animate height { duration: Fluent2SizeSettings.control-motion-duration; easing: ease-out; }
+        animate height { duration: Fluent2SizeSettings.table-motion-duration; easing: ease-out; }
     }
 }
 

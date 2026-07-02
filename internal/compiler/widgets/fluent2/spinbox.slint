@@ -13,7 +13,7 @@ component SpinBoxButton {
     in property <bool> enabled: true;
     out property <bool> has-focus: touch-area.has-focus;
 
-    min-width: Fluent2SizeSettings.compact-control-height;
+    min-width: Fluent2SizeSettings.spinbox-button-width;
     horizontal-stretch: 0;
 
     states [
@@ -30,22 +30,22 @@ component SpinBoxButton {
     ]
 
     background := Rectangle {
-        border-radius: Fluent2SizeSettings.control-radius;
+        border-radius: Fluent2SizeSettings.spinbox-button-radius;
 
-        animate background, border-color { duration: Fluent2SizeSettings.control-motion-duration; }
+        animate background { duration: Fluent2SizeSettings.spinbox-button-motion-duration; }
 
         icon := Image {
             image-fit: contain;
             colorize: Fluent2Palette.spinbox-button-icon-foreground;
-            width: Fluent2SizeSettings.icon-size;
+            width: Fluent2SizeSettings.spinbox-button-icon-size;
             accessible-role: none;
 
-            animate colorize { duration: Fluent2SizeSettings.control-motion-duration; }
+            animate colorize { duration: Fluent2SizeSettings.spinbox-button-motion-duration; }
         }
     }
 
     if root.has-focus && root.enabled : FocusBorder {
-        border-radius: Fluent2SizeSettings.control-radius;
+        border-radius: Fluent2SizeSettings.spinbox-button-radius;
     }
 
     touch-area := FocusTouchArea {
@@ -66,7 +66,7 @@ export component SpinBox {
     callback edited <=> base.edited;
 
     min-width: max(Fluent2SizeSettings.spinbox-min-width, layout.min-width);
-    min-height: max(Fluent2SizeSettings.control-height, layout.min-height);
+    min-height: max(Fluent2SizeSettings.spinbox-height, layout.min-height);
     vertical-stretch: 0;
     horizontal-stretch: 1;
     forward-focus: base;
@@ -97,9 +97,9 @@ export component SpinBox {
     ]
 
     background := Rectangle {
-        border-radius: Fluent2SizeSettings.control-radius;
+        border-radius: Fluent2SizeSettings.spinbox-radius;
         background: Fluent2Palette.spinbox-background;
-        border-width: Fluent2SizeSettings.stroke-width;
+        border-width: Fluent2SizeSettings.spinbox-border-width;
         border-color: Fluent2Palette.text-control-border;
 
         layout := HorizontalLayout {
@@ -107,7 +107,7 @@ export component SpinBox {
             padding-right: Fluent2SizeSettings.spinbox-button-column-padding;
             padding-top: Fluent2SizeSettings.spinbox-vertical-padding;
             padding-bottom: Fluent2SizeSettings.spinbox-vertical-padding;
-            spacing: Fluent2SizeSettings.overlay-padding;
+            spacing: Fluent2SizeSettings.spinbox-button-spacing;
 
             Rectangle {
                 clip: true;

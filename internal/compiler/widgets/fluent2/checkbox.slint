@@ -49,7 +49,7 @@ export component CheckBox {
         }
     ]
 
-    animate text-color { duration: Fluent2SizeSettings.control-motion-duration; }
+    animate text-color { duration: Fluent2SizeSettings.checkbox-motion-duration; }
 
     layout := HorizontalLayout {
         spacing: Fluent2SizeSettings.checkbox-label-spacing;
@@ -61,12 +61,14 @@ export component CheckBox {
             background: Fluent2Palette.checkbox-background;
             border-radius: Fluent2SizeSettings.checkbox-radius;
 
-            animate background, border-color { duration: Fluent2SizeSettings.control-motion-duration; }
+            animate background { duration: Fluent2SizeSettings.checkbox-motion-duration; }
 
             border := Rectangle {
                 border-color: Fluent2Palette.checkbox-border;
-                border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.stroke-width;
+                border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.checkbox-border-width;
                 border-radius: parent.border-radius;
+
+                animate border-color { duration: Fluent2SizeSettings.checkbox-motion-duration; }
             }
 
             icon := Image {
@@ -74,10 +76,10 @@ export component CheckBox {
                 visible: root.checked;
                 source: Icons.check-mark;
                 colorize: Fluent2Palette.checkbox-checkmark-foreground;
-                width: Fluent2SizeSettings.icon-size;
+                width: Fluent2SizeSettings.checkbox-checkmark-size;
                 accessible-role: none;
 
-                animate colorize { duration: Fluent2SizeSettings.control-motion-duration; }
+                animate colorize { duration: Fluent2SizeSettings.checkbox-motion-duration; }
             }
         }
 
@@ -105,6 +107,6 @@ export component CheckBox {
 
     // focus border
     if root.has-focus && root.enabled : FocusBorder {
-        border-radius: Fluent2SizeSettings.button-radius;
+        border-radius: Fluent2SizeSettings.checkbox-focus-radius;
     }
 }

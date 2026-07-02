@@ -17,8 +17,8 @@ export component Slider {
     callback changed <=> base.changed;
     callback released <=> base.released;
 
-    min-width: base.vertical ? Fluent2SizeSettings.slider-thumb-size : 0px;
-    min-height: base.vertical ? 0px : Fluent2SizeSettings.slider-thumb-size;
+    min-width: base.vertical ? Fluent2SizeSettings.slider-thumb-size : Fluent2SizeSettings.slider-cross-axis-min-size;
+    min-height: base.vertical ? Fluent2SizeSettings.slider-cross-axis-min-size : Fluent2SizeSettings.slider-thumb-size;
     vertical-stretch: base.vertical ? 1 : 0;
     horizontal-stretch: base.vertical ? 0 : 1;
     accessible-role: slider;
@@ -85,17 +85,17 @@ export component Slider {
             width: Fluent2SizeSettings.slider-thumb-border-size;
             height: self.width;
             border-radius: Fluent2SizeSettings.slider-thumb-border-radius;
-            border-width: Fluent2SizeSettings.stroke-width;
+            border-width: Fluent2SizeSettings.slider-thumb-border-width;
             border-color: Fluent2Palette.slider-thumb-border;
         }
 
         thumb-inner := Rectangle {
-            width: Fluent2SizeSettings.icon-size;
+            width: Fluent2SizeSettings.slider-thumb-inner-size;
             height: self.width;
             border-radius: Fluent2SizeSettings.slider-thumb-inner-radius;
             background: Fluent2Palette.slider-thumb-active-background;
 
-            animate background, width { duration: Fluent2SizeSettings.control-motion-duration; }
+            animate background, width { duration: Fluent2SizeSettings.slider-motion-duration; }
         }
 
         if root.has-focus && root.enabled : FocusBorder {

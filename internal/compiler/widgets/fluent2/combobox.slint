@@ -16,11 +16,11 @@ export component ComboBox {
 
     callback selected <=> base.selected;
 
-    property <length> popup-padding: Fluent2SizeSettings.overlay-padding;
+    property <length> popup-padding: Fluent2SizeSettings.combobox-popup-padding;
     property <int> visible-items: min(6, model.length);
 
-    min-width: max(Fluent2SizeSettings.input-min-width, layout.min-height);
-    min-height: max(Fluent2SizeSettings.control-height, layout.min-height);
+    min-width: max(Fluent2SizeSettings.combobox-min-width, layout.min-width);
+    min-height: max(Fluent2SizeSettings.combobox-height, layout.min-height);
     horizontal-stretch: 1;
     vertical-stretch: 0;
     forward-focus: base;
@@ -63,12 +63,12 @@ export component ComboBox {
     }
 
     background := Rectangle {
-        border-radius: Fluent2SizeSettings.control-radius;
+        border-radius: Fluent2SizeSettings.combobox-radius;
         background: Fluent2Palette.combobox-background;
-        border-width: Fluent2SizeSettings.stroke-width;
+        border-width: Fluent2SizeSettings.combobox-border-width;
         border-color: Fluent2Palette.combobox-border;
 
-        animate border-color { duration: Fluent2SizeSettings.control-motion-duration; }
+        animate border-color { duration: Fluent2SizeSettings.combobox-motion-duration; }
 
         layout := HorizontalLayout {
             padding-left: Fluent2SizeSettings.combobox-horizontal-padding;
@@ -88,12 +88,12 @@ export component ComboBox {
 
             icon := Image {
                 colorize: Fluent2Palette.combobox-icon-foreground;
-                width: Fluent2SizeSettings.icon-size;
+                width: Fluent2SizeSettings.combobox-icon-size;
                 source: Icons.dropdown;
                 y: Fluent2SizeSettings.combobox-icon-offset-y;
                 accessible-role: none;
 
-                animate colorize { duration: Fluent2SizeSettings.control-motion-duration; }
+                animate colorize { duration: Fluent2SizeSettings.combobox-motion-duration; }
             }
         }
     }
@@ -109,7 +109,7 @@ export component ComboBox {
         // Ideally it should be so that the current element is over the popup.
         y: Fluent2SizeSettings.combobox-popup-offset-y;
         width: root.width;
-        height: root.visible-items * Fluent2SizeSettings.item-height +  2 * root.popup-padding;
+        height: root.visible-items * Fluent2SizeSettings.combobox-popup-item-height +  2 * root.popup-padding;
         forward-focus: inner-fs;
 
         inner-fs := FocusScope {

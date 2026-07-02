@@ -18,6 +18,8 @@ export component StateLayer inherits Rectangle {
             root.background: root.state-brush.with_alpha(Fluent2SizeSettings.state-layer-hover-opacity);
         }
     ]
+
+    animate background { duration: Fluent2SizeSettings.state-layer-motion-duration; }
 }
 
 export struct IconButtonStyle {
@@ -175,7 +177,7 @@ export component SelectionButton {
             colorize: root.style.foreground;
             transform-rotation: root.checked ? 180deg : 0;
 
-            animate transform-rotation { duration: Fluent2SizeSettings.control-motion-duration; }
+            animate transform-rotation { duration: Fluent2SizeSettings.picker-selection-motion-duration; }
         }
     }
 
