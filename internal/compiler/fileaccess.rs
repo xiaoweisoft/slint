@@ -1610,7 +1610,12 @@ fn test_fluent2_progress_indicator_geometry_uses_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for expected in ["progress-track-background", "progress-rail-radius", "progress-track-radius"] {
+    for expected in [
+        "progress-track-background",
+        "progress-rail-radius",
+        "progress-track-radius",
+        "progress-determinate-track-offset",
+    ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
@@ -1623,6 +1628,7 @@ fn test_fluent2_progress_indicator_geometry_uses_tokens() {
         "background: Fluent2Palette.progress-track-background",
         "border-radius: Fluent2SizeSettings.progress-rail-radius",
         "border-radius: Fluent2SizeSettings.progress-track-radius",
+        "x: !root.indeterminate ? Fluent2SizeSettings.progress-determinate-track-offset",
     ] {
         assert!(source.contains(expected), "fluent2 progress indicator should use {expected}");
     }
@@ -1635,6 +1641,10 @@ fn test_fluent2_progress_indicator_geometry_uses_tokens() {
     assert!(
         !source.contains("border-radius: Fluent2SizeSettings.progress-height"),
         "fluent2 progress indicator track radius should not be derived from progress height"
+    );
+    assert!(
+        !source.contains("x: !root.indeterminate ? 0px"),
+        "fluent2 progress indicator determinate track offset should not be hardcoded"
     );
 }
 
