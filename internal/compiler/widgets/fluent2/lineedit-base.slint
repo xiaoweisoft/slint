@@ -153,7 +153,7 @@ export component LineEditClearIcon {
     in property <image> source <=> icon.source;
     in property <brush> colorize <=> icon.colorize;
     in property <length> icon-size: Fluent2SizeSettings.lineedit-icon-size;
-    in property <brush> state-brush: Fluent2Palette.state;
+    in property <brush> state-brush: Fluent2Palette.lineedit-icon-state-brush;
     callback clear();
 
     min-width: Fluent2SizeSettings.lineedit-icon-touch-target;
@@ -164,7 +164,7 @@ export component LineEditClearIcon {
         has-hover: touch-area.has-hover;
         has-focus: touch-area.has-focus;
         state-brush: root.state-brush;
-        border-radius: max(root.width, root.height) / 2;
+        border-radius: Fluent2SizeSettings.lineedit-icon-state-layer-radius;
     }
     touch-area := FocusTouchArea {
         width: 100%;
@@ -190,7 +190,7 @@ export component LineEditPasswordIcon {
     in property <image> hide-password-image;
     in property <brush> colorize <=> icon.colorize;
     in property <length> icon-size: Fluent2SizeSettings.lineedit-icon-size;
-    in property <brush> state-brush: Fluent2Palette.state;
+    in property <brush> state-brush: Fluent2Palette.lineedit-icon-state-brush;
 
     min-width: Fluent2SizeSettings.lineedit-icon-touch-target;
     min-height: Fluent2SizeSettings.lineedit-icon-touch-target;
@@ -200,7 +200,7 @@ export component LineEditPasswordIcon {
         has-hover: touch-area.has-hover;
         has-focus: touch-area.has-focus;
         state-brush: root.state-brush;
-        border-radius: max(root.width, root.height) / 2;
+        border-radius: Fluent2SizeSettings.lineedit-icon-state-layer-radius;
     }
     touch-area := FocusTouchArea {
         width: 100%;

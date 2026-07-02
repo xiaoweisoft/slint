@@ -1,6 +1,8 @@
 // Copyright © SixtyFPS GmbH <info@slint.dev>
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 
+import { FocusTouchArea } from "internal-components.slint";
+
 export component MenuBarItemBase {
     in property <MenuEntry> entry;
     in property <brush> default-foreground;
@@ -23,7 +25,7 @@ export component MenuBarItemBase {
     background-layer := Rectangle {
         background: root.default-background;
 
-        touch-area := TouchArea {
+        touch-area := FocusTouchArea {
             layout := HorizontalLayout {
                 padding-top: root.top-padding;
                 padding-bottom: root.bottom-padding;
@@ -122,7 +124,7 @@ export component MenuItemBase {
     background-layer := Rectangle {
         background: root.default-background;
 
-        touch-area := TouchArea {
+        touch-area := FocusTouchArea {
             visible: !entry.is-separator;
             enabled: entry.enabled;
 

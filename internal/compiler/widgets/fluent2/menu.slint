@@ -17,11 +17,11 @@ export component MenuBarItem {
         horizontal-padding: Fluent2SizeSettings.control-horizontal-padding;
         top-padding: Fluent2SizeSettings.control-vertical-padding;
         bottom-padding: Fluent2SizeSettings.menu-bar-item-bottom-padding;
-        default-foreground: Fluent2Palette.foreground;
-        hover-foreground: Fluent2Palette.foreground;
-        pressed-foreground: Fluent2Palette.text-secondary;
-        hover-background: Fluent2Palette.subtle-secondary;
-        pressed-background: Fluent2Palette.control-alt-tertiary;
+        default-foreground: Fluent2Palette.menu-bar-item-foreground;
+        hover-foreground: Fluent2Palette.menu-bar-item-foreground;
+        pressed-foreground: Fluent2Palette.menu-bar-item-pressed-foreground;
+        hover-background: Fluent2Palette.menu-bar-item-hover-background;
+        pressed-background: Fluent2Palette.menu-bar-item-pressed-background;
         font-size: Fluent2FontSettings.body.font-size;
         font-weight: Fluent2FontSettings.body.font-weight;
         font-family: Fluent2Palette.font-family;
@@ -35,10 +35,10 @@ export component MenuBar inherits MenuBarBase {
 }
 
 export component MenuFrame inherits MenuFrameBase {
-    background: Fluent2Palette.background;
+    background: Fluent2Palette.menu-frame-background;
     border-radius: Fluent2SizeSettings.overlay-radius;
     border-width: Fluent2SizeSettings.stroke-width;
-    border-color: Fluent2Palette.border;
+    border-color: Fluent2Palette.menu-frame-border;
     drop-shadow-color: Fluent2Palette.elevation-shadow-flyout-color;
     drop-shadow-offset-y: Fluent2SizeSettings.elevation-shadow-flyout-offset-y;
     drop-shadow-blur: Fluent2SizeSettings.elevation-shadow-flyout-blur;
@@ -58,15 +58,15 @@ export component MenuItem {
     max-height: entry.is-separator ? Fluent2SizeSettings.menu-separator-height : base.max-height;
 
     HorizontalLayout {
-        padding: entry.is-separator ? Fluent2SizeSettings.overlay-padding : Fluent2SizeSettings.menu-item-outer-padding;
-        padding-left: entry.is-separator ? 0px : Fluent2SizeSettings.menu-item-outer-padding;
-        padding-right: entry.is-separator ? 0px : Fluent2SizeSettings.menu-item-outer-padding;
+        padding: entry.is-separator ? Fluent2SizeSettings.menu-separator-vertical-padding : Fluent2SizeSettings.menu-item-outer-padding;
+        padding-left: entry.is-separator ? Fluent2SizeSettings.menu-separator-horizontal-inset : Fluent2SizeSettings.menu-item-outer-padding;
+        padding-right: entry.is-separator ? Fluent2SizeSettings.menu-separator-horizontal-inset : Fluent2SizeSettings.menu-item-outer-padding;
 
         base := MenuItemBase {
-            default-foreground: Fluent2Palette.foreground;
-            current-foreground: Fluent2Palette.foreground;
-            current-background: Fluent2Palette.subtle-secondary;
-            separator-color: Fluent2Palette.border;
+            default-foreground: Fluent2Palette.menu-item-foreground;
+            current-foreground: Fluent2Palette.menu-item-current-foreground;
+            current-background: Fluent2Palette.menu-item-current-background;
+            separator-color: Fluent2Palette.menu-separator-color;
             font-size: Fluent2FontSettings.body.font-size;
             font-weight: Fluent2FontSettings.body.font-weight;
             font-family: Fluent2Palette.font-family;

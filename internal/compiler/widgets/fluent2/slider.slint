@@ -37,18 +37,18 @@ export component Slider {
 
     states [
         disabled when !root.enabled : {
-            track.background: Fluent2Palette.accent-disabled;
-            rail.background: Fluent2Palette.accent-disabled;
-            thumb-inner.background: Fluent2Palette.accent-disabled;
+            track.background: Fluent2Palette.slider-disabled-background;
+            rail.background: Fluent2Palette.slider-disabled-background;
+            thumb-inner.background: Fluent2Palette.slider-disabled-background;
         }
         pressed when base.handle-pressed || base.has-focus : {
             thumb-inner.width: Fluent2SizeSettings.slider-thumb-pressed-size;
-            thumb-inner.background: Fluent2Palette.tertiary-accent-background;
-            thumb.border-color: Fluent2Palette.border;
+            thumb-inner.background: Fluent2Palette.slider-thumb-pressed-background;
+            thumb.border-color: Fluent2Palette.slider-thumb-stroke;
         }
         hover when base.has-hover : {
             thumb-inner.width: Fluent2SizeSettings.slider-thumb-hover-size;
-            thumb-inner.background: Fluent2Palette.secondary-accent-background;
+            thumb-inner.background: Fluent2Palette.slider-thumb-hover-background;
         }
     ]
 
@@ -57,7 +57,7 @@ export component Slider {
         y: base.vertical ? thumb.height / 2 : (parent.height - self.height) / 2;
         width: base.vertical ? Fluent2SizeSettings.slider-track-size : parent.width - thumb.width;
         height: base.vertical ? parent.height - thumb.height : Fluent2SizeSettings.slider-track-size;
-        background: Fluent2Palette.border;
+        background: Fluent2Palette.slider-rail-background;
         border-radius: Fluent2SizeSettings.slider-track-radius;
     }
 
@@ -66,8 +66,8 @@ export component Slider {
         y: base.vertical ? thumb.y + thumb.height / 2 : (parent.height - self.height) / 2;
         width: base.vertical ? rail.width : thumb.x;
         height: base.vertical ? parent.height - thumb.y - thumb.height : rail.height;
-        background: Fluent2Palette.accent-background;
-        border-radius: rail.border-radius;
+        background: Fluent2Palette.slider-track-active-background;
+        border-radius: Fluent2SizeSettings.slider-track-active-radius;
     }
 
     thumb := Rectangle {
@@ -76,7 +76,7 @@ export component Slider {
         width: Fluent2SizeSettings.slider-thumb-size;
         height: self.width;
         border-radius: Fluent2SizeSettings.slider-thumb-radius;
-        background: Fluent2Palette.control-solid;
+        background: Fluent2Palette.slider-thumb-background;
 
         thumb-border := Rectangle {
             x: (parent.width - self.width) / 2;
@@ -85,14 +85,14 @@ export component Slider {
             height: self.width;
             border-radius: Fluent2SizeSettings.slider-thumb-border-radius;
             border-width: Fluent2SizeSettings.stroke-width;
-            border-color: Fluent2Palette.circle-border;
+            border-color: Fluent2Palette.slider-thumb-border;
         }
 
         thumb-inner := Rectangle {
             width: Fluent2SizeSettings.icon-size;
             height: self.width;
-            border-radius: self.width / 2;
-            background: Fluent2Palette.accent-background;
+            border-radius: Fluent2SizeSettings.slider-thumb-inner-radius;
+            background: Fluent2Palette.slider-thumb-active-background;
 
             animate background, width { duration: Fluent2SizeSettings.control-motion-duration; }
         }

@@ -34,19 +34,19 @@ export component ComboBox {
 
     states [
         disabled when !root.enabled : {
-            background.background: Fluent2Palette.control-disabled;
-            background.border-color: Fluent2Palette.border;
-            text.color: Fluent2Palette.text-disabled;
-            icon.colorize: Fluent2Palette.text-disabled;
+            background.background: Fluent2Palette.combobox-disabled-background;
+            background.border-color: Fluent2Palette.combobox-disabled-border;
+            text.color: Fluent2Palette.combobox-disabled-foreground;
+            icon.colorize: Fluent2Palette.combobox-disabled-icon-foreground;
         }
         pressed when base.pressed : {
-            background.background: Fluent2Palette.control-alt-tertiary;
-            background.border-color: Fluent2Palette.border;
-            text.color: Fluent2Palette.text-secondary;
-            icon.colorize: Fluent2Palette.text-tertiary;
+            background.background: Fluent2Palette.combobox-pressed-background;
+            background.border-color: Fluent2Palette.combobox-border;
+            text.color: Fluent2Palette.combobox-pressed-foreground;
+            icon.colorize: Fluent2Palette.combobox-icon-pressed-foreground;
         }
         hover when base.has-hover : {
-            background.background: Fluent2Palette.control-secondary;
+            background.background: Fluent2Palette.combobox-hover-background;
         }
     ]
 
@@ -64,9 +64,9 @@ export component ComboBox {
 
     background := Rectangle {
         border-radius: Fluent2SizeSettings.control-radius;
-        background: Fluent2Palette.control-background;
+        background: Fluent2Palette.combobox-background;
         border-width: Fluent2SizeSettings.stroke-width;
-        border-color: Fluent2Palette.control-border;
+        border-color: Fluent2Palette.combobox-border;
 
         animate border-color { duration: Fluent2SizeSettings.control-motion-duration; }
 
@@ -81,13 +81,13 @@ export component ComboBox {
                 font-size: Fluent2FontSettings.body.font-size;
                 font-weight: Fluent2FontSettings.body.font-weight;
                 font-family: Fluent2Palette.font-family;
-                color: Fluent2Palette.control-foreground;
+                color: Fluent2Palette.combobox-foreground;
                 text: root.current-value;
                 accessible-role: none;
             }
 
             icon := Image {
-                colorize: Fluent2Palette.text-secondary;
+                colorize: Fluent2Palette.combobox-icon-foreground;
                 width: Fluent2SizeSettings.icon-size;
                 source: Icons.dropdown;
                 y: Fluent2SizeSettings.combobox-icon-offset-y;

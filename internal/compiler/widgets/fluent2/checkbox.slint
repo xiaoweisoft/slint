@@ -13,7 +13,7 @@ export component CheckBox {
 
     callback toggled;
 
-    private property <color> text-color: Fluent2Palette.foreground;
+    private property <color> text-color: Fluent2Palette.checkbox-foreground;
 
     min-height: max(Fluent2SizeSettings.checkbox-size, layout.min-height);
     accessible-checkable: true;
@@ -31,21 +31,21 @@ export component CheckBox {
 
     states [
         disabled when !root.enabled : {
-            border.border-color: Fluent2Palette.control-strong-stroke-disabled;
-            background.background: root.checked ? Fluent2Palette.accent-disabled : Fluent2Palette.control-alt-disabled;
-            icon.colorize: Fluent2Palette.text-accent-foreground-disabled;
-            root.text-color: Fluent2Palette.text-disabled;
+            border.border-color: Fluent2Palette.checkbox-disabled-border;
+            background.background: root.checked ? Fluent2Palette.checkbox-checked-disabled-background : Fluent2Palette.checkbox-disabled-background;
+            icon.colorize: Fluent2Palette.checkbox-checkmark-disabled-foreground;
+            root.text-color: Fluent2Palette.checkbox-disabled-foreground;
         }
         pressed when touch-area.pressed : {
-            border.border-color: Fluent2Palette.control-strong-stroke-disabled;
-            background.background: root.checked ? Fluent2Palette.tertiary-accent-background : Fluent2Palette.control-alt-quartiary;
-            icon.colorize: Fluent2Palette.text-accent-foreground-secondary;
+            border.border-color: Fluent2Palette.checkbox-disabled-border;
+            background.background: root.checked ? Fluent2Palette.checkbox-checked-pressed-background : Fluent2Palette.checkbox-pressed-background;
+            icon.colorize: Fluent2Palette.checkbox-checkmark-pressed-foreground;
         }
         hover when touch-area.has-hover : {
-            background.background: root.checked ?  Fluent2Palette.secondary-accent-background : Fluent2Palette.control-alt-tertiary;
+            background.background: root.checked ?  Fluent2Palette.checkbox-checked-hover-background : Fluent2Palette.checkbox-hover-background;
         }
         checked when root.checked && root.enabled : {
-            background.background: Fluent2Palette.accent-background;
+            background.background: Fluent2Palette.checkbox-checked-background;
         }
     ]
 
@@ -58,13 +58,13 @@ export component CheckBox {
             width: Fluent2SizeSettings.checkbox-size;
             height: self.width;
             y: (parent.height - self.height) / 2;
-            background: Fluent2Palette.control-alt-secondary;
+            background: Fluent2Palette.checkbox-background;
             border-radius: Fluent2SizeSettings.checkbox-radius;
 
             animate background, border-color { duration: Fluent2SizeSettings.control-motion-duration; }
 
             border := Rectangle {
-                border-color: Fluent2Palette.control-strong-stroke;
+                border-color: Fluent2Palette.checkbox-border;
                 border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.stroke-width;
                 border-radius: parent.border-radius;
             }
@@ -73,7 +73,7 @@ export component CheckBox {
                 image-fit: contain;
                 visible: root.checked;
                 source: Icons.check-mark;
-                colorize: Fluent2Palette.accent-foreground;
+                colorize: Fluent2Palette.checkbox-checkmark-foreground;
                 width: Fluent2SizeSettings.icon-size;
                 accessible-role: none;
 

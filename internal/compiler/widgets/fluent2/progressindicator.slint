@@ -20,7 +20,7 @@ export component ProgressIndicator {
 
         i-rail := Rectangle {
             height: Fluent2SizeSettings.progress-rail-height;
-            background: Fluent2Palette.border;
+            background: Fluent2Palette.progress-track-background;
             border-radius: Fluent2SizeSettings.progress-rail-radius;
         }
 
@@ -28,8 +28,8 @@ export component ProgressIndicator {
             width: !root.indeterminate ?  parent.width * min(1, max(0, root.progress)) : parent.width;
             height: 100%;
             x: !root.indeterminate ? 0px : -parent.width + (parent.width * mod(animation-tick(), Fluent2SizeSettings.progress-indeterminate-cycle-duration) / Fluent2SizeSettings.progress-indeterminate-sweep-duration);
-            border-radius: Fluent2SizeSettings.progress-height;
-            background: Fluent2Palette.accent-background;
+            border-radius: Fluent2SizeSettings.progress-track-radius;
+            background: Fluent2Palette.progress-indicator-active-background;
         }
     }
 }

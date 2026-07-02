@@ -38,12 +38,15 @@ export component FocusTouchArea {
 
     callback clicked <=> touch-area.clicked;
     callback pointer-event <=> touch-area.pointer-event;
+    callback scroll-event <=> touch-area.scroll-event;
 
     forward-focus: focus-scope;
 
     touch-area := TouchArea {
         enabled: root.enabled;
     }
+
+    @children
 
     focus-scope := FocusScope {
         width: Fluent2SizeSettings.interaction-receiver-size;
@@ -85,7 +88,7 @@ export component IconButton {
         has-hover: touch-area.has-hover;
         has-focus: touch-area.has-focus;
         state-brush: root.style.state-brush;
-        border-radius: max(self.width, self.height) / 2;
+        border-radius: Fluent2SizeSettings.picker-icon-state-layer-radius;
     }
 
     content-layer := VerticalLayout {
@@ -149,6 +152,7 @@ export component SelectionButton {
         has-hover: touch-area.has-hover;
         has-focus: touch-area.has-focus;
         state-brush: root.style.state-brush;
+        border-radius: Fluent2SizeSettings.picker-selection-state-layer-radius;
     }
 
     content-layer := HorizontalLayout {

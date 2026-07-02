@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 
 import { Fluent2SizeSettings } from "styling.slint";
+import { FocusTouchArea } from "internal-components.slint";
 
-export component TabBarBase inherits TouchArea {
+export component TabBarBase {
     // injected properties:
     // The currently selected tab
     in-out property <int> current;
@@ -22,16 +23,22 @@ export component TabBarBase inherits TouchArea {
 
     private property <length> scroll-delta: Fluent2SizeSettings.tab-scroll-delta;
 
-    // Allows scrolling through the tabs
-    scroll-event(event) => {
-        if (event.delta-y < -root.scroll-delta) {
-            root.current = next-tab();
-            return accept;
+    touch-area := FocusTouchArea {
+        enabled: true;
+
+        // Allows scrolling through the tabs
+        scroll-event(event) => {
+            if (event.delta-y < -root.scroll-delta) {
+                root.current = next-tab();
+                return accept;
+            }
+            if (event.delta-y > root.scroll-delta) {
+                root.current = previous-tab();
+                return accept;
+            }
+            reject
         }
-        if (event.delta-y > root.scroll-delta) {
-            root.current = previous-tab();
-            return accept;
-        }
-        reject
     }
+
+    @children
 }

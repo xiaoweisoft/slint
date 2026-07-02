@@ -29,7 +29,7 @@ export component FocusBorder {
 
 export component MenuBorder inherits Rectangle {
     border-radius: Fluent2SizeSettings.overlay-radius;
-    background: Fluent2Palette.alternate-background;
+    background: Fluent2Palette.menu-flyout-background;
     drop-shadow-blur: Fluent2SizeSettings.elevation-shadow-flyout-blur;
     drop-shadow-offset-y: Fluent2SizeSettings.elevation-shadow-flyout-offset-y;
     drop-shadow-color: Fluent2Palette.elevation-shadow-flyout-color;
@@ -37,7 +37,7 @@ export component MenuBorder inherits Rectangle {
     Rectangle {
         border-width: Fluent2SizeSettings.stroke-width;
         border-radius: parent.border-radius;
-        border-color: Fluent2Palette.control-background-stroke-flyout;
+        border-color: Fluent2Palette.menu-flyout-border;
     }
 }
 
@@ -63,15 +63,15 @@ export component ListItem {
 
     states [
         pressed when root.pressed : {
-            i-background.background: is-selected ? Fluent2Palette.subtle-secondary : Fluent2Palette.subtle-tertiary;
+            i-background.background: is-selected ? Fluent2Palette.list-item-selected-pressed-background : Fluent2Palette.list-item-pressed-background;
         }
         hover when root.has-hover : {
-            i-text.color: Fluent2Palette.text-secondary;
-            i-background.background: is-selected ? Fluent2Palette.subtle-tertiary : Fluent2Palette.subtle-secondary;
+            i-text.color: Fluent2Palette.list-item-hover-foreground;
+            i-background.background: is-selected ? Fluent2Palette.list-item-selected-hover-background : Fluent2Palette.list-item-hover-background;
             i-selector.height: root.is-selected ? Fluent2SizeSettings.selection-indicator-height : Fluent2SizeSettings.selection-indicator-hidden-height;
         }
         is-selected when root.is-selected : {
-            i-background.background: Fluent2Palette.subtle-secondary;
+            i-background.background: Fluent2Palette.list-item-selected-background;
             i-selector.height: Fluent2SizeSettings.selection-indicator-height;
         }
     ]
@@ -83,7 +83,7 @@ export component ListItem {
     i-background := Rectangle {
         width: root.width - Fluent2SizeSettings.list-item-horizontal-inset;
         height: root.height - Fluent2SizeSettings.list-item-vertical-inset;
-        background: transparent;
+        background: Fluent2Palette.list-item-background;
         border-radius: Fluent2SizeSettings.control-radius;
 
         animate background { duration: Fluent2SizeSettings.control-motion-duration; }
@@ -95,7 +95,7 @@ export component ListItem {
 
             i-text := Text {
                 text: root.item.text;
-                color: Fluent2Palette.control-foreground;
+                color: Fluent2Palette.list-item-foreground;
                 font-size: Fluent2FontSettings.body.font-size;
                 font-weight: Fluent2FontSettings.body.font-weight;
                 font-family: Fluent2Palette.font-family;
@@ -109,11 +109,11 @@ export component ListItem {
         }
 
         i-selector := Rectangle {
-            x: 0px;
+            x: Fluent2SizeSettings.selection-indicator-offset;
             y: (parent.height - self.height) / 2;
             width: Fluent2SizeSettings.selection-indicator-width;
             height: Fluent2SizeSettings.selection-indicator-hidden-height;
-            background: Fluent2Palette.accent-background;
+            background: Fluent2Palette.list-item-selection-indicator-background;
             border-radius: Fluent2SizeSettings.selection-indicator-radius;
 
             animate height { duration: Fluent2SizeSettings.control-motion-duration; easing: ease-out; }

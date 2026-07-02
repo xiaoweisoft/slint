@@ -17,14 +17,14 @@ component SpinBoxButton {
 
     states [
         disabled when !root.enabled : {
-            icon.colorize: Fluent2Palette.text-disabled;
+            icon.colorize: Fluent2Palette.spinbox-button-disabled-icon-foreground;
         }
         pressed when touch-area.pressed : {
-            background.background: Fluent2Palette.subtle-tertiary;
-            icon.colorize: Fluent2Palette.text-tertiary;
+            background.background: Fluent2Palette.spinbox-button-pressed-background;
+            icon.colorize: Fluent2Palette.spinbox-button-icon-pressed-foreground;
         }
         hover when touch-area.has-hover : {
-            background.background: Fluent2Palette.subtle-secondary;
+            background.background: Fluent2Palette.spinbox-button-hover-background;
         }
     ]
 
@@ -35,7 +35,7 @@ component SpinBoxButton {
 
         icon := Image {
             image-fit: contain;
-            colorize: Fluent2Palette.text-secondary;
+            colorize: Fluent2Palette.spinbox-button-icon-foreground;
             width: Fluent2SizeSettings.icon-size;
             accessible-role: none;
 
@@ -79,21 +79,21 @@ export component SpinBox {
 
     states [
         disabled when !root.enabled : {
-            background.background: Fluent2Palette.control-disabled;
-            background.border-color: Fluent2Palette.border;
-            base.color: Fluent2Palette.text-disabled;
-            base.selection-foreground-color: Fluent2Palette.text-accent-foreground-disabled;
+            background.background: Fluent2Palette.spinbox-disabled-background;
+            background.border-color: Fluent2Palette.spinbox-disabled-border;
+            base.color: Fluent2Palette.spinbox-disabled-foreground;
+            base.selection-foreground-color: Fluent2Palette.spinbox-disabled-selection-foreground;
         }
         focused when root.has-focus : {
-            background.background: Fluent2Palette.control-input-active;
-            background.border-color: Fluent2Palette.border;
-            focus-border.background: Fluent2Palette.accent-background;
+            background.background: Fluent2Palette.spinbox-active-background;
+            background.border-color: Fluent2Palette.text-control-border;
+            focus-border.background: Fluent2Palette.spinbox-focus-indicator-background;
         }
     ]
 
     background := Rectangle {
         border-radius: Fluent2SizeSettings.control-radius;
-        background: Fluent2Palette.control-background;
+        background: Fluent2Palette.spinbox-background;
         border-width: Fluent2SizeSettings.stroke-width;
         border-color: Fluent2Palette.text-control-border;
 
@@ -110,12 +110,12 @@ export component SpinBox {
 
                 base := SpinBoxBase {
                     width: 100%;
-                    color: Fluent2Palette.control-foreground;
+                    color: Fluent2Palette.spinbox-foreground;
                     font-size: Fluent2FontSettings.body.font-size;
                     font-weight: Fluent2FontSettings.body.font-weight;
                     font-family: Fluent2Palette.font-family;
-                    selection-background-color: Fluent2Palette.selection-background;
-                    selection-foreground-color: Fluent2Palette.accent-foreground;
+                    selection-background-color: Fluent2Palette.spinbox-selection-background;
+                    selection-foreground-color: Fluent2Palette.spinbox-selection-foreground;
                 }
             }
 

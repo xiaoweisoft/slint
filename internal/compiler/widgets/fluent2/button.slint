@@ -19,7 +19,7 @@ export component Button {
 
     callback clicked;
 
-    private property <brush> text-color: primary || checked ? Fluent2Palette.accent-foreground : Fluent2Palette.control-foreground;
+    private property <brush> text-color: primary || checked ? Fluent2Palette.button-primary-foreground : Fluent2Palette.button-foreground;
 
     min-width: max(Fluent2SizeSettings.control-min-width, i-layout.min-width);
     min-height: max(Fluent2SizeSettings.control-height, i-layout.min-height);
@@ -36,35 +36,36 @@ export component Button {
 
     states [
         disabled when !root.enabled : {
-            i-background.background: root.primary || root.checked ? Fluent2Palette.accent-disabled : Fluent2Palette.control-disabled;
-            i-border.border-color: root.primary || root.checked ? transparent : Fluent2Palette.border;
-            root.text-color: root.primary || root.checked ? Fluent2Palette.text-accent-foreground-disabled : Fluent2Palette.text-disabled;
+            i-background.background: root.primary || root.checked ? Fluent2Palette.button-primary-disabled-background : Fluent2Palette.button-disabled-background;
+            i-border.border-color: root.primary || root.checked ? Fluent2Palette.button-primary-disabled-border : Fluent2Palette.button-border;
+            root.text-color: root.primary || root.checked ? Fluent2Palette.button-primary-disabled-foreground : Fluent2Palette.button-disabled-foreground;
         }
         pressed when root.pressed : {
-            i-background.background: root.primary || root.checked ? Fluent2Palette.tertiary-accent-background : Fluent2Palette.control-tertiary;
-            i-border.border-color: Fluent2Palette.border;
-            root.text-color: root.primary || root.checked ? Fluent2Palette.text-accent-foreground-secondary : Fluent2Palette.text-secondary;
+            i-background.background: root.primary || root.checked ? Fluent2Palette.button-primary-pressed-background : Fluent2Palette.button-pressed-background;
+            i-border.border-color: Fluent2Palette.button-border;
+            root.text-color: root.primary || root.checked ? Fluent2Palette.button-primary-pressed-foreground : Fluent2Palette.button-pressed-foreground;
         }
         hover when i-touch-area.has-hover : {
-            i-background.background: root.primary || root.checked ? Fluent2Palette.secondary-accent-background : Fluent2Palette.control-secondary;
+            i-background.background: root.primary || root.checked ? Fluent2Palette.button-primary-hover-background : Fluent2Palette.button-hover-background;
+            root.text-color: root.primary || root.checked ? Fluent2Palette.button-primary-hover-foreground : Fluent2Palette.button-hover-foreground;
         }
         checked when root.checked : {
-            i-background.background: Fluent2Palette.accent-background;
-            i-border.border-color: Fluent2Palette.accent-control-border;
-            root.text-color: Fluent2Palette.accent-foreground;
+            i-background.background: Fluent2Palette.button-primary-background;
+            i-border.border-color: Fluent2Palette.button-primary-border;
+            root.text-color: Fluent2Palette.button-primary-foreground;
         }
     ]
 
     i-background := Rectangle {
         border-radius: Fluent2SizeSettings.button-radius;
-        background: root.primary ? Fluent2Palette.accent-background : Fluent2Palette.control-background;
+        background: root.primary ? Fluent2Palette.button-primary-background : Fluent2Palette.button-background;
 
         animate background, border-color { duration: Fluent2SizeSettings.control-motion-duration; }
 
         i-border := Rectangle {
             border-radius: parent.border-radius;
             border-width: Fluent2SizeSettings.stroke-width;
-            border-color: root.primary ? Fluent2Palette.accent-control-border : Fluent2Palette.control-border;
+            border-color: root.primary ? Fluent2Palette.button-primary-border : Fluent2Palette.button-border;
         }
 
         i-layout := HorizontalLayout {
@@ -80,7 +81,7 @@ export component Button {
                 source <=> root.icon;
                 width: root.icon-size;
                 min-height: root.icon-size;
-                colorize: root.colorize-icon ? root.text-color : transparent;
+                colorize: root.colorize-icon ? root.text-color : Fluent2Palette.button-icon-transparent-foreground;
             }
 
             if (root.text != ""): Text {

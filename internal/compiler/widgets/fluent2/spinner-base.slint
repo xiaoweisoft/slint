@@ -10,7 +10,7 @@ export component SpinnerBase {
     in property <brush> stroke <=> path.stroke;
 
     path := Path {
-        private property <float> radius: min(self.viewbox-width, self.viewbox-height) / 2;
+        private property <float> radius: Fluent2SizeSettings.spinner-radius;
         private property <float> start-x: self.viewbox-width / 2;
         private property <float> start-y: self.viewbox-height / 2;
         private property <float> start : !indeterminate ? 0 :

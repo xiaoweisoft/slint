@@ -66,8 +66,8 @@ export component TabImpl inherits Rectangle {
             height: parent.height + self.border-radius;
             border-radius: Fluent2SizeSettings.overlay-radius;
             border-width: root.is-current ? Fluent2SizeSettings.stroke-width : Fluent2SizeSettings.control-hidden-stroke-width;
-            border-color: Fluent2Palette.card-stroke;
-            background: i-touch-area.pressed || root.is-current ? Fluent2Palette.layer-on-mica-base-alt : i-touch-area.has-hover ? Fluent2Palette.layer-on-mica-base-alt-secondary : transparent;
+            border-color: Fluent2Palette.tab-border;
+            background: i-touch-area.pressed ? Fluent2Palette.tab-pressed-background : root.is-current ? Fluent2Palette.tab-selected-background : i-touch-area.has-hover ? Fluent2Palette.tab-hover-background : Fluent2Palette.tab-background;
         }
     }
 
@@ -87,7 +87,7 @@ export component TabImpl inherits Rectangle {
             font-size: root.is-current ? Fluent2FontSettings.body-strong.font-size : Fluent2FontSettings.body.font-size;
             font-weight: root.is-current ? Fluent2FontSettings.body-strong.font-weight : Fluent2FontSettings.body.font-weight;
             font-family: Fluent2Palette.font-family;
-            color: root.is-current ? Fluent2Palette.control-foreground : Fluent2Palette.text-secondary;
+            color: root.is-current ? Fluent2Palette.tab-selected-foreground : Fluent2Palette.tab-foreground;
             accessible-role: none;
         }
     }
@@ -96,13 +96,13 @@ export component TabImpl inherits Rectangle {
         x: (parent.width - self.width);
         width: Fluent2SizeSettings.separator-thickness;
         height: Fluent2SizeSettings.selection-indicator-height;
-        background: Fluent2Palette.divider;
+        background: Fluent2Palette.tab-separator;
     }
     if (!root.is-current && !i-touch-area.has-hover && !i-touch-area.pressed): Rectangle {
         y: (parent.height - self.height);
         width: 100%;
         height: Fluent2SizeSettings.separator-thickness;
-        background: Fluent2Palette.divider;
+        background: Fluent2Palette.tab-separator;
     }
 
     // focus border

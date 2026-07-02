@@ -2,10 +2,15 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 
 import { Fluent2Palette, Fluent2SizeSettings, Icons } from "styling.slint";
+import { FocusTouchArea } from "internal-components.slint";
 
-component ScrollViewButton inherits TouchArea {
+component ScrollViewButton {
     in property <image> icon;
     in property <bool> horizontal;
+    out property <bool> pressed: touch-area.pressed;
+    out property <bool> has-hover: touch-area.has-hover;
+
+    callback clicked <=> touch-area.clicked;
 
     width: root.horizontal ? Fluent2SizeSettings.scrollbar-button-short-size : Fluent2SizeSettings.scrollbar-button-long-size;
     height: root.horizontal ? Fluent2SizeSettings.scrollbar-button-long-size : Fluent2SizeSettings.scrollbar-button-short-size;
@@ -15,7 +20,7 @@ component ScrollViewButton inherits TouchArea {
         y: (parent.height - self.height) / 2;
         width: parent.width;
         source: root.icon;
-        colorize: Fluent2Palette.border;
+        colorize: Fluent2Palette.scrollbar-button-foreground;
         accessible-role: none;
 
         animate colorize, opacity { duration: Fluent2SizeSettings.control-motion-duration; }
@@ -29,9 +34,13 @@ component ScrollViewButton inherits TouchArea {
         }
         hover when root.has-hover : {
             opacity: Fluent2SizeSettings.scrollbar-button-visible-opacity;
-            icon.colorize: Fluent2Palette.text-secondary;
+            icon.colorize: Fluent2Palette.scrollbar-button-hover-foreground;
         }
     ]
+
+    touch-area := FocusTouchArea {
+        enabled: true;
+    }
 }
 
 component ScrollBar inherits Rectangle {
@@ -56,7 +65,7 @@ component ScrollBar inherits Rectangle {
 
     states [
         hover when touch-area.has-hover || down-scroll-button.has-hover || up-scroll-button.has-hover : {
-            root.background: Fluent2Palette.alternate-background;
+            root.background: Fluent2Palette.scrollbar-track-hover-background;
             root.size: Fluent2SizeSettings.scrollbar-expanded-size;
             up-scroll-button.opacity: Fluent2SizeSettings.scrollbar-button-visible-opacity;
             down-scroll-button.opacity: Fluent2SizeSettings.scrollbar-button-visible-opacity;
@@ -70,8 +79,8 @@ component ScrollBar inherits Rectangle {
         height: root.horizontal ? root.size : root.maximum <= 0phx ? 0phx : max(min(Fluent2SizeSettings.scrollbar-min-thumb-size, root.height), root.track-size * (root.page-size / (root.maximum + root.page-size)));
         x: !root.horizontal ? parent.width - Fluent2SizeSettings.scrollbar-button-offset - self.width : root.offset + (root.track-size - thumb.width) * (-root.value / root.maximum);
         y: root.horizontal ? parent.height - Fluent2SizeSettings.scrollbar-button-offset - self.height : root.offset + (root.track-size - thumb.height) * (-root.value / root.maximum);
-        border-radius: (root.horizontal ? self.height : self.width) / 2;
-        background: Fluent2Palette.border;
+        border-radius: Fluent2SizeSettings.scrollbar-thumb-radius;
+        background: Fluent2Palette.scrollbar-thumb-background;
 
         animate width, height { duration: Fluent2SizeSettings.control-motion-duration; easing: ease-out; }
     }

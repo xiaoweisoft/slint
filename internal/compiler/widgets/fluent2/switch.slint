@@ -13,7 +13,7 @@ export component Switch {
 
     callback toggled;
 
-    private property <color> text-color: Fluent2Palette.foreground;
+    private property <color> text-color: Fluent2Palette.switch-foreground;
 
     function toggle-checked() {
         if(!root.enabled) {
@@ -43,29 +43,29 @@ export component Switch {
 
     states [
         disabled when !root.enabled : {
-            rail.background: root.checked ? Fluent2Palette.accent-disabled : transparent;
-            rail.border-color: Fluent2Palette.control-strong-stroke-disabled;
-            root.text-color: Fluent2Palette.text-disabled;
+            rail.background: root.checked ? Fluent2Palette.switch-rail-checked-disabled-background : Fluent2Palette.switch-rail-disabled-background;
+            rail.border-color: Fluent2Palette.switch-rail-disabled-border;
+            root.text-color: Fluent2Palette.switch-disabled-foreground;
             thumb.background: root.checked ? Fluent2Palette.switch-thumb-checked-disabled : Fluent2Palette.switch-thumb-disabled;
         }
         pressed when touch-area.pressed : {
-            rail.background: root.checked ? Fluent2Palette.tertiary-accent-background : Fluent2Palette.control-alt-quartiary;
+            rail.background: root.checked ? Fluent2Palette.switch-rail-checked-pressed-background : Fluent2Palette.switch-rail-pressed-background;
             thumb.width: Fluent2SizeSettings.switch-thumb-pressed-width;
             thumb.height: Fluent2SizeSettings.switch-thumb-pressed-height;
             thumb.border-width: root.checked ? Fluent2SizeSettings.stroke-width : Fluent2SizeSettings.control-hidden-stroke-width;
-            thumb.background: root.checked ? Fluent2Palette.accent-foreground : Fluent2Palette.text-secondary;
+            thumb.background: root.checked ? Fluent2Palette.switch-thumb-checked-pressed-background : Fluent2Palette.switch-thumb-pressed-background;
         }
         hover when touch-area.has-hover : {
-            rail.background:  root.checked ? Fluent2Palette.secondary-accent-background : Fluent2Palette.control-alt-tertiary;
+            rail.background:  root.checked ? Fluent2Palette.switch-rail-checked-hover-background : Fluent2Palette.switch-rail-hover-background;
             thumb.width: Fluent2SizeSettings.switch-thumb-hover-size;
             thumb.border-width: root.checked ? Fluent2SizeSettings.stroke-width : Fluent2SizeSettings.control-hidden-stroke-width;
-            thumb.background: root.checked ? Fluent2Palette.accent-foreground : Fluent2Palette.text-secondary;
+            thumb.background: root.checked ? Fluent2Palette.switch-thumb-checked-hover-background : Fluent2Palette.switch-thumb-hover-background;
         }
         selected when root.checked : {
-            rail.background: Fluent2Palette.accent-background;
+            rail.background: Fluent2Palette.switch-rail-checked-background;
             thumb.border-width: Fluent2SizeSettings.stroke-width;
-            thumb.border-color: Fluent2Palette.circle-border;
-            thumb.background: Fluent2Palette.accent-foreground;
+            thumb.border-color: Fluent2Palette.switch-thumb-border;
+            thumb.background: Fluent2Palette.switch-thumb-checked-background;
         }
     ]
 
@@ -80,10 +80,10 @@ export component Switch {
                 height: Fluent2SizeSettings.switch-height;
 
                 rail := Rectangle {
-                    border-radius: self.height / 2;
+                    border-radius: Fluent2SizeSettings.switch-rail-radius;
                     border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.stroke-width;
-                    border-color: Fluent2Palette.control-strong-stroke;
-                    background: Fluent2Palette.control-alt-secondary;
+                    border-color: Fluent2Palette.switch-rail-border;
+                    background: Fluent2Palette.switch-rail-background;
                 }
 
                 thumb := Rectangle {
@@ -91,11 +91,11 @@ export component Switch {
                     y: (parent.height - self.height) / 2;
                     width: Fluent2SizeSettings.switch-thumb-size;
                     height: self.width;
-                    border-radius: self.height / 2;
-                    background: Fluent2Palette.text-secondary;
-                    border-color: Fluent2Palette.circle-border;
+                    border-radius: Fluent2SizeSettings.switch-thumb-radius;
+                    background: Fluent2Palette.switch-thumb-background;
+                    border-color: Fluent2Palette.switch-thumb-border;
 
-                    animate background, width { duration: Fluent2SizeSettings.control-motion-duration; easing: linear; }
+                    animate background, x, y, width, height { duration: Fluent2SizeSettings.control-motion-duration; easing: linear; }
                 }
 
                 // focus border

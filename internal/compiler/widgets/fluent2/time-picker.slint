@@ -33,27 +33,29 @@ export component TimePickerPopup inherits PopupWindow {
         base := TimePickerBase {
             title: root.title;
             style: {
-                foreground: Fluent2Palette.foreground,
+                foreground: Fluent2Palette.time-picker-popup-foreground,
                 vertical-spacing: Fluent2SizeSettings.picker-vertical-spacing,
                 horizontal-spacing: Fluent2SizeSettings.picker-horizontal-spacing,
                 clock-style: {
-                    background: Fluent2Palette.background,
-                    foreground: Fluent2Palette.accent-background,
+                    background: Fluent2Palette.time-clock-background,
+                    foreground: Fluent2Palette.time-picker-clock-foreground,
                     time-selector-style: {
-                        foreground: Fluent2Palette.foreground,
-                        foreground-selected: Fluent2Palette.accent-foreground,
-                        state-brush: Fluent2Palette.state,
-                        state-brush-selected: Fluent2Palette.state-secondary,
+                        foreground: Fluent2Palette.time-picker-selector-foreground,
+                        foreground-selected: Fluent2Palette.time-picker-selector-selected-foreground,
+                        state-brush: Fluent2Palette.time-picker-selector-state-brush,
+                        state-brush-selected: Fluent2Palette.time-picker-selector-selected-state-brush,
                         font-size: Fluent2FontSettings.body-strong.font-size,
                         font-weight: Fluent2FontSettings.body-strong.font-weight,
                         font-family: Fluent2Palette.font-family
                     }
                 },
                 input-style: {
-                    background: Fluent2Palette.control-background,
-                    background-selected: Fluent2Palette.accent-background,
-                    foreground: Fluent2Palette.foreground,
-                    foreground-selected: Fluent2Palette.accent-foreground,
+                    background: Fluent2Palette.time-picker-input-background,
+                    background-selected: Fluent2Palette.time-picker-input-selected-background,
+                    foreground: Fluent2Palette.time-picker-input-foreground,
+                    foreground-selected: Fluent2Palette.time-picker-input-selected-foreground,
+                    state-brush: Fluent2Palette.time-picker-input-state-brush,
+                    state-brush-selected: Fluent2Palette.time-picker-input-selected-state-brush,
                     border-radius: Fluent2SizeSettings.overlay-radius,
                     font-size: Fluent2SizeSettings.time-input-display.font-size,
                     font-weight: Fluent2SizeSettings.time-input-display.font-weight,
@@ -62,23 +64,23 @@ export component TimePickerPopup inherits PopupWindow {
                 period-selector-style: {
                     border-radius: Fluent2SizeSettings.overlay-radius,
                     border-width: Fluent2SizeSettings.stroke-width,
-                    border-brush: Fluent2Palette.border,
+                    border-brush: Fluent2Palette.time-picker-period-border,
                     item-style: {
                         font-size: Fluent2FontSettings.body-strong.font-size,
                         font-weight: Fluent2FontSettings.body-strong.font-weight,
                         font-family: Fluent2Palette.font-family,
-                        foreground: Fluent2Palette.foreground,
-                        state-brush: Fluent2Palette.state,
-                        background-selected: Fluent2Palette.accent-background,
-                        state-brush-selected: Fluent2Palette.state-secondary,
-                        foreground-selected: Fluent2Palette.accent-foreground
+                        foreground: Fluent2Palette.time-picker-period-item-foreground,
+                        state-brush: Fluent2Palette.time-picker-period-item-state-brush,
+                        background-selected: Fluent2Palette.time-picker-period-item-selected-background,
+                        state-brush-selected: Fluent2Palette.time-picker-period-item-selected-state-brush,
+                        foreground-selected: Fluent2Palette.time-picker-period-item-selected-foreground
                     }
                 },
                 title-style: {
                     font-size: Fluent2FontSettings.body.font-size,
                     font-weight: Fluent2FontSettings.body.font-weight,
                     font-family: Fluent2Palette.font-family,
-                    foreground: Fluent2Palette.foreground,
+                    foreground: Fluent2Palette.time-picker-title-foreground,
                 },
             };
         }

@@ -59,23 +59,23 @@ export component LineEdit {
 
     states [
         disabled when !root.enabled : {
-            background.background: Fluent2Palette.control-disabled;
-            background.border-color: Fluent2Palette.border;
-            base.text-color: Fluent2Palette.text-disabled;
-            base.selection-foreground-color: Fluent2Palette.text-accent-foreground-disabled;
-            base.placeholder-color: Fluent2Palette.text-disabled;
+            background.background: Fluent2Palette.text-input-disabled-background;
+            background.border-color: Fluent2Palette.text-input-disabled-border;
+            base.text-color: Fluent2Palette.text-input-disabled-foreground;
+            base.selection-foreground-color: Fluent2Palette.text-input-disabled-selection-foreground;
+            base.placeholder-color: Fluent2Palette.text-input-disabled-foreground;
         }
         focused when root.has-focus : {
-            background.background: Fluent2Palette.control-input-active;
-            background.border-color: Fluent2Palette.border;
-            focus-border.background: Fluent2Palette.accent-background;
-            base.placeholder-color: Fluent2Palette.text-tertiary;
+            background.background: Fluent2Palette.text-input-active-background;
+            background.border-color: Fluent2Palette.text-control-border;
+            focus-border.background: Fluent2Palette.text-input-focus-indicator-background;
+            base.placeholder-color: Fluent2Palette.text-input-focused-placeholder-foreground;
         }
     ]
 
     background := Rectangle {
         border-radius: Fluent2SizeSettings.button-radius;
-        background: Fluent2Palette.control-background;
+        background: Fluent2Palette.text-input-background;
         border-width: Fluent2SizeSettings.stroke-width;
         border-color: Fluent2Palette.text-control-border;
 
@@ -88,10 +88,10 @@ export component LineEdit {
                 font-size: Fluent2FontSettings.body.font-size;
                 font-weight: Fluent2FontSettings.body.font-weight;
                 font-family: Fluent2Palette.font-family;
-                selection-background-color: Fluent2Palette.selection-background;
-                selection-foreground-color: Fluent2Palette.accent-foreground;
-                text-color: Fluent2Palette.foreground;
-                placeholder-color: Fluent2Palette.text-secondary;
+                selection-background-color: Fluent2Palette.text-input-selection-background;
+                selection-foreground-color: Fluent2Palette.text-input-selection-foreground;
+                text-color: Fluent2Palette.text-input-foreground;
+                placeholder-color: Fluent2Palette.text-input-placeholder-foreground;
                 margin: layout.padding-left + layout.padding-right;
                 horizontal-stretch: 1;
             }

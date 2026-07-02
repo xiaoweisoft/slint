@@ -3,7 +3,7 @@
 
 //! This file contains a Fluent2-owned implementation of the MenuBar and ContextMenu shells.
 
-import { Fluent2SizeSettings } from "styling.slint";
+import { Fluent2Palette, Fluent2SizeSettings } from "styling.slint";
 import { MenuBarItem, MenuBar, MenuFrame, MenuItem } from "std-widgets-impl.slint";
 
 export component PopupMenuImpl inherits Window {
@@ -19,7 +19,7 @@ export component PopupMenuImpl inherits Window {
     callback close();
 
     forward-focus: focus-scope;
-    background: transparent;
+    background: Fluent2Palette.menu-popup-window-background;
 
     focus-scope := FocusScope {
         frame := MenuFrame {

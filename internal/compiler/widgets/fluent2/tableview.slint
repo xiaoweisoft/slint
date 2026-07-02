@@ -11,19 +11,20 @@ component TableViewColumn inherits Rectangle {
     callback clicked <=> touch-area.clicked;
     callback adjust_size(length);
 
-    background: Fluent2Palette.background;
+    background: Fluent2Palette.table-header-background;
 
     states [
         pressed when touch-area.pressed : {
-            background: Fluent2Palette.control-secondary;
+            background: Fluent2Palette.table-header-pressed-background;
         }
         hover when touch-area.has-hover : {
-            background: Fluent2Palette.sub-title-tertiary;
+            background: Fluent2Palette.table-header-hover-background;
         }
     ]
 
-    touch-area := TouchArea {
+    touch-area := FocusTouchArea {
         width: parent.width - Fluent2SizeSettings.control-horizontal-padding;
+        enabled: true;
     }
 
     HorizontalLayout {
@@ -37,7 +38,7 @@ component TableViewColumn inherits Rectangle {
 
         icon := Image {
             image-fit: contain;
-            colorize: Fluent2Palette.text-secondary;
+            colorize: Fluent2Palette.table-header-sort-icon-foreground;
             visible: root.sort-order != SortOrder.unsorted;
             width: Fluent2SizeSettings.icon-size;
             y: (parent.height - self.height) / 2;
@@ -53,7 +54,7 @@ component TableViewColumn inherits Rectangle {
         y: parent.height - self.height;
         width: 100%;
         height: Fluent2SizeSettings.separator-thickness;
-        background: Fluent2Palette.divider;
+        background: Fluent2Palette.table-header-separator;
     }
 
     Rectangle {
@@ -62,7 +63,7 @@ component TableViewColumn inherits Rectangle {
 
         states [
             hover when movable-touch-area.has-hover : {
-                background: Fluent2Palette.control-secondary;
+                background: Fluent2Palette.table-header-resize-hover-background;
             }
         ]
 
@@ -104,18 +105,18 @@ component TableViewRow inherits Rectangle {
     min-width: layout.min-width;
     min-height: max(Fluent2SizeSettings.item-height, layout.min-height);
     border-radius: Fluent2SizeSettings.control-radius;
-    background: root.even ? Fluent2Palette.control-background : transparent;
+    background: root.even ? Fluent2Palette.table-row-background : Fluent2Palette.table-row-alternate-background;
 
     states [
         pressed when touch-area.pressed : {
-            root.background: selected ? Fluent2Palette.subtle-secondary : Fluent2Palette.subtle-tertiary;
+            root.background: selected ? Fluent2Palette.table-row-selected-pressed-background : Fluent2Palette.table-row-pressed-background;
         }
         hover when touch-area.has-hover : {
-            root.background: selected ? Fluent2Palette.subtle-tertiary : Fluent2Palette.subtle-secondary;
+            root.background: selected ? Fluent2Palette.table-row-selected-hover-background : Fluent2Palette.table-row-hover-background;
             selector.height: root.selected ? Fluent2SizeSettings.selection-indicator-height : Fluent2SizeSettings.selection-indicator-hidden-height;
         }
         selected when root.selected : {
-            root.background: Fluent2Palette.subtle-secondary;
+            root.background: Fluent2Palette.table-row-selected-background;
             selector.height: Fluent2SizeSettings.selection-indicator-height;
         }
     ]
@@ -136,11 +137,11 @@ component TableViewRow inherits Rectangle {
     }
 
     selector := Rectangle {
-        x: 0px;
+        x: Fluent2SizeSettings.selection-indicator-offset;
         y: (parent.height - self.height) / 2;
         width: Fluent2SizeSettings.selection-indicator-width;
         height: Fluent2SizeSettings.selection-indicator-hidden-height;
-        background: Fluent2Palette.accent-background;
+        background: Fluent2Palette.table-row-selection-indicator-background;
         border-radius: Fluent2SizeSettings.selection-indicator-radius;
 
         animate height { duration: Fluent2SizeSettings.control-motion-duration; easing: ease-out; }
@@ -245,7 +246,7 @@ export component StandardTableView {
                         font-weight: Fluent2FontSettings.body.font-weight;
                         font-size: Fluent2FontSettings.body.font-size;
                         font-family: Fluent2Palette.font-family;
-                        color: Fluent2Palette.text-secondary;
+                        color: Fluent2Palette.table-header-foreground;
                         overflow: elide;
                     }
                 }
@@ -287,7 +288,7 @@ export component StandardTableView {
                             font-weight: Fluent2FontSettings.body.font-weight;
                             font-size: Fluent2FontSettings.body.font-size;
                             font-family: Fluent2Palette.font-family;
-                            color: mod(idx, 2) == 0 ? Fluent2Palette.control-foreground : Fluent2Palette.text-secondary;
+                            color: mod(idx, 2) == 0 ? Fluent2Palette.table-row-foreground : Fluent2Palette.table-row-alternate-foreground;
                         }
                     }
                 }

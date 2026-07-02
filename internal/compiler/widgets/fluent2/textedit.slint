@@ -63,35 +63,35 @@ export component TextEdit {
 
     states [
         disabled when !root.enabled: {
-            base.background: Fluent2Palette.control-disabled;
-            base.border-color: Fluent2Palette.border;
-            base.foreground: Fluent2Palette.text-disabled;
-            base.selection-foreground-color: Fluent2Palette.text-accent-foreground-disabled;
+            base.background: Fluent2Palette.text-input-disabled-background;
+            base.border-color: Fluent2Palette.text-input-disabled-border;
+            base.foreground: Fluent2Palette.text-input-disabled-foreground;
+            base.selection-foreground-color: Fluent2Palette.text-input-disabled-selection-foreground;
         }
         focused when root.has-focus: {
-            base.background: Fluent2Palette.control-input-active;
-            base.border-color: Fluent2Palette.border;
-            i-focus-border.background: Fluent2Palette.accent-background;
+            base.background: Fluent2Palette.text-input-active-background;
+            base.border-color: Fluent2Palette.text-control-border;
+            i-focus-border.background: Fluent2Palette.text-input-focus-indicator-background;
         }
     ]
 
     base := TextEditBase {
         width: 100%;
         height: 100%;
-        background: Fluent2Palette.control-background;
+        background: Fluent2Palette.text-input-background;
         border-radius: Fluent2SizeSettings.button-radius;
         border-width: Fluent2SizeSettings.stroke-width;
         border-color: Fluent2Palette.text-control-border;
         scroll-view-padding: Fluent2SizeSettings.control-horizontal-padding;
         cursor-margin: Fluent2SizeSettings.control-horizontal-padding;
         estimated-line-height: Fluent2SizeSettings.textedit-estimated-line-height;
-        foreground: Fluent2Palette.foreground;
+        foreground: Fluent2Palette.text-input-foreground;
         font-size: Fluent2FontSettings.body.font-size;
         font-weight: Fluent2FontSettings.body.font-weight;
         font-family: Fluent2Palette.font-family;
-        placeholder-color: Fluent2Palette.text-secondary;
-        selection-background-color: Fluent2Palette.selection-background;
-        selection-foreground-color: Fluent2Palette.selection-foreground;
+        placeholder-color: Fluent2Palette.text-input-placeholder-foreground;
+        selection-background-color: Fluent2Palette.text-input-selection-background;
+        selection-foreground-color: Fluent2Palette.text-input-selection-foreground;
 
         i-focus-border := Rectangle {
             x: parent.border-radius;
