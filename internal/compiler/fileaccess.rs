@@ -5685,6 +5685,44 @@ fn test_fluent2_tabbar_base_uses_focus_touch_area() {
 }
 
 #[test]
+fn test_fluent2_combo_and_spin_scroll_delta_use_component_tokens() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for expected in [
+        "out property <length> combobox-scroll-delta: control-scroll-delta;",
+        "out property <length> spinbox-scroll-delta: control-scroll-delta;",
+        "out property <length> tab-scroll-delta: control-scroll-delta;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 scroll thresholds should expose component-specific aliases: {expected}"
+        );
+    }
+
+    for (file, expected_token) in [
+        ("combobox-base.slint", "Fluent2SizeSettings.combobox-scroll-delta"),
+        ("spinbox-base.slint", "Fluent2SizeSettings.spinbox-scroll-delta"),
+    ] {
+        let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{file}")))
+            .unwrap_or_else(|| panic!("fluent2 should embed {file}"));
+        let source_contents = source.read();
+        let source = std::str::from_utf8(&source_contents).unwrap();
+
+        assert!(
+            source.contains(expected_token),
+            "fluent2 {file} should use component-specific scroll threshold token {expected_token}"
+        );
+        assert!(
+            !source.contains("Fluent2SizeSettings.control-scroll-delta"),
+            "fluent2 {file} should not bind directly to the broad control scroll threshold token"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_owns_lineedit_base_geometry() {
     let base = load_file(&std::path::PathBuf::from("builtin:/fluent2/lineedit-base.slint"))
         .expect("fluent2 should own lineedit-base.slint");
