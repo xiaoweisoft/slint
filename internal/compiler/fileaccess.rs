@@ -2255,7 +2255,7 @@ fn test_fluent2_control_alt_quaternary_token_uses_fluent2_name() {
     }
 
     for expected in [
-        "property <brush> switch-rail-pressed-fill: control-alt-quaternary;",
+        "property <brush> switch-rail-pressed-fill: control-alt-fill-quaternary;",
         "out property <brush> switch-rail-pressed-background: switch-rail-pressed-fill;",
     ] {
         assert!(
@@ -4114,9 +4114,9 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
     }
 
     for expected in [
-        "property <brush> switch-rail-rest-fill: control-alt-secondary;",
-        "property <brush> switch-rail-hover-fill: control-alt-tertiary;",
-        "property <brush> switch-rail-pressed-fill: control-alt-quaternary;",
+        "property <brush> switch-rail-rest-fill: control-alt-fill-secondary;",
+        "property <brush> switch-rail-hover-fill: control-alt-fill-tertiary;",
+        "property <brush> switch-rail-pressed-fill: control-alt-fill-quaternary;",
         "switch-rail-background: switch-rail-rest-fill",
         "switch-rail-hover-background: switch-rail-hover-fill",
         "switch-rail-pressed-background: switch-rail-pressed-fill",
@@ -4129,6 +4129,9 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
     }
 
     for copied_bridge in [
+        "switch-rail-rest-fill: control-alt-secondary",
+        "switch-rail-hover-fill: control-alt-tertiary",
+        "switch-rail-pressed-fill: control-alt-quaternary",
         "switch-rail-background: control-alt-secondary",
         "switch-rail-hover-background: control-alt-tertiary",
         "switch-rail-pressed-background: control-alt-quaternary",
