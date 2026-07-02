@@ -5057,9 +5057,14 @@ fn test_fluent2_picker_radius_geometry_uses_tokens() {
         "time-clock-coordinate-radius",
         "time-clock-center-dot-radius",
         "time-clock-current-selector-radius",
-        "time-clock-inner-dot-radius",
     ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
+    }
+    for stale_token in ["time-clock-inner-dot-size", "time-clock-inner-dot-radius"] {
+        assert!(
+            !styling.contains(stale_token),
+            "fluent2 styling should not keep stale {stale_token} after removing negative-index selector chrome"
+        );
     }
 
     let datepicker = load_file(&std::path::PathBuf::from("builtin:/fluent2/datepicker-base.slint"))
@@ -5088,7 +5093,6 @@ fn test_fluent2_picker_radius_geometry_uses_tokens() {
         "property <length> radius: Fluent2SizeSettings.time-clock-coordinate-radius",
         "border-radius: Fluent2SizeSettings.time-clock-center-dot-radius",
         "border-radius: Fluent2SizeSettings.time-clock-current-selector-radius",
-        "border-radius: Fluent2SizeSettings.time-clock-inner-dot-radius",
     ] {
         assert!(timepicker.contains(expected), "fluent2 time picker should use {expected}");
     }
@@ -5132,6 +5136,10 @@ fn test_fluent2_time_picker_clock_selection_uses_bounded_index() {
     assert!(
         !source.contains("if root.current-item < root.model.length: Rectangle"),
         "fluent2 time picker current selector should not render for negative current indexes"
+    );
+    assert!(
+        !source.contains("if root.current-item < 0: Rectangle"),
+        "fluent2 time picker current selector should not keep unreachable negative-index selector chrome"
     );
 }
 

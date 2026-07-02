@@ -131,12 +131,6 @@ export component Clock {
         border-radius: Fluent2SizeSettings.time-clock-current-selector-radius;
         background: root.style.foreground;
 
-        if root.current-item < 0: Rectangle {
-            width: Fluent2SizeSettings.time-clock-inner-dot-size;
-            height: Fluent2SizeSettings.time-clock-inner-dot-size;
-            border-radius: Fluent2SizeSettings.time-clock-inner-dot-radius;
-            background: root.style.time-selector-style.foreground;
-        }
     }
 
     for val[index] in root.model: TimeSelector {
