@@ -349,8 +349,14 @@ fn test_fluent2_render_fixture_covers_picker_surfaces() {
         .join("docs/astro/src/fluent2-render-fixtures");
 
     let pickers_path = fixture_root.join("fluent2-pickers.md");
+    let date_picker_path = fixture_root.join("fluent2-date-picker.md");
+    let time_picker_path = fixture_root.join("fluent2-time-picker.md");
     let pickers = std::fs::read_to_string(&pickers_path)
         .unwrap_or_else(|err| panic!("failed to read {pickers_path:?}: {err}"));
+    let date_picker = std::fs::read_to_string(&date_picker_path)
+        .unwrap_or_else(|err| panic!("failed to read {date_picker_path:?}: {err}"));
+    let time_picker = std::fs::read_to_string(&time_picker_path)
+        .unwrap_or_else(|err| panic!("failed to read {time_picker_path:?}: {err}"));
 
     for expected in [
         "imagePath=\"../assets/generated/fluent2-render-fixtures/fluent2-pickers.png\"",
@@ -372,6 +378,21 @@ fn test_fluent2_render_fixture_covers_picker_surfaces() {
             pickers.contains(expected),
             "fluent2 picker render fixture should include {expected}"
         );
+    }
+
+    for (source, image, component, title) in [
+        (&date_picker, "fluent2-date-picker.png", "DatePickerPopup {", "Pick a date"),
+        (&time_picker, "fluent2-time-picker.png", "TimePickerPopup {", "Pick a time"),
+    ] {
+        assert!(
+            source.contains(&format!(
+                "imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""
+            )),
+            "fluent2 picker surface fixture should write {image}"
+        );
+        assert!(source.contains("init => {"), "{image} should open its popup in init");
+        assert!(source.contains(component), "{image} should cover {component}");
+        assert!(source.contains(&format!("title: \"{title}\";")), "{image} should set title");
     }
 }
 
