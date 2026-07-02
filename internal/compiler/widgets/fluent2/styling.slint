@@ -82,6 +82,9 @@ export global Fluent2Palette {
     property <brush> control-fill-pressed: dark-color-scheme ? #FFFFFF0A : #EDEDED;
     property <brush> control-fill-disabled: dark-color-scheme ? #FFFFFF0A : #F5F5F5;
     out property <brush> control-fill-transparent: transparent;
+    property <brush> control-alt-fill-secondary: dark-color-scheme ? #0000001A : #00000005;
+    property <brush> control-alt-fill-tertiary: dark-color-scheme ? #FFFFFF0A : #0000000F;
+    property <brush> control-alt-fill-quaternary: dark-color-scheme ? #FFFFFF12 : #00000017;
     property <brush> control-fill-subtle: dark-color-scheme ? #FFFFFF0F : #0000000A;
     property <brush> control-fill-subtle-hover: dark-color-scheme ? #FFFFFF14 : #0000000F;
     property <brush> control-fill-subtle-pressed: dark-color-scheme ? #FFFFFF0A : #00000014;
@@ -284,9 +287,9 @@ export global Fluent2Palette {
     out property <brush> control-secondary: control-fill-hover;
     out property <brush> control-tertiary: control-fill-pressed;
     out property <brush> control-disabled: control-fill-disabled;
-    out property <brush> control-alt-secondary: dark-color-scheme ? #0000001A : #00000005;
-    out property <brush> control-alt-tertiary: dark-color-scheme ? #FFFFFF0A : #0000000F;
-    out property <brush> control-alt-quaternary: dark-color-scheme ? #FFFFFF12 : #00000017;
+    out property <brush> control-alt-secondary: control-alt-fill-secondary;
+    out property <brush> control-alt-tertiary: control-alt-fill-tertiary;
+    out property <brush> control-alt-quaternary: control-alt-fill-quaternary;
     out property <brush> control-alt-disabled: control-fill-transparent;
     out property <brush> control-strong-stroke: neutral-stroke-strong;
     out property <brush> control-strong-stroke-disabled: neutral-stroke-disabled;

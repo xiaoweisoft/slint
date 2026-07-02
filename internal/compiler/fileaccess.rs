@@ -2090,6 +2090,31 @@ fn test_fluent2_control_alt_quaternary_token_uses_fluent2_name() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
+    for expected in [
+        "property <brush> control-alt-fill-secondary: dark-color-scheme ? #0000001A : #00000005;",
+        "property <brush> control-alt-fill-tertiary: dark-color-scheme ? #FFFFFF0A : #0000000F;",
+        "property <brush> control-alt-fill-quaternary: dark-color-scheme ? #FFFFFF12 : #00000017;",
+        "out property <brush> control-alt-secondary: control-alt-fill-secondary;",
+        "out property <brush> control-alt-tertiary: control-alt-fill-tertiary;",
+        "out property <brush> control-alt-quaternary: control-alt-fill-quaternary;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 public control-alt bridge tokens should route through named Fluent2 fill primitives: {expected}"
+        );
+    }
+
+    for copied_bridge in [
+        "out property <brush> control-alt-secondary: dark-color-scheme ? #0000001A : #00000005;",
+        "out property <brush> control-alt-tertiary: dark-color-scheme ? #FFFFFF0A : #0000000F;",
+        "out property <brush> control-alt-quaternary: dark-color-scheme ? #FFFFFF12 : #00000017;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_bridge),
+            "fluent2 public control-alt bridge tokens should not own raw copied light/dark alpha branches: {copied_bridge}"
+        );
+    }
+
     assert!(
         styling.contains("control-alt-quaternary"),
         "fluent2 styling should expose the Fluent2 control-alt-quaternary token name"
