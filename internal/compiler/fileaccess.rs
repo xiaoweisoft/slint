@@ -2604,11 +2604,18 @@ fn test_fluent2_spinbox_buttons_use_state_tokens() {
         .and_then(|after| after.split("export component SpinBox").next())
         .expect("fluent2 spinbox should define SpinBoxButton before SpinBox");
 
+    assert!(
+        source.contains("import { FocusBorder } from \"components.slint\""),
+        "fluent2 SpinBoxButton should import the shared Fluent2 focus border"
+    );
+
     for expected in [
         "in property <bool> enabled",
         "enabled: root.enabled",
         "out property <bool> has-focus: touch-area.has-focus",
         "FocusTouchArea",
+        "if root.has-focus && root.enabled : FocusBorder",
+        "border-radius: Fluent2SizeSettings.control-radius",
         "disabled when !root.enabled",
         "hover when touch-area.has-hover",
         "background.background: Fluent2Palette.spinbox-button-hover-background",
