@@ -1,0 +1,305 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { ColorSchemeSelector } from "color-scheme.slint";
+
+export struct TextStyle {
+    font-size: relative-font-size,
+    font-weight: int,
+}
+
+export global Fluent2FontSettings {
+    out property <int> regular-font-weight: 400;
+    out property <int> medium-font-weight: 500;
+    out property <int> semibold-font-weight: 600;
+    out property <TextStyle> caption: {
+        font-size: 12 * 0.0769rem,
+        font-weight: regular-font-weight
+    };
+    out property <TextStyle> body: {
+        font-size: 14 * 0.0769rem,
+        font-weight: regular-font-weight
+    };
+    out property <TextStyle> body-strong: {
+        font-size: 14 * 0.0769rem,
+        font-weight: semibold-font-weight
+    };
+    out property <TextStyle> title: {
+        font-size: 28 * 0.0769rem,
+        font-weight: semibold-font-weight
+    };
+}
+
+export global Fluent2Palette {
+    in-out property <ColorScheme> color-scheme: ColorSchemeSelector.color-scheme;
+    property <bool> dark-color-scheme: {
+        if (color-scheme == ColorScheme.unknown) {
+            return SlintInternal.color-scheme == ColorScheme.dark;
+        }
+        return color-scheme == ColorScheme.dark;
+    }
+
+    // Public bridge settings. These stay API-compatible with the existing Palette singleton,
+    // but the fluent2 namespace does not branch into the older retrotone palette.
+    in-out property <string> theme-engine: "fluent2";
+    in-out property <string> font-family: "Segoe UI";
+    in-out property <color> accent-color-override: #00000000;
+    in-out property <color> retro-accent-color-override: #00000000;
+
+    property <brush> neutral-background-1: dark-color-scheme ? #1B1A19 : #FFFFFF;
+    property <brush> neutral-background-2: dark-color-scheme ? #242322 : #FAFAFA;
+    property <brush> neutral-background-3: dark-color-scheme ? #2E2D2C : #F5F5F5;
+    property <brush> neutral-background-4: dark-color-scheme ? #3A3837 : #F0F0F0;
+    property <brush> neutral-foreground-1: dark-color-scheme ? #FFFFFF : #242424;
+    property <brush> neutral-foreground-2: dark-color-scheme ? #D6D6D6 : #424242;
+    property <brush> neutral-foreground-3: dark-color-scheme ? #ADADAD : #616161;
+    property <brush> neutral-foreground-disabled: dark-color-scheme ? #5C5C5C : #BDBDBD;
+    property <brush> neutral-stroke-1: dark-color-scheme ? #666666 : #D1D1D1;
+    property <brush> neutral-stroke-2: dark-color-scheme ? #525252 : #E0E0E0;
+    property <brush> neutral-stroke-subtle: dark-color-scheme ? #3D3D3D : #EDEBE9;
+    property <brush> neutral-stroke-focus-inner: dark-color-scheme ? #000000B3 : #FFFFFF;
+    property <brush> neutral-stroke-focus-outer: dark-color-scheme ? #FFFFFF : #000000E6;
+
+    property <brush> accent-fill: accent-color-override.alpha > 0 ? accent-color-override : (dark-color-scheme ? #479EF5 : #0F6CBD);
+    property <brush> accent-fill-hover: accent-color-override.alpha > 0 ? accent-color-override.transparentize(8%) : (dark-color-scheme ? #62ABF5 : #115EA3);
+    property <brush> accent-fill-pressed: accent-color-override.alpha > 0 ? accent-color-override.transparentize(18%) : (dark-color-scheme ? #2886DE : #0F548C);
+    property <brush> accent-fill-disabled: dark-color-scheme ? #2E2E2E : #F0F0F0;
+    property <brush> accent-foreground-1: #FFFFFF;
+    property <brush> accent-foreground-2: dark-color-scheme ? #000000 : #FFFFFF;
+    property <brush> accent-foreground-disabled: dark-color-scheme ? #8A8A8A : #BDBDBD;
+
+    property <brush> control-fill: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;
+    property <brush> control-fill-hover: dark-color-scheme ? #FFFFFF14 : #F5F5F5;
+    property <brush> control-fill-pressed: dark-color-scheme ? #FFFFFF0A : #EDEDED;
+    property <brush> control-fill-disabled: dark-color-scheme ? #FFFFFF0A : #F5F5F5;
+    property <brush> control-fill-transparent: transparent;
+    property <brush> control-fill-subtle: dark-color-scheme ? #FFFFFF0F : #0000000A;
+    property <brush> control-fill-subtle-hover: dark-color-scheme ? #FFFFFF14 : #0000000F;
+    property <brush> control-fill-subtle-pressed: dark-color-scheme ? #FFFFFF0A : #00000014;
+    property <brush> control-fill-solid: dark-color-scheme ? #454545 : #FFFFFF;
+    property <brush> input-fill-active: dark-color-scheme ? #1E1E1E : #FFFFFF;
+    property <brush> flyout-stroke: dark-color-scheme ? #00000033 : #0000000F;
+    property <brush> shadow-ambient: dark-color-scheme ? #00000052 : #00000024;
+    property <brush> shadow-key: dark-color-scheme ? #00000066 : #0000001F;
+
+    out property <brush> background: neutral-background-1;
+    out property <brush> foreground: neutral-foreground-1;
+    out property <brush> alternate-background: neutral-background-3;
+    out property <brush> alternate-foreground: neutral-foreground-1;
+    out property <brush> control-background: control-fill;
+    out property <brush> control-foreground: neutral-foreground-1;
+    out property <brush> accent-background: accent-fill;
+    out property <brush> accent-foreground: accent-foreground-1;
+    out property <brush> selection-background: accent-fill;
+    out property <brush> selection-foreground: accent-foreground-1;
+    out property <brush> border: neutral-stroke-1;
+
+    out property <brush> secondary-accent-background: accent-fill-hover;
+    out property <brush> tertiary-accent-background: accent-fill-pressed;
+    out property <brush> accent-disabled: accent-fill-disabled;
+    out property <brush> accent-control-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF14 90.67%, #00000024 100%) : @linear-gradient(180deg, #FFFFFF14 90.67%, #00000066 100%);
+    out property <brush> control-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF17 0%, #00000012 8.33%) : @linear-gradient(180deg, #0000000F 90.58%, #00000029 100%);
+    out property <brush> text-accent-foreground-secondary: dark-color-scheme ? #00000080 : #FFFFFFB3;
+    out property <brush> text-accent-foreground-disabled: accent-foreground-disabled;
+    out property <brush> text-secondary: neutral-foreground-2;
+    out property <brush> text-tertiary: neutral-foreground-3;
+    out property <brush> text-disabled: neutral-foreground-disabled;
+    out property <brush> switch-thumb-disabled: text-secondary;
+    out property <brush> switch-thumb-checked-disabled: text-accent-foreground-disabled;
+    out property <brush> text-control-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF14 99.98%, #FFFFFF8A 100%, #FFFFFF8A 100%) : @linear-gradient(180deg, #0000000F 99.99%, #00000073 100%, #00000073 100%);
+    out property <brush> control-secondary: control-fill-hover;
+    out property <brush> control-tertiary: control-fill-pressed;
+    out property <brush> control-disabled: control-fill-disabled;
+    out property <brush> control-alt-secondary: dark-color-scheme ? #0000001A : #00000005;
+    out property <brush> control-alt-tertiary: dark-color-scheme ? #FFFFFF0A : #0000000F;
+    out property <brush> control-alt-quartiary: dark-color-scheme ? #FFFFFF12 : #00000017;
+    out property <brush> control-alt-disabled: transparent;
+    out property <brush> control-strong-stroke: dark-color-scheme ? #FFFFFF99 : #00000099;
+    out property <brush> control-strong-stroke-disabled: dark-color-scheme ? #FFFFFF29 : #00000038;
+    out property <brush> control-solid: control-fill-solid;
+    out property <brush> circle-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF17 0%, #FFFFFF12 100%) : @linear-gradient(180deg, #0000000F 0%, #00000029 100%);
+    out property <brush> control-input-active: input-fill-active;
+    out property <brush> focus-stroke-inner: neutral-stroke-focus-inner;
+    out property <brush> focus-stroke-outer: neutral-stroke-focus-outer;
+    out property <brush> control-background-stroke-flyout: flyout-stroke;
+    out property <brush> sub-title-secondary: control-fill-subtle;
+    out property <brush> sub-title-tertiary: control-fill-subtle-pressed;
+    out property <brush> shadow: shadow-ambient;
+    out property <brush> elevation-shadow-rest-color: shadow-key;
+    out property <brush> elevation-shadow-flyout-color: shadow-ambient;
+    out property <brush> subtle: control-fill-subtle;
+    out property <brush> subtle-secondary: control-fill-subtle-hover;
+    out property <brush> subtle-tertiary: control-fill-subtle-pressed;
+    out property <brush> divider: neutral-stroke-subtle;
+    out property <brush> layer-on-mica-base-alt: dark-color-scheme ? #3A3A3A73 : #FFFFFFB3;
+    out property <brush> layer-on-mica-base-alt-secondary: control-fill-subtle;
+    out property <brush> card-stroke: dark-color-scheme ? #0000001A : #0000000F;
+    out property <brush> state: dark-color-scheme ? #FFFFFF : #000000;
+    out property <brush> state-secondary: dark-color-scheme ? #000000 : #FFFFFF;
+}
+
+export global Icons {
+    out property <image> arrow-down: @image-url("_arrow-down.svg");
+    out property <image> arrow-up: @image-url("_arrow-up.svg");
+    out property <image> check-mark: @image-url("_check-mark.svg");
+    out property <image> chevron-down: @image-url("_chevron-down.svg");
+    out property <image> chevron-up: @image-url("_chevron-up.svg");
+    out property <image> down: @image-url("_down.svg");
+    out property <image> dropdown: @image-url("_dropdown.svg");
+    out property <image> left: @image-url("_left.svg");
+    out property <image> right: @image-url("_right.svg");
+    out property <image> up: @image-url("_up.svg");
+    out property <image> keyboard: @image-url("_keyboard.svg");
+    out property <image> clock: @image-url("_clock.svg");
+    out property <image> arrow-back: @image-url("_arrow_back.svg");
+    out property <image> arrow-forward: @image-url("_arrow_forward.svg");
+    out property <image> edit: @image-url("_edit.svg");
+    out property <image> calendar: @image-url("_calendar.svg");
+}
+
+export global Fluent2SizeSettings {
+    out property <length> layout-spacing: 8px;
+    out property <length> layout-padding: 8px;
+    out property <length> text-cursor-width: 1px;
+    out property <length> control-height: 32px;
+    out property <length> compact-control-height: 28px;
+    out property <length> control-min-width: 32px;
+    out property <length> input-min-width: 160px;
+    out property <length> spinbox-min-width: 128px;
+    out property <length> control-radius: 4px;
+    out property <length> control-horizontal-padding: 12px;
+    out property <length> control-tight-horizontal-padding: 2px;
+    out property <length> control-vertical-padding: 4px;
+    out property <length> control-spacing: 8px;
+    out property <length> control-label-spacing: 12px;
+    out property <length> interaction-receiver-size: 0px;
+    out property <length> control-scroll-delta: 2px;
+    out property <length> input-min-focusable-width: 1px;
+    out property <length> input-focus-indicator-height: 2px;
+    out property <length> textedit-estimated-line-height: 20px;
+    out property <length> stroke-width: 1px;
+    out property <length> control-hidden-stroke-width: 0px;
+    out property <length> focus-stroke-width: 2px;
+    out property <length> focus-ring-gap: 2px;
+    out property <length> focus-ring-inner-stroke-width: stroke-width;
+    out property <length> focus-ring-radius-adjust: focus-ring-gap;
+    out property <length> separator-thickness: 1px;
+    out property <length> item-height: 36px;
+    out property <length> compact-item-height: 32px;
+    out property <length> list-item-horizontal-padding: 16px;
+    out property <length> list-item-horizontal-inset: 6px;
+    out property <length> list-item-vertical-inset: 4px;
+    out property <length> button-radius: control-radius;
+    out property <length> overlay-radius: 8px;
+    out property <length> overlay-padding: 4px;
+    out property <length> checkbox-size: 16px;
+    out property <length> checkbox-radius: 2px;
+    out property <length> switch-width: 40px;
+    out property <length> switch-height: 20px;
+    out property <length> switch-thumb-size: 12px;
+    out property <length> switch-thumb-inset: 4px;
+    out property <length> switch-thumb-pressed-width: 17px;
+    out property <length> switch-thumb-pressed-height: 14px;
+    out property <length> slider-track-size: 4px;
+    out property <length> slider-track-radius: 2px;
+    out property <length> slider-thumb-size: 20px;
+    out property <length> slider-thumb-border-size: 21px;
+    out property <length> slider-thumb-radius: 10px;
+    out property <length> slider-thumb-border-radius: 10.5px;
+    out property <length> slider-thumb-pressed-size: 10px;
+    out property <length> slider-thumb-hover-size: 14px;
+    out property <length> slider-focus-scope-size: 0px;
+    out property <length> switch-thumb-hover-size: 14px;
+    out property <length> icon-size: 12px;
+    out property <length> button-icon-size: 20px;
+    out property <length> lineedit-icon-size: 16px;
+    out property <length> lineedit-icon-touch-target: compact-control-height;
+    out property <length> combobox-icon-offset-y: 2px;
+    out property <length> combobox-popup-offset-y: -4px;
+    out property <length> menu-bar-height: 40px;
+    out property <length> menu-bar-item-bottom-padding: 6px;
+    out property <length> menu-separator-height: 9px;
+    out property <length> menu-item-outer-padding: 1px;
+    out property <length> menu-item-vertical-padding: 0px;
+    out property <length> menu-item-content-spacing: 8px;
+    out property <length> menu-frame-margin: 5px;
+    out property <length> menu-frame-min-width: 280px;
+    out property <length> elevation-shadow-rest-offset-y: 2px;
+    out property <length> elevation-shadow-rest-blur: 4px;
+    out property <length> elevation-shadow-flyout-offset-y: 8px;
+    out property <length> elevation-shadow-flyout-blur: 16px;
+    out property <duration> menu-submenu-open-delay: 500ms;
+    out property <length> scrollbar-button-offset: 4px;
+    out property <length> scrollbar-button-short-size: 6px;
+    out property <length> scrollbar-button-long-size: 8px;
+    out property <length> scrollbar-offset: 16px;
+    out property <length> scrollbar-collapsed-size: 2px;
+    out property <length> scrollbar-expanded-size: 6px;
+    out property <length> scrollbar-min-thumb-size: 16px;
+    out property <length> scrollbar-step-size: 10px;
+    out property <length> scrollbar-gutter-size: 14px;
+    out property <float> scrollbar-button-hidden-opacity: 0;
+    out property <float> scrollbar-button-visible-opacity: 1;
+    out property <length> scrollview-min-size: 50px;
+    out property <length> table-cell-vertical-padding: 9px;
+    out property <length> table-header-height: 42px;
+    out property <length> table-min-width: 400px;
+    out property <length> table-min-height: 200px;
+    out property <length> table-min-column-width: 1px;
+    out property <length> table-unconstrained-column-width: 100000px;
+    out property <length> table-resize-grip-width: 10px;
+    out property <length> selection-indicator-width: 3px;
+    out property <length> selection-indicator-hidden-height: interaction-receiver-size;
+    out property <length> selection-indicator-height: 16px;
+    out property <length> selection-indicator-radius: 2px;
+    out property <length> progress-height: 3px;
+    out property <length> progress-rail-height: 1px;
+    out property <length> progress-rail-radius: 1px;
+    out property <duration> progress-indeterminate-cycle-duration: 2s;
+    out property <duration> progress-indeterminate-sweep-duration: 1s;
+    out property <length> spinner-size: 30px;
+    out property <length> spinner-stroke-width: 3px;
+    out property <float> spinner-viewbox-size: 100;
+    out property <float> spinner-maximum-progress: 0.9999;
+    out property <float> spinner-minimum-indeterminate-progress: 0.20;
+    out property <duration> spinner-rotation-duration: 3s;
+    out property <duration> spinner-sweep-duration: 1.5s;
+    out property <length> group-title-spacing: 8px;
+    out property <length> group-top-padding: 16px;
+    out property <length> group-bottom-padding: 8px;
+    out property <length> picker-dialog-padding: 8px;
+    out property <length> picker-vertical-spacing: 8px;
+    out property <length> picker-horizontal-spacing: 4px;
+    out property <length> picker-icon-size: 12px;
+    out property <length> picker-small-icon-size: 8px;
+    out property <length> about-layout-padding: 12px;
+    out property <length> about-logo-width: 256px;
+    out property <length> about-logo-height: 48px;
+    out property <TextStyle> about-caption: {
+        font-size: 10 * 0.0769rem,
+        font-weight: Fluent2FontSettings.regular-font-weight
+    };
+    out property <length> picker-touch-target: 40px;
+    out property <length> picker-large-touch-target: 48px;
+    out property <float> state-layer-hover-opacity: 0.08;
+    out property <float> state-layer-active-opacity: 0.12;
+    out property <float> picker-state-opacity-disabled: 0.38;
+    out property <float> disabled-opacity: 0.5;
+    out property <length> tab-scroll-delta: control-scroll-delta;
+    out property <length> date-delegate-size: 40px;
+    out property <length> date-year-delegate-width: 72px;
+    out property <length> time-clock-size: 256px;
+    out property <length> time-clock-stroke-width: 2px;
+    out property <length> time-clock-center-dot-size: 8px;
+    out property <length> time-clock-inner-dot-size: 4px;
+    out property <length> time-clock-outer-padding: 2px;
+    out property <length> time-clock-inner-padding: 32px;
+    out property <length> time-input-width: 96px;
+    out property <length> time-input-height: 80px;
+    out property <length> period-selector-min-width: 38px;
+    out property <TextStyle> time-input-display: {
+        font-size: 57 * 0.0625rem,
+        font-weight: Fluent2FontSettings.regular-font-weight
+    };
+    out property <duration> control-motion-duration: 150ms;
+}

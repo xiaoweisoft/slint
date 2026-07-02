@@ -1,0 +1,310 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { Fluent2Palette, Fluent2FontSettings, Fluent2SizeSettings, Icons } from "styling.slint";
+import { ListView } from "listview.slint";
+
+component TableViewColumn inherits Rectangle {
+    in property <SortOrder> sort-order: SortOrder.unsorted;
+
+    callback clicked <=> touch-area.clicked;
+    callback adjust_size(length);
+
+    background: Fluent2Palette.background;
+
+    states [
+        pressed when touch-area.pressed : {
+            background: Fluent2Palette.control-secondary;
+        }
+        hover when touch-area.has-hover : {
+            background: Fluent2Palette.sub-title-tertiary;
+        }
+    ]
+
+    touch-area := TouchArea {
+        width: parent.width - Fluent2SizeSettings.control-horizontal-padding;
+    }
+
+    HorizontalLayout {
+        padding-left: Fluent2SizeSettings.control-horizontal-padding;
+        padding-right: Fluent2SizeSettings.control-horizontal-padding;
+        spacing: Fluent2SizeSettings.control-tight-horizontal-padding;
+
+        HorizontalLayout {
+            @children
+        }
+
+        icon := Image {
+            image-fit: contain;
+            colorize: Fluent2Palette.text-secondary;
+            visible: root.sort-order != SortOrder.unsorted;
+            width: Fluent2SizeSettings.icon-size;
+            y: (parent.height - self.height) / 2;
+            source: root.sort-order == SortOrder.ascending ? Icons.arrow-down : Icons.arrow-up;
+            accessible-role: none;
+
+            animate colorize { duration: Fluent2SizeSettings.control-motion-duration; }
+        }
+    }
+
+    // border
+    Rectangle {
+        y: parent.height - self.height;
+        width: 100%;
+        height: Fluent2SizeSettings.separator-thickness;
+        background: Fluent2Palette.divider;
+    }
+
+    Rectangle {
+        x: parent.width - Fluent2SizeSettings.separator-thickness;
+        width: Fluent2SizeSettings.separator-thickness;
+
+        states [
+            hover when movable-touch-area.has-hover : {
+                background: Fluent2Palette.control-secondary;
+            }
+        ]
+
+        animate background { duration: Fluent2SizeSettings.control-motion-duration; }
+
+        movable-touch-area := TouchArea {
+            width: Fluent2SizeSettings.table-resize-grip-width;
+            mouse-cursor: ew-resize;
+
+            moved => {
+                if (self.pressed) {
+                    adjust_size(self.mouse-x - self.pressed-x);
+                }
+            }
+        }
+    }
+}
+
+component TableViewCell inherits Rectangle {
+    clip: true;
+
+    HorizontalLayout {
+        padding-left: Fluent2SizeSettings.control-horizontal-padding;
+        padding-right: Fluent2SizeSettings.control-horizontal-padding;
+        padding-top: Fluent2SizeSettings.table-cell-vertical-padding;
+        padding-bottom: Fluent2SizeSettings.table-cell-vertical-padding;
+
+        @children
+    }
+}
+
+component TableViewRow inherits Rectangle {
+    in property <bool> selected;
+    in property <bool> even;
+
+    callback clicked <=> touch-area.clicked;
+    callback pointer-event(event: PointerEvent, position: Point);
+
+    min-width: layout.min-width;
+    min-height: max(Fluent2SizeSettings.item-height, layout.min-height);
+    border-radius: Fluent2SizeSettings.control-radius;
+    background: root.even ? Fluent2Palette.control-background : transparent;
+
+    states [
+        pressed when touch-area.pressed : {
+            root.background: selected ? Fluent2Palette.subtle-secondary : Fluent2Palette.subtle-tertiary;
+        }
+        hover when touch-area.has-hover : {
+            root.background: selected ? Fluent2Palette.subtle-tertiary : Fluent2Palette.subtle-secondary;
+            selector.height: root.selected ? Fluent2SizeSettings.selection-indicator-height : Fluent2SizeSettings.selection-indicator-hidden-height;
+        }
+        selected when root.selected : {
+            root.background: Fluent2Palette.subtle-secondary;
+            selector.height: Fluent2SizeSettings.selection-indicator-height;
+        }
+    ]
+
+    touch-area := TouchArea {
+        pointer-event(pe) => {
+            root.pointer-event(pe, {
+                x: self.absolute-position.x + self.mouse-x,
+                y: self.absolute-position.y + self.mouse-y,
+            });
+        }
+    }
+
+    layout := HorizontalLayout {
+       @children
+    }
+
+    selector := Rectangle {
+        x: 0px;
+        y: (parent.height - self.height) / 2;
+        width: Fluent2SizeSettings.selection-indicator-width;
+        height: Fluent2SizeSettings.selection-indicator-hidden-height;
+        background: Fluent2Palette.accent-background;
+        border-radius: Fluent2SizeSettings.selection-indicator-radius;
+
+        animate height { duration: Fluent2SizeSettings.control-motion-duration; easing: ease-out; }
+    }
+}
+
+export component StandardTableView {
+    in property <[[StandardListViewItem]]> rows;
+    out property <int> current-sort-column: -1;
+    in-out property <[TableColumn]> columns;
+    in-out property <int> current-row: -1;
+    in property <bool> enabled <=> scroll-view.enabled;
+    out property <length> visible-width <=> scroll-view.visible-width;
+    out property <length> visible-height <=> scroll-view.visible-height;
+    in-out property <bool> has-focus <=> scroll-view.has-focus;
+    in-out property <length> viewport-width <=> scroll-view.viewport-width;
+    in-out property <length> viewport-height <=> scroll-view.viewport-height;
+    in-out property <length> viewport-x <=> scroll-view.viewport-x;
+    in-out property <length> viewport-y <=> scroll-view.viewport-y;
+    in property <ScrollBarPolicy> vertical-scrollbar-policy <=> scroll-view.vertical-scrollbar-policy;
+    in property <ScrollBarPolicy> horizontal-scrollbar-policy <=> scroll-view.horizontal-scrollbar-policy;
+
+    callback sort-ascending(column: int);
+    callback sort-descending(column: int);
+    callback row-pointer-event(row: int, event: PointerEvent, position: Point);
+    callback current-row-changed(current-row: int);
+
+    public function set-current-row(index: int) {
+        if (index < 0 || index >= rows.length) {
+            return;
+        }
+
+        current-row = index;
+        current-row-changed(current-row);
+
+        if (current-item-y < 0) {
+            scroll-view.viewport-y += 0 - current-item-y;
+        }
+
+        if (current-item-y + item-height > scroll-view.visible-height) {
+            scroll-view.viewport-y -= current-item-y + item-height - scroll-view.visible-height;
+        }
+    }
+
+    private property <length> min-header-height: Fluent2SizeSettings.table-header-height;
+    private property <length> item-height: scroll-view.viewport-height / rows.length;
+    private property <length> current-item-y: scroll-view.viewport-y + current-row * item-height;
+
+    function sort(index: int) {
+        if (root.current-sort-column != index) {
+            root.columns[root.current-sort-column].sort-order = SortOrder.unsorted;
+        }
+
+        if(root.columns[index].sort-order == SortOrder.ascending) {
+            root.columns[index].sort-order = SortOrder.descending;
+            root.sort-descending(index);
+        } else {
+            root.columns[index].sort-order = SortOrder.ascending;
+            root.sort-ascending(index);
+        }
+
+        root.current-sort-column = index;
+    }
+
+    min-width: Fluent2SizeSettings.table-min-width;
+    min-height: Fluent2SizeSettings.table-min-height;
+    horizontal-stretch: 1;
+    vertical-stretch: 1;
+    forward-focus: focus-scope;
+    accessible-role: table;
+
+    VerticalLayout {
+        Rectangle {
+            clip: true;
+            vertical-stretch: 0;
+            min-height: header-layout.min-height;
+
+            header-layout := HorizontalLayout {
+                width: max(self.preferred-width, parent.width);
+                x: scroll-view.viewport-x;
+                padding-right: Fluent2SizeSettings.list-item-horizontal-inset;
+                min-height: root.min-header-height;
+
+                for column[index] in root.columns : TableViewColumn {
+                    sort-order: column.sort-order;
+                    horizontal-stretch: column.horizontal-stretch;
+                    min-width: max(column.min-width, column.width);
+                    preferred-width: self.min-width;
+                    max-width: (index < columns.length && column.width >= Fluent2SizeSettings.table-min-column-width) ? max(column.min-width, column.width) : Fluent2SizeSettings.table-unconstrained-column-width;
+
+                    clicked => {
+                        root.sort(index);
+                    }
+
+                    adjust-size(diff) => {
+                        column.width = max(Fluent2SizeSettings.table-min-column-width, self.width + diff);
+                    }
+
+                    Text {
+                        vertical-alignment: center;
+                        text: column.title;
+                        font-weight: Fluent2FontSettings.body.font-weight;
+                        font-size: Fluent2FontSettings.body.font-size;
+                        font-family: Fluent2Palette.font-family;
+                        color: Fluent2Palette.text-secondary;
+                        overflow: elide;
+                    }
+                }
+            }
+        }
+
+        scroll-view := ListView {
+            for row[idx] in root.rows : TableViewRow {
+                selected: idx == root.current-row;
+                even: mod(idx, 2) == 0;
+
+                pointer-event(pe, pos) => {
+                    root.row-pointer-event(idx, pe, {
+                        x: pos.x - root.absolute-position.x,
+                        y: pos.y - root.absolute-position.y,
+                    });
+                }
+
+                clicked => {
+                    root.focus();
+                    root.set-current-row(idx);
+                }
+
+                for cell[index] in row : TableViewCell {
+                    private property <bool> has_inner_focus;
+
+                    horizontal-stretch: root.columns[index].horizontal-stretch;
+                    min-width: max(columns[index].min-width, columns[index].width);
+                    preferred-width: self.min-width;
+                    max-width: (index < columns.length && columns[index].width >= Fluent2SizeSettings.table-min-column-width) ? max(columns[index].min-width, columns[index].width) : Fluent2SizeSettings.table-unconstrained-column-width;
+
+                    Rectangle {
+                        Text {
+                            width: 100%;
+                            height: 100%;
+                            overflow: elide;
+                            vertical-alignment: center;
+                            text: cell.text;
+                            font-weight: Fluent2FontSettings.body.font-weight;
+                            font-size: Fluent2FontSettings.body.font-size;
+                            font-family: Fluent2Palette.font-family;
+                            color: mod(idx, 2) == 0 ? Fluent2Palette.control-foreground : Fluent2Palette.text-secondary;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    focus-scope := FocusScope {
+        x: 0;
+        width: Fluent2SizeSettings.interaction-receiver-size; // Do not react on clicks
+
+        key-pressed(event) => {
+            if (event.text == Key.UpArrow) {
+                root.set-current-row(root.current-row - 1);
+                return accept;
+            } else if (event.text == Key.DownArrow) {
+                root.set-current-row(root.current-row + 1);
+                return accept;
+            }
+            reject
+        }
+    }
+}

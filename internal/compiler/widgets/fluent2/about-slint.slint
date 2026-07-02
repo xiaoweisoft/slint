@@ -1,0 +1,33 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { Palette } from "std-widgets-impl.slint";
+import { Fluent2Palette, Fluent2SizeSettings } from "styling.slint";
+
+export component AboutSlint {
+    preferred-height: 100%;
+    preferred-width: 100%;
+    min-height: i-layout.min-height;
+    min-width: i-layout.min-width;
+
+    i-layout := VerticalLayout {
+        padding: Fluent2SizeSettings.about-layout-padding;
+        spacing: Fluent2SizeSettings.control-spacing;
+        alignment: start;
+
+        Image {
+            source: Palette.color-scheme == ColorScheme.dark ? @image-url("MadeWithSlint-logo-dark.svg") : @image-url("MadeWithSlint-logo-light.svg");
+            preferred-width: Fluent2SizeSettings.about-logo-width;
+            min-height: Fluent2SizeSettings.about-logo-height;
+            accessible-label: "#MadeWithSlint";
+        }
+
+        Text {
+            text: "Version 1.15.1\nhttps://slint.dev/";
+            font-size: Fluent2SizeSettings.about-caption.font-size;
+            font-weight: Fluent2SizeSettings.about-caption.font-weight;
+            font-family: Fluent2Palette.font-family;
+            horizontal-alignment: center;
+        }
+    }
+}

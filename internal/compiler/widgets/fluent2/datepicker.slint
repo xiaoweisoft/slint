@@ -1,0 +1,107 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { VerticalBox } from "../common/layout.slint";
+import { Button } from "./button.slint";
+import { Fluent2Palette, Fluent2FontSettings, Fluent2SizeSettings, Icons } from "styling.slint";
+import { MenuBorder } from "./components.slint";
+import { StandardButton } from "standardbutton.slint";
+
+import { Date, DatePickerBase } from "datepicker-base.slint";
+export { Date }
+
+export component DatePickerPopup inherits PopupWindow {
+    in property <string> title: "Select date";
+    in property <Date> date <=> base.date;
+
+    callback canceled();
+    callback accepted(date: Date);
+
+    width: dialog.width;
+    height: dialog.height;
+
+    close-policy: PopupClosePolicy.no-auto-close;
+
+    background-layer := MenuBorder {
+        width: dialog.width;
+        height: dialog.height;
+    }
+
+    dialog := Dialog {
+        padding: Fluent2SizeSettings.picker-dialog-padding;
+
+        base := DatePickerBase {
+            title: root.title;
+            style: {
+                  border-brush: Fluent2Palette.border,
+                  vertical-spacing: Fluent2SizeSettings.picker-vertical-spacing,
+                  horizontal-spacing: Fluent2SizeSettings.picker-horizontal-spacing,
+                  calendar-style: {
+                      spacing: Fluent2SizeSettings.picker-vertical-spacing,
+                      delegate-style: {
+                          font-size: Fluent2FontSettings.body-strong.font-size,
+                          font-weight: Fluent2FontSettings.body-strong.font-weight,
+                          font-family: Fluent2Palette.font-family,
+                          foreground: Fluent2Palette.foreground,
+                          state-brush: Fluent2Palette.state,
+                          background-selected: Fluent2Palette.accent-background,
+                          foreground-selected: Fluent2Palette.accent-foreground,
+                          state-brush-selected: Fluent2Palette.state-secondary,
+                          border-color-today: Fluent2Palette.accent-background,
+                          foreground-today: Fluent2Palette.accent-background,
+                          state-brush-today: Fluent2Palette.state,
+                      }
+                  },
+                  icon-button-style: {
+                      foreground: Fluent2Palette.foreground,
+                      state-brush: Fluent2Palette.state,
+                      icon-size: Fluent2SizeSettings.picker-icon-size,
+                  },
+                  current-day-style: {
+                      font-size: Fluent2FontSettings.title.font-size,
+                      font-weight: Fluent2FontSettings.title.font-weight,
+                      font-family: Fluent2Palette.font-family,
+                      foreground: Fluent2Palette.foreground,
+                  },
+                  title-style: {
+                      font-size: Fluent2FontSettings.body.font-size,
+                      font-weight: Fluent2FontSettings.body.font-weight,
+                      font-family: Fluent2Palette.font-family,
+                      foreground: Fluent2Palette.foreground,
+                  },
+                  previous-icon: Icons.arrow-back,
+                  next-icon: Icons.arrow-forward,
+                  drop-down-icon: Icons.dropdown,
+                  input-icon: Icons.edit,
+                  calendar-icon: Icons.calendar,
+                  selection-button-style: {
+                      foreground: Fluent2Palette.foreground,
+                      state-brush: Fluent2Palette.state,
+                      icon-size: Fluent2SizeSettings.picker-small-icon-size,
+                      font-size: Fluent2FontSettings.body.font-size,
+                      font-weight: Fluent2FontSettings.body.font-weight,
+                      font-family: Fluent2Palette.font-family
+                  }
+            };
+        }
+
+        StandardButton {
+            kind: cancel;
+
+            clicked => {
+                root.close();
+                root.canceled();
+            }
+        }
+
+        StandardButton {
+            enabled: base.ok-enabled();
+            kind: ok;
+
+            clicked => {
+                root.close();
+                root.accepted(base.get-current-date());
+            }
+        }
+    }
+}

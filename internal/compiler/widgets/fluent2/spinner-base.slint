@@ -1,0 +1,47 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { Fluent2SizeSettings } from "styling.slint";
+
+export component SpinnerBase {
+    in property <float> progress;
+    in property <bool> indeterminate;
+    in property <length> stroke-width <=> path.stroke-width;
+    in property <brush> stroke <=> path.stroke;
+
+    path := Path {
+        private property <float> radius: min(self.viewbox-width, self.viewbox-height) / 2;
+        private property <float> start-x: self.viewbox-width / 2;
+        private property <float> start-y: self.viewbox-height / 2;
+        private property <float> start : !indeterminate ? 0 :
+            1 * mod(animation-tick(), Fluent2SizeSettings.spinner-rotation-duration) / Fluent2SizeSettings.spinner-rotation-duration;
+        // min is a workaround to get filled circle by 1.0
+        private property <float> progress: !root.indeterminate ? min(Fluent2SizeSettings.spinner-maximum-progress, root.progress) :
+            min(Fluent2SizeSettings.spinner-maximum-progress, max(Fluent2SizeSettings.spinner-minimum-indeterminate-progress, 1 * abs(sin(360deg * animation-tick() / Fluent2SizeSettings.spinner-sweep-duration))));
+
+        viewbox-width: Fluent2SizeSettings.spinner-viewbox-size;
+        viewbox-height: Fluent2SizeSettings.spinner-viewbox-size;
+        width: 100%;
+        height: 100%;
+
+        MoveTo {
+            x: start-x - radius * sin(-(path.start - 0.001) * 360deg);
+            y: start-y - radius * cos(-(path.start - 0.001) * 360deg);
+        }
+
+        // Workaround for femtovg not filling complete circle
+        LineTo {
+            x: start-x - radius * sin(-path.start * 360deg);
+            y: start-y - radius * cos(-path.start * 360deg);
+        }
+
+        ArcTo {
+            radius-x: path.radius;
+            radius-y: path.radius;
+            x: start-x - path.radius * sin(-(path.start + path.progress) * 360deg);
+            y: start-y - path.radius * cos(-(path.start + path.progress) * 360deg);
+            sweep: path.progress > 0;
+            large-arc: path.progress > 0.5;
+        }
+    }
+}

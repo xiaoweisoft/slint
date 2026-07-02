@@ -1,0 +1,115 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { Fluent2FontSettings, Fluent2Palette, Fluent2SizeSettings } from "styling.slint";
+import { FocusBorder } from "components.slint";
+import { FocusTouchArea } from "internal-components.slint";
+
+export component Button {
+    in property <string> text;
+    in property <image> icon;
+    in property <length> icon-size: Fluent2SizeSettings.button-icon-size;
+    in property <bool> primary;
+    in property <bool> enabled: true;
+    in property <bool> checkable;
+    in property <bool> colorize-icon;
+    out property <bool> has-focus: i-touch-area.has-focus;
+    out property <bool> pressed: self.enabled && i-touch-area.pressed;
+    in-out property <bool> checked;
+
+    callback clicked;
+
+    private property <brush> text-color: primary || checked ? Fluent2Palette.accent-foreground : Fluent2Palette.control-foreground;
+
+    min-width: max(Fluent2SizeSettings.control-min-width, i-layout.min-width);
+    min-height: max(Fluent2SizeSettings.control-height, i-layout.min-height);
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+    forward-focus: i-touch-area;
+
+    accessible-role: button;
+    accessible-enabled: root.enabled;
+    accessible-checkable: root.checkable;
+    accessible-checked: root.checked;
+    accessible-label: root.text;
+    accessible-action-default => { i-touch-area.clicked(); }
+
+    states [
+        disabled when !root.enabled : {
+            i-background.background: root.primary || root.checked ? Fluent2Palette.accent-disabled : Fluent2Palette.control-disabled;
+            i-border.border-color: root.primary || root.checked ? transparent : Fluent2Palette.border;
+            root.text-color: root.primary || root.checked ? Fluent2Palette.text-accent-foreground-disabled : Fluent2Palette.text-disabled;
+        }
+        pressed when root.pressed : {
+            i-background.background: root.primary || root.checked ? Fluent2Palette.tertiary-accent-background : Fluent2Palette.control-tertiary;
+            i-border.border-color: Fluent2Palette.border;
+            root.text-color: root.primary || root.checked ? Fluent2Palette.text-accent-foreground-secondary : Fluent2Palette.text-secondary;
+        }
+        hover when i-touch-area.has-hover : {
+            i-background.background: root.primary || root.checked ? Fluent2Palette.secondary-accent-background : Fluent2Palette.control-secondary;
+        }
+        checked when root.checked : {
+            i-background.background: Fluent2Palette.accent-background;
+            i-border.border-color: Fluent2Palette.accent-control-border;
+            root.text-color: Fluent2Palette.accent-foreground;
+        }
+    ]
+
+    i-background := Rectangle {
+        border-radius: Fluent2SizeSettings.button-radius;
+        background: root.primary ? Fluent2Palette.accent-background : Fluent2Palette.control-background;
+
+        animate background, border-color { duration: Fluent2SizeSettings.control-motion-duration; }
+
+        i-border := Rectangle {
+            border-radius: parent.border-radius;
+            border-width: Fluent2SizeSettings.stroke-width;
+            border-color: root.primary ? Fluent2Palette.accent-control-border : Fluent2Palette.control-border;
+        }
+
+        i-layout := HorizontalLayout {
+            padding-left: Fluent2SizeSettings.control-horizontal-padding;
+            padding-right: Fluent2SizeSettings.control-horizontal-padding;
+            padding-top: Fluent2SizeSettings.control-vertical-padding;
+            padding-bottom: Fluent2SizeSettings.control-vertical-padding;
+            spacing: Fluent2SizeSettings.overlay-padding;
+            alignment: center;
+
+            if (root.icon.width > 0 && root.icon.height > 0) : Image {
+                y: (parent.height - self.height) / 2;
+                source <=> root.icon;
+                width: root.icon-size;
+                min-height: root.icon-size;
+                colorize: root.colorize-icon ? root.text-color : transparent;
+            }
+
+            if (root.text != ""): Text {
+                font-size: Fluent2FontSettings.body.font-size;
+                font-weight: Fluent2FontSettings.body.font-weight;
+                font-family: Fluent2Palette.font-family;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                text: root.text;
+                color: root.text-color;
+                animate color { duration: Fluent2SizeSettings.control-motion-duration; }
+                accessible-role: none;
+            }
+        }
+    }
+
+    i-touch-area := FocusTouchArea {
+        enabled: root.enabled;
+
+        clicked => {
+            if (root.checkable) {
+                root.checked = !root.checked;
+            }
+            root.clicked();
+        }
+    }
+
+    // focus border
+    if (root.has-focus && root.enabled) : FocusBorder {
+        border-radius: i-background.border-radius;
+    }
+}

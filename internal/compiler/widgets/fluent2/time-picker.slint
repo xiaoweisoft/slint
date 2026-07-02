@@ -1,0 +1,116 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { Time, TimePickerBase } from "time-picker-base.slint";
+import { VerticalBox } from "../common/layout.slint";
+import { Button } from "./button.slint";
+import { Fluent2Palette, Fluent2FontSettings, Fluent2SizeSettings, Icons } from "styling.slint";
+import { MenuBorder } from "./components.slint";
+import { StandardButton } from "standardbutton.slint";
+
+export { Time }
+
+export component TimePickerPopup inherits PopupWindow {
+    in property <bool> use-24-hour-format <=> base.use-24-hour-format;
+    in property <string> title: "Select time";
+    in property <Time> time <=> base.time;
+
+    callback canceled();
+    callback accepted(/* current-time */ Time);
+
+    width: dialog.width;
+    height: dialog.height;
+
+    close-policy: PopupClosePolicy.no-auto-close;
+
+    background-layer := MenuBorder {
+        width: dialog.width;
+        height: dialog.height;
+    }
+
+    dialog := Dialog {
+        padding: Fluent2SizeSettings.picker-dialog-padding;
+        base := TimePickerBase {
+            title: root.title;
+            style: {
+                foreground: Fluent2Palette.foreground,
+                vertical-spacing: Fluent2SizeSettings.picker-vertical-spacing,
+                horizontal-spacing: Fluent2SizeSettings.picker-horizontal-spacing,
+                clock-style: {
+                    background: Fluent2Palette.background,
+                    foreground: Fluent2Palette.accent-background,
+                    time-selector-style: {
+                        foreground: Fluent2Palette.foreground,
+                        foreground-selected: Fluent2Palette.accent-foreground,
+                        state-brush: Fluent2Palette.state,
+                        state-brush-selected: Fluent2Palette.state-secondary,
+                        font-size: Fluent2FontSettings.body-strong.font-size,
+                        font-weight: Fluent2FontSettings.body-strong.font-weight,
+                        font-family: Fluent2Palette.font-family
+                    }
+                },
+                input-style: {
+                    background: Fluent2Palette.control-background,
+                    background-selected: Fluent2Palette.accent-background,
+                    foreground: Fluent2Palette.foreground,
+                    foreground-selected: Fluent2Palette.accent-foreground,
+                    border-radius: Fluent2SizeSettings.overlay-radius,
+                    font-size: Fluent2SizeSettings.time-input-display.font-size,
+                    font-weight: Fluent2SizeSettings.time-input-display.font-weight,
+                    font-family: Fluent2Palette.font-family
+                },
+                period-selector-style: {
+                    border-radius: Fluent2SizeSettings.overlay-radius,
+                    border-width: Fluent2SizeSettings.stroke-width,
+                    border-brush: Fluent2Palette.border,
+                    item-style: {
+                        font-size: Fluent2FontSettings.body-strong.font-size,
+                        font-weight: Fluent2FontSettings.body-strong.font-weight,
+                        font-family: Fluent2Palette.font-family,
+                        foreground: Fluent2Palette.foreground,
+                        state-brush: Fluent2Palette.state,
+                        background-selected: Fluent2Palette.accent-background,
+                        state-brush-selected: Fluent2Palette.state-secondary,
+                        foreground-selected: Fluent2Palette.accent-foreground
+                    }
+                },
+                title-style: {
+                    font-size: Fluent2FontSettings.body.font-size,
+                    font-weight: Fluent2FontSettings.body.font-weight,
+                    font-family: Fluent2Palette.font-family,
+                    foreground: Fluent2Palette.foreground,
+                },
+            };
+        }
+
+        Button {
+            icon: base.selection-mode ? Icons.keyboard : Icons.clock;
+            colorize-icon: true;
+            accessible-label: "Toggle input picker";
+            dialog-button-role: action;
+
+            clicked => {
+                base.selection-mode = !base.selection-mode;
+            }
+        }
+
+        StandardButton {
+            kind: cancel;
+
+            clicked => {
+                root.close();
+                root.canceled();
+            }
+        }
+
+        StandardButton {
+            enabled: base.ok-enabled();
+            kind: ok;
+
+            clicked => {
+                root.close();
+                root.accepted(base.get-current-time());
+            }
+        }
+    }
+}

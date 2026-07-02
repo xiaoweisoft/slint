@@ -1,0 +1,85 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { Fluent2Palette, Fluent2FontSettings, Fluent2SizeSettings } from "styling.slint";
+import { MenuBarItemBase, MenuBarBase, MenuFrameBase, MenuItemBase } from "menu-base.slint";
+
+export component MenuBarItem {
+    in property <MenuEntry> entry <=> base.entry;
+
+    callback clicked <=> base.clicked;
+    callback hovered <=> base.hovered;
+
+    min-width: base.min-width;
+    min-height: base.min-height;
+
+    base := MenuBarItemBase {
+        horizontal-padding: Fluent2SizeSettings.control-horizontal-padding;
+        top-padding: Fluent2SizeSettings.control-vertical-padding;
+        bottom-padding: Fluent2SizeSettings.menu-bar-item-bottom-padding;
+        default-foreground: Fluent2Palette.foreground;
+        hover-foreground: Fluent2Palette.foreground;
+        pressed-foreground: Fluent2Palette.text-secondary;
+        hover-background: Fluent2Palette.subtle-secondary;
+        pressed-background: Fluent2Palette.control-alt-tertiary;
+        font-size: Fluent2FontSettings.body.font-size;
+        font-weight: Fluent2FontSettings.body.font-weight;
+        font-family: Fluent2Palette.font-family;
+        border-radius: Fluent2SizeSettings.control-radius;
+    }
+}
+
+export component MenuBar inherits MenuBarBase {
+    spacing: Fluent2SizeSettings.control-spacing;
+    min-layout-height: Fluent2SizeSettings.menu-bar-height;
+}
+
+export component MenuFrame inherits MenuFrameBase {
+    background: Fluent2Palette.background;
+    border-radius: Fluent2SizeSettings.overlay-radius;
+    border-width: Fluent2SizeSettings.stroke-width;
+    border-color: Fluent2Palette.border;
+    drop-shadow-color: Fluent2Palette.elevation-shadow-flyout-color;
+    drop-shadow-offset-y: Fluent2SizeSettings.elevation-shadow-flyout-offset-y;
+    drop-shadow-blur: Fluent2SizeSettings.elevation-shadow-flyout-blur;
+    margin: Fluent2SizeSettings.menu-frame-margin;
+    layout-min-width: Fluent2SizeSettings.menu-frame-min-width;
+}
+
+export component MenuItem {
+    in property <bool> is-current <=> base.is-current;
+    in property <MenuEntry> entry <=> base.entry;
+
+    callback set-current <=> base.set-current;
+    callback clear-current <=> base.clear-current;
+    callback activate <=> base.activate;
+
+    min-height: entry.is-separator ? Fluent2SizeSettings.menu-separator-height : max(Fluent2SizeSettings.compact-item-height, base.min-height);
+    max-height: entry.is-separator ? Fluent2SizeSettings.menu-separator-height : base.max-height;
+
+    HorizontalLayout {
+        padding: entry.is-separator ? Fluent2SizeSettings.overlay-padding : Fluent2SizeSettings.menu-item-outer-padding;
+        padding-left: entry.is-separator ? 0px : Fluent2SizeSettings.menu-item-outer-padding;
+        padding-right: entry.is-separator ? 0px : Fluent2SizeSettings.menu-item-outer-padding;
+
+        base := MenuItemBase {
+            default-foreground: Fluent2Palette.foreground;
+            current-foreground: Fluent2Palette.foreground;
+            current-background: Fluent2Palette.subtle-secondary;
+            separator-color: Fluent2Palette.border;
+            font-size: Fluent2FontSettings.body.font-size;
+            font-weight: Fluent2FontSettings.body.font-weight;
+            font-family: Fluent2Palette.font-family;
+            border-radius: Fluent2SizeSettings.control-radius;
+            horizontal-padding: Fluent2SizeSettings.control-horizontal-padding;
+            vertical-padding: Fluent2SizeSettings.menu-item-vertical-padding;
+            spacing: Fluent2SizeSettings.control-spacing;
+            content-spacing: Fluent2SizeSettings.menu-item-content-spacing;
+            check-icon: @image-url("_check-mark.svg");
+            sub-menu-icon: @image-url("_arrow_forward.svg");
+            icon-size: Fluent2SizeSettings.icon-size;
+            separator-height: Fluent2SizeSettings.separator-thickness;
+            disabled-opacity: Fluent2SizeSettings.disabled-opacity;
+        }
+    }
+}

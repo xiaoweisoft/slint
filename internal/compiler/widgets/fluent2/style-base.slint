@@ -1,0 +1,39 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+//! This file contains only StyleMetrics and Palette, with minimal dependencies.
+//! It is used by the compiler to avoid loading the entire widget library.
+
+import { Fluent2Palette, Fluent2SizeSettings } from "styling.slint";
+
+export global StyleMetrics {
+    out property <length> layout-spacing: Fluent2SizeSettings.layout-spacing;
+    out property <length> layout-padding: Fluent2SizeSettings.layout-padding;
+    out property <length> text-cursor-width: Fluent2SizeSettings.text-cursor-width;
+    out property <color> window-background: Fluent2Palette.background;
+    out property <color> default-text-color: Fluent2Palette.foreground;
+    out property <color> textedit-background: Fluent2Palette.background;
+    out property <color> textedit-text-color: Fluent2Palette.foreground;
+    out property <color> textedit-background-disabled: Fluent2Palette.control-disabled;
+    out property <color> textedit-text-color-disabled: Fluent2Palette.text-disabled;
+    out property <bool> dark-color-scheme: Palette.color-scheme == ColorScheme.dark;
+}
+
+export global Palette {
+    out property <brush> background: Fluent2Palette.background;
+    out property <brush> foreground: Fluent2Palette.foreground;
+    out property <brush> alternate-background: Fluent2Palette.alternate-background;
+    out property <brush> alternate-foreground: Fluent2Palette.alternate-foreground;
+    out property <brush> control-background: Fluent2Palette.control-background;
+    out property <brush> control-foreground: Fluent2Palette.control-foreground;
+    out property <brush> accent-background: Fluent2Palette.accent-background;
+    out property <brush> accent-foreground: Fluent2Palette.accent-foreground;
+    out property <brush> selection-background: Fluent2Palette.selection-background;
+    out property <brush> selection-foreground: Fluent2Palette.selection-foreground;
+    out property <brush> border: Fluent2Palette.border;
+    in-out property <ColorScheme> color-scheme <=> Fluent2Palette.color-scheme;
+    in-out property <string> theme-engine <=> Fluent2Palette.theme-engine;
+    in-out property <string> font-family <=> Fluent2Palette.font-family;
+    in-out property <color> accent-color-override <=> Fluent2Palette.accent-color-override;
+    in-out property <color> retro-accent-color-override <=> Fluent2Palette.retro-accent-color-override;
+}

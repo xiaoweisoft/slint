@@ -42,6 +42,76 @@ fn android_backend_log(message: &str) {
     }
 }
 
+#[cfg(target_os = "android")]
+fn dispatch_xiaoweios_controller_axis(axis: Axis, value: f32, source: Source) -> bool {
+    type AxisHook = unsafe extern "C" fn(i32, f32, i32) -> bool;
+    let Some(hook) = lookup_xiaoweios_controller_hook::<AxisHook>(
+        b"xiaoweios_slint_android_controller_axis_event\0",
+    ) else {
+        return false;
+    };
+    unsafe { hook(u32::from(axis) as i32, value, u32::from(source) as i32) }
+}
+
+#[cfg(target_os = "android")]
+fn lookup_xiaoweios_controller_hook<T>(symbol: &'static [u8]) -> Option<T>
+where
+    T: Copy,
+{
+    use core::ffi::{c_char, c_void};
+
+    unsafe extern "C" {
+        fn dlsym(handle: *mut c_void, symbol: *const c_char) -> *mut c_void;
+    }
+
+    let ptr = unsafe { dlsym(core::ptr::null_mut(), symbol.as_ptr().cast()) };
+    if ptr.is_null() { None } else { Some(unsafe { core::mem::transmute_copy(&ptr) }) }
+}
+
+#[cfg(not(target_os = "android"))]
+fn dispatch_xiaoweios_controller_axis(_axis: Axis, _value: f32, _source: Source) -> bool {
+    false
+}
+
+#[cfg(target_os = "android")]
+fn dispatch_xiaoweios_controller_key(key_event: &android_activity::input::KeyEvent) -> bool {
+    if !matches!(
+        key_event.key_code(),
+        Keycode::Back
+            | Keycode::DpadUp
+            | Keycode::DpadDown
+            | Keycode::DpadLeft
+            | Keycode::DpadRight
+            | Keycode::DpadCenter
+    ) {
+        return false;
+    }
+    let action = match key_event.action() {
+        KeyAction::Down | KeyAction::Multiple => 0,
+        KeyAction::Up => 1,
+        _ => return false,
+    };
+    type KeyHook = unsafe extern "C" fn(i32, i32, i32, i32) -> bool;
+    let Some(hook) = lookup_xiaoweios_controller_hook::<KeyHook>(
+        b"xiaoweios_slint_android_controller_key_event\0",
+    ) else {
+        return false;
+    };
+    unsafe {
+        hook(
+            u32::from(key_event.key_code()) as i32,
+            action,
+            key_event.repeat_count() as i32,
+            u32::from(key_event.source()) as i32,
+        )
+    }
+}
+
+#[cfg(not(target_os = "android"))]
+fn dispatch_xiaoweios_controller_key(_key_event: &android_activity::input::KeyEvent) -> bool {
+    false
+}
+
 struct LongPressDetection {
     _timer: Timer,
     position: LogicalPosition,
@@ -567,6 +637,18 @@ impl AndroidWindowAdapter {
             "input controller motion source=0x{source_bits:x} x={x:.3} y={y:.3} hat_x={hat_x:.3} hat_y={hat_y:.3}"
         ));
 
+        let mut handled_by_shell = false;
+        handled_by_shell |= dispatch_xiaoweios_controller_axis(Axis::X, x, motion_event.source());
+        handled_by_shell |= dispatch_xiaoweios_controller_axis(Axis::Y, y, motion_event.source());
+        handled_by_shell |=
+            dispatch_xiaoweios_controller_axis(Axis::HatX, hat_x, motion_event.source());
+        handled_by_shell |=
+            dispatch_xiaoweios_controller_axis(Axis::HatY, hat_y, motion_event.source());
+        if handled_by_shell {
+            android_backend_log("input controller motion routed=xiaoweios-shell");
+            return true;
+        }
+
         self.update_controller_axis(&self.controller_axis_x, axis_key_horizontal(x));
         self.update_controller_axis(&self.controller_axis_y, axis_key_vertical(y));
         self.update_controller_axis(&self.controller_axis_hat_x, axis_key_horizontal(hat_x));
@@ -807,6 +889,10 @@ fn button_for_event(
 }
 
 fn map_key_event(key_event: &android_activity::input::KeyEvent) -> Option<WindowEvent> {
+    if dispatch_xiaoweios_controller_key(key_event) {
+        android_backend_log("input key routed=xiaoweios-shell");
+        return None;
+    }
     let text = map_key_code(key_event.key_code())?;
     let repeat = key_event.repeat_count() > 0;
     match key_event.action() {

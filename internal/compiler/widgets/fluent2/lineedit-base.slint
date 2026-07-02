@@ -1,0 +1,222 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { Fluent2Palette, Fluent2SizeSettings } from "styling.slint";
+import { FocusTouchArea, StateLayer } from "internal-components.slint";
+
+export component LineEditBase inherits Rectangle {
+    in property <string> placeholder-text;
+    in property <length> font-size <=> text-input.font-size;
+    in property <string> font-family <=> text-input.font-family;
+    in property <bool> font-italic <=> text-input.font-italic;
+    in-out property <string> text <=> text-input.text;
+    in-out property <brush> placeholder-color;
+    in property <bool> enabled <=> text-input.enabled;
+    out property <bool> has-focus: text-input.has-focus;
+    in property <InputType> input-type <=> text-input.input-type;
+    in property <TextHorizontalAlignment> horizontal-alignment <=> text-input.horizontal-alignment;
+    in property <bool> read-only <=> text-input.read-only;
+    in property <int> font-weight <=> text-input.font-weight;
+    in property <brush> text-color;
+    in property <color> selection-background-color <=> text-input.selection-background-color;
+    in property <color> selection-foreground-color <=> text-input.selection-foreground-color;
+    in property <length> margin;
+
+    callback accepted(text: string);
+    callback edited(text: string);
+    callback key-pressed(event: KeyEvent) -> EventResult;
+    callback key-released(event: KeyEvent) -> EventResult;
+
+    public function set-selection-offsets(start: int, end: int) {
+        text-input.set-selection-offsets(start, end);
+    }
+
+    public function select-all() {
+        text-input.select-all();
+    }
+
+    public function clear-selection() {
+        text-input.clear-selection();
+    }
+
+    public function cut() {
+        text-input.cut();
+    }
+
+    public function copy() {
+        text-input.copy();
+    }
+
+    public function paste() {
+        text-input.paste();
+    }
+
+    // TextInput cannot receive focus when clipped or narrower than this floor.
+    min-width: Fluent2SizeSettings.input-min-focusable-width;
+    min-height: text-input.preferred-height;
+    clip: true;
+    forward-focus: text-input;
+
+    placeholder := Text {
+        width: 100%;
+        height: 100%;
+        vertical-alignment: center;
+        text: (root.text == "" && text-input.preedit-text == "") ? root.placeholder-text : "";
+        font-size: text-input.font-size;
+        font-italic: text-input.font-italic;
+        font-weight: text-input.font-weight;
+        font-family: text-input.font-family;
+        color: root.placeholder-color;
+        horizontal-alignment: root.horizontal-alignment;
+        // `accessible-placeholder-text` is set on LineEdit already
+        accessible-role: none;
+    }
+
+    ContextMenuArea {
+        enabled: root.enabled;
+        Menu {
+            MenuItem {
+                title: @tr("Cut");
+                enabled: !root.read-only && root.enabled;
+                activated => {
+                    text-input.cut();
+                }
+            }
+
+            MenuItem {
+                title: @tr("Copy");
+                enabled: !root.text.is-empty;
+                activated => {
+                    text-input.copy();
+                }
+            }
+
+            MenuItem {
+                title: @tr("Paste");
+                enabled: !root.read-only && root.enabled;
+                activated => {
+                    text-input.paste();
+                }
+            }
+
+            MenuItem {
+                title: @tr("Select All");
+                enabled: !root.text.is-empty;
+                activated => {
+                    text-input.select-all();
+                }
+            }
+        }
+
+        text-input := TextInput {
+            property <length> computed-x;
+
+            x: min(0px, max(parent.width - self.width - self.text-cursor-width, self.computed-x));
+            width: max(parent.width - self.text-cursor-width, self.preferred-width);
+            height: 100%;
+            vertical-alignment: center;
+            single-line: true;
+            color: root.text-color;
+            // Disable TextInput's built-in accessibility support as the widget takes care of that.
+            accessible-role: none;
+
+            cursor-position-changed(cursor-position) => {
+                if cursor-position.x + self.computed_x < root.margin {
+                    self.computed_x = - cursor-position.x + root.margin;
+                } else if cursor-position.x + self.computed_x > parent.width - root.margin - self.text-cursor-width {
+                    self.computed_x = parent.width - cursor-position.x - root.margin - self.text-cursor-width;
+                }
+            }
+
+            accepted => {
+                root.accepted(self.text);
+            }
+
+            edited => {
+                root.edited(self.text);
+            }
+
+            key-pressed(event) => {
+                root.key-pressed(event)
+            }
+
+            key-released(event) => {
+                root.key-released(event)
+            }
+        }
+    }
+}
+
+export component LineEditClearIcon {
+    in-out property <string> text;
+    in property <bool> enabled: true;
+    in property <image> source <=> icon.source;
+    in property <brush> colorize <=> icon.colorize;
+    in property <length> icon-size: Fluent2SizeSettings.lineedit-icon-size;
+    in property <brush> state-brush: Fluent2Palette.state;
+    callback clear();
+
+    min-width: Fluent2SizeSettings.lineedit-icon-touch-target;
+    min-height: Fluent2SizeSettings.lineedit-icon-touch-target;
+    state-layer := StateLayer {
+        enabled: root.enabled;
+        pressed: touch-area.pressed;
+        has-hover: touch-area.has-hover;
+        has-focus: touch-area.has-focus;
+        state-brush: root.state-brush;
+        border-radius: max(root.width, root.height) / 2;
+    }
+    touch-area := FocusTouchArea {
+        width: 100%;
+        height: 100%;
+        enabled: root.enabled;
+        clicked => { root.clear(); }
+    }
+
+    icon := Image {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        width: root.icon-size;
+        image-fit: contain;
+        accessible-role: none;
+    }
+}
+
+export component LineEditPasswordIcon {
+    callback show-password-changed(bool);
+    in property <bool> enabled: true;
+    in property <bool> show-password;
+    in property <image> show-password-image;
+    in property <image> hide-password-image;
+    in property <brush> colorize <=> icon.colorize;
+    in property <length> icon-size: Fluent2SizeSettings.lineedit-icon-size;
+    in property <brush> state-brush: Fluent2Palette.state;
+
+    min-width: Fluent2SizeSettings.lineedit-icon-touch-target;
+    min-height: Fluent2SizeSettings.lineedit-icon-touch-target;
+    state-layer := StateLayer {
+        enabled: root.enabled;
+        pressed: touch-area.pressed;
+        has-hover: touch-area.has-hover;
+        has-focus: touch-area.has-focus;
+        state-brush: root.state-brush;
+        border-radius: max(root.width, root.height) / 2;
+    }
+    touch-area := FocusTouchArea {
+        width: 100%;
+        height: 100%;
+        enabled: root.enabled;
+        clicked => {
+            root.show-password-changed(!show-password);
+        }
+    }
+
+    icon := Image {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        source: root.show-password ? root.hide-password-image : root.show-password-image;
+        width: root.icon-size;
+        image-fit: contain;
+        accessible-role: none;
+    }
+}

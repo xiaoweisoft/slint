@@ -1,0 +1,148 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { Fluent2Palette, Fluent2FontSettings, Fluent2SizeSettings, Icons } from "styling.slint";
+import { SpinBoxBase } from "spinbox-base.slint";
+
+component SpinBoxButton {
+    callback clicked <=> touch-area.clicked;
+
+    in property <image> icon <=> icon.source;
+    in property <bool> enabled: true;
+
+    min-width: Fluent2SizeSettings.compact-control-height;
+    horizontal-stretch: 0;
+
+    states [
+        disabled when !root.enabled : {
+            icon.colorize: Fluent2Palette.text-disabled;
+        }
+        pressed when touch-area.pressed : {
+            background.background: Fluent2Palette.subtle-tertiary;
+            icon.colorize: Fluent2Palette.text-tertiary;
+        }
+        hover when touch-area.has-hover : {
+            background.background: Fluent2Palette.subtle-secondary;
+        }
+    ]
+
+    background := Rectangle {
+        border-radius: Fluent2SizeSettings.control-radius;
+
+        animate background, border-color { duration: Fluent2SizeSettings.control-motion-duration; }
+
+        icon := Image {
+            image-fit: contain;
+            colorize: Fluent2Palette.text-secondary;
+            width: Fluent2SizeSettings.icon-size;
+            accessible-role: none;
+
+            animate colorize { duration: Fluent2SizeSettings.control-motion-duration; }
+        }
+    }
+
+    touch-area := TouchArea {
+        enabled: root.enabled;
+    }
+}
+
+export component SpinBox {
+    in property <int> minimum <=> base.minimum;
+    in property <int> maximum <=> base.maximum;
+    in property <bool> enabled <=> base.enabled;
+    in property <int> step-size <=> base.step-size;
+    in property <bool> read-only <=> base.read-only;
+    in property <TextHorizontalAlignment> horizontal-alignment <=> base.horizontal-alignment;
+    out property <bool> has-focus <=> base.has-focus;
+    in-out property <int> value <=> base.value;
+
+    callback edited <=> base.edited;
+
+    min-width: max(Fluent2SizeSettings.spinbox-min-width, layout.min-width);
+    min-height: max(Fluent2SizeSettings.control-height, layout.min-height);
+    vertical-stretch: 0;
+    horizontal-stretch: 1;
+    forward-focus: base;
+
+    accessible-role: spinbox;
+    accessible-enabled: root.enabled;
+    accessible-value: root.value;
+    accessible-value-minimum: root.minimum;
+    accessible-value-maximum: root.maximum;
+    accessible-value-step: (root.maximum - root.minimum) / 100;
+    accessible-action-set-value(v) => { if v.is-float() { base.update-value(v.to-float()); } }
+    accessible-action-increment => { base.increment(); }
+    accessible-action-decrement => { base.decrement(); }
+    accessible-read-only: root.read-only;
+
+    states [
+        disabled when !root.enabled : {
+            background.background: Fluent2Palette.control-disabled;
+            background.border-color: Fluent2Palette.border;
+            base.color: Fluent2Palette.text-disabled;
+            base.selection-foreground-color: Fluent2Palette.text-accent-foreground-disabled;
+        }
+        focused when root.has-focus : {
+            background.background: Fluent2Palette.control-input-active;
+            background.border-color: Fluent2Palette.border;
+            focus-border.background: Fluent2Palette.accent-background;
+        }
+    ]
+
+    background := Rectangle {
+        border-radius: Fluent2SizeSettings.control-radius;
+        background: Fluent2Palette.control-background;
+        border-width: Fluent2SizeSettings.stroke-width;
+        border-color: Fluent2Palette.text-control-border;
+
+        layout := HorizontalLayout {
+            padding-left: Fluent2SizeSettings.control-horizontal-padding;
+            padding-right: Fluent2SizeSettings.control-tight-horizontal-padding;
+            padding-top: Fluent2SizeSettings.control-vertical-padding;
+            padding-bottom: Fluent2SizeSettings.control-vertical-padding;
+            spacing: Fluent2SizeSettings.overlay-padding;
+
+            Rectangle {
+                clip: true;
+                horizontal-stretch: 1;
+
+                base := SpinBoxBase {
+                    width: 100%;
+                    color: Fluent2Palette.control-foreground;
+                    font-size: Fluent2FontSettings.body.font-size;
+                    font-weight: Fluent2FontSettings.body.font-weight;
+                    font-family: Fluent2Palette.font-family;
+                    selection-background-color: Fluent2Palette.selection-background;
+                    selection-foreground-color: Fluent2Palette.accent-foreground;
+                }
+            }
+
+            SpinBoxButton {
+                enabled: root.enabled && !root.read-only;
+                visible: !root.read-only;
+                icon: Icons.chevron-up;
+
+                clicked => {
+                    base.increment();
+                }
+            }
+
+            SpinBoxButton {
+                enabled: root.enabled && !root.read-only;
+                visible: !root.read-only;
+                icon: Icons.chevron-down;
+
+                clicked => {
+                    base.decrement();
+                }
+            }
+        }
+
+        focus-border := Rectangle {
+            x: parent.border-radius;
+            y: parent.height - self.height;
+            width: parent.width - 2 * parent.border-radius;
+            height: Fluent2SizeSettings.input-focus-indicator-height;
+        }
+    }
+}

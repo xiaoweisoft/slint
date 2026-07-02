@@ -1,0 +1,110 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { Fluent2FontSettings, Fluent2Palette, Fluent2SizeSettings, Icons } from "styling.slint";
+import { FocusBorder } from "components.slint";
+import { FocusTouchArea } from "internal-components.slint";
+
+export component CheckBox {
+    in property <string> text;
+    in property <bool> enabled: true;
+    out property <bool> has-focus: touch-area.has-focus;
+    in-out property <bool> checked;
+
+    callback toggled;
+
+    private property <color> text-color: Fluent2Palette.foreground;
+
+    min-height: max(Fluent2SizeSettings.checkbox-size, layout.min-height);
+    accessible-checkable: true;
+    accessible-enabled: root.enabled;
+    accessible-label: root.text;
+    accessible-checked <=> root.checked;
+    accessible-role: checkbox;
+    accessible-action-default => {
+        if (root.enabled) {
+           root.checked = !root.checked;
+           root.toggled();
+        }
+    }
+    forward-focus: touch-area;
+
+    states [
+        disabled when !root.enabled : {
+            border.border-color: Fluent2Palette.control-strong-stroke-disabled;
+            background.background: root.checked ? Fluent2Palette.accent-disabled : Fluent2Palette.control-alt-disabled;
+            icon.colorize: Fluent2Palette.text-accent-foreground-disabled;
+            root.text-color: Fluent2Palette.text-disabled;
+        }
+        pressed when touch-area.pressed : {
+            border.border-color: Fluent2Palette.control-strong-stroke-disabled;
+            background.background: root.checked ? Fluent2Palette.tertiary-accent-background : Fluent2Palette.control-alt-quartiary;
+            icon.colorize: Fluent2Palette.text-accent-foreground-secondary;
+        }
+        hover when touch-area.has-hover : {
+            background.background: root.checked ?  Fluent2Palette.secondary-accent-background : Fluent2Palette.control-alt-tertiary;
+        }
+        checked when root.checked && root.enabled : {
+            background.background: Fluent2Palette.accent-background;
+        }
+    ]
+
+    animate text-color { duration: Fluent2SizeSettings.control-motion-duration; }
+
+    layout := HorizontalLayout {
+        spacing: Fluent2SizeSettings.control-label-spacing;
+
+        background := Rectangle {
+            width: Fluent2SizeSettings.checkbox-size;
+            height: self.width;
+            y: (parent.height - self.height) / 2;
+            background: Fluent2Palette.control-alt-secondary;
+            border-radius: Fluent2SizeSettings.checkbox-radius;
+
+            animate background, border-color { duration: Fluent2SizeSettings.control-motion-duration; }
+
+            border := Rectangle {
+                border-color: Fluent2Palette.control-strong-stroke;
+                border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.stroke-width;
+                border-radius: parent.border-radius;
+            }
+
+            icon := Image {
+                image-fit: contain;
+                visible: root.checked;
+                source: Icons.check-mark;
+                colorize: Fluent2Palette.accent-foreground;
+                width: Fluent2SizeSettings.icon-size;
+                accessible-role: none;
+
+                animate colorize { duration: Fluent2SizeSettings.control-motion-duration; }
+            }
+        }
+
+        if root.text != "" : Text {
+            text: root.text;
+            color: root.text-color;
+            font-size: Fluent2FontSettings.body.font-size;
+            font-weight: Fluent2FontSettings.body.font-weight;
+            font-family: Fluent2Palette.font-family;
+            vertical-alignment: center;
+            horizontal-alignment: left;
+        }
+    }
+
+    touch-area := FocusTouchArea {
+        enabled: root.enabled;
+
+        clicked => {
+            if (root.enabled) {
+                root.checked = !root.checked;
+                root.toggled();
+            }
+        }
+    }
+
+    // focus border
+    if root.has-focus && root.enabled : FocusBorder {
+        border-radius: Fluent2SizeSettings.button-radius;
+    }
+}

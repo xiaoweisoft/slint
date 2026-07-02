@@ -1,0 +1,109 @@
+// Copyright © SixtyFPS GmbH <info@slint.dev>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
+
+import { Fluent2Palette, Fluent2SizeSettings } from "styling.slint";
+import { SliderBase } from "slider-base.slint";
+
+export component Slider {
+    in property <Orientation> orientation <=> base.orientation;
+    in property <float> maximum <=> base.maximum;
+    in property <float> minimum <=> base.minimum;
+    in property <float> step <=> base.step;
+    in property <bool> enabled <=> base.enabled;
+    out property <bool> has-focus: base.has-focus;
+    in-out property <float> value <=> base.value;
+
+    callback changed <=> base.changed;
+    callback released <=> base.released;
+
+    min-width: base.vertical ? Fluent2SizeSettings.slider-thumb-size : 0px;
+    min-height: base.vertical ? 0px : Fluent2SizeSettings.slider-thumb-size;
+    vertical-stretch: base.vertical ? 1 : 0;
+    horizontal-stretch: base.vertical ? 0 : 1;
+    accessible-role: slider;
+    accessible-enabled: root.enabled;
+    accessible-value: root.value;
+    accessible-value-minimum: root.minimum;
+    accessible-value-maximum: root.maximum;
+    accessible-value-step: min(root.step, (root.maximum - root.minimum) / 100);
+    accessible-action-set-value(v) => {
+        if v.is-float() {
+            base.set-value(v.to-float());
+        }
+    }
+    accessible-action-increment => { base.increment(); }
+    accessible-action-decrement => { base.decrement(); }
+    forward-focus: base;
+
+    states [
+        disabled when !root.enabled : {
+            track.background: Fluent2Palette.accent-disabled;
+            rail.background: Fluent2Palette.accent-disabled;
+            thumb-inner.background: Fluent2Palette.accent-disabled;
+        }
+        pressed when base.handle-pressed || base.has-focus : {
+            thumb-inner.width: Fluent2SizeSettings.slider-thumb-pressed-size;
+            thumb-inner.background: Fluent2Palette.tertiary-accent-background;
+            thumb.border-color: Fluent2Palette.border;
+        }
+        hover when base.has-hover : {
+            thumb-inner.width: Fluent2SizeSettings.slider-thumb-hover-size;
+            thumb-inner.background: Fluent2Palette.secondary-accent-background;
+        }
+    ]
+
+    rail := Rectangle {
+        x: base.vertical ? (parent.width - self.width) / 2 : thumb.width / 2;
+        y: base.vertical ? thumb.height / 2 : (parent.height - self.height) / 2;
+        width: base.vertical ? Fluent2SizeSettings.slider-track-size : parent.width - thumb.width;
+        height: base.vertical ? parent.height - thumb.height : Fluent2SizeSettings.slider-track-size;
+        background: Fluent2Palette.border;
+        border-radius: Fluent2SizeSettings.slider-track-radius;
+    }
+
+    track := Rectangle {
+        x: base.vertical ? (parent.width - self.width) / 2 : thumb.width / 2;
+        y: base.vertical ? thumb.y + thumb.height / 2 : (parent.height - self.height) / 2;
+        width: base.vertical ? rail.width : thumb.x;
+        height: base.vertical ? parent.height - thumb.y - thumb.height : rail.height;
+        background: Fluent2Palette.accent-background;
+        border-radius: rail.border-radius;
+    }
+
+    thumb := Rectangle {
+        x: base.vertical ? (parent.width - self.width) / 2 : clamp((parent.width - self.width) * (root.value - root.minimum) / (root.maximum - root.minimum), 0, parent.width - self.width);
+        y: base.vertical ? clamp((parent.height - self.height) * (root.maximum - root.value) / (root.maximum - root.minimum), 0, parent.height - self.height) : (parent.height - self.height) / 2;
+        width: Fluent2SizeSettings.slider-thumb-size;
+        height: self.width;
+        border-radius: Fluent2SizeSettings.slider-thumb-radius;
+        background: Fluent2Palette.control-solid;
+
+        thumb-border := Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            width: Fluent2SizeSettings.slider-thumb-border-size;
+            height: self.width;
+            border-radius: Fluent2SizeSettings.slider-thumb-border-radius;
+            border-width: Fluent2SizeSettings.stroke-width;
+            border-color: Fluent2Palette.circle-border;
+        }
+
+        thumb-inner := Rectangle {
+            width: Fluent2SizeSettings.icon-size;
+            height: self.width;
+            border-radius: self.width / 2;
+            background: Fluent2Palette.accent-background;
+
+            animate background, width { duration: Fluent2SizeSettings.control-motion-duration; }
+        }
+    }
+
+    base := SliderBase {
+        width: 100%;
+        height: 100%;
+        handle-x: thumb.x;
+        handle-y: thumb.y;
+        handle-width: thumb.width;
+        handle-height: thumb.height;
+    }
+}
