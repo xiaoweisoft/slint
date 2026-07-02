@@ -2259,9 +2259,12 @@ fn test_fluent2_scrollbar_thumb_radius_uses_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for token in
-        ["scrollbar-track-radius", "scrollbar-track-border-width", "scrollbar-thumb-radius"]
-    {
+    for token in [
+        "scrollbar-track-radius",
+        "scrollbar-track-border-width",
+        "scrollbar-thumb-radius",
+        "scrollbar-zero-range-thumb-size",
+    ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
@@ -2283,6 +2286,11 @@ fn test_fluent2_scrollbar_thumb_radius_uses_tokens() {
         "fluent2 scrollbar thumb should use the thumb radius token"
     );
     assert!(
+        source
+            .contains("root.maximum <= 0phx ? Fluent2SizeSettings.scrollbar-zero-range-thumb-size"),
+        "fluent2 scrollbar thumb should use the zero-range thumb size token"
+    );
+    assert!(
         !source.contains("border-radius: Fluent2SizeSettings.overlay-radius"),
         "fluent2 scrollbar track should not borrow the generic overlay radius token"
     );
@@ -2293,6 +2301,10 @@ fn test_fluent2_scrollbar_thumb_radius_uses_tokens() {
     assert!(
         !source.contains("border-radius: (root.horizontal ? self.height : self.width) / 2"),
         "fluent2 scrollbar thumb radius should not be derived from live thumb geometry"
+    );
+    assert!(
+        !source.contains("root.maximum <= 0phx ? 0phx"),
+        "fluent2 scrollbar thumb zero-range size should not be hardcoded"
     );
 }
 
