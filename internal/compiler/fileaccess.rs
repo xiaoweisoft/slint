@@ -259,6 +259,44 @@ fn test_fluent2_render_fixture_covers_representative_controls() {
 }
 
 #[test]
+fn test_fluent2_alias_render_fixtures_cover_light_and_dark_schemes() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    let light_path = fixture_root.join("fluent2-states-light.md");
+    let dark_path = fixture_root.join("fluent2-states-dark.md");
+    let light = std::fs::read_to_string(&light_path)
+        .unwrap_or_else(|err| panic!("failed to read {light_path:?}: {err}"));
+    let dark = std::fs::read_to_string(&dark_path)
+        .unwrap_or_else(|err| panic!("failed to read {dark_path:?}: {err}"));
+
+    for (source, scheme, image) in [
+        (&light, "fluent2-light", "fluent2-states-light.png"),
+        (&dark, "fluent2-dark", "fluent2-states-dark.png"),
+    ] {
+        assert!(
+            source.contains(&format!(
+                "imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""
+            )),
+            "{scheme} render fixture should write to its scheme-specific image"
+        );
+        assert!(source.contains("import { Palette,"), "{scheme} fixture should use std widgets");
+        assert!(
+            source.contains("Button { text: \"Primary\"; primary: true; }"),
+            "{scheme} fixture should cover primary button rendering"
+        );
+        assert!(
+            source.contains("ScrollView {"),
+            "{scheme} fixture should cover direct ScrollView rendering"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_light_dark_aliases_select_color_scheme() {
     let source = r#"
         import { ColorSchemeSelector } from "color-scheme.slint";
