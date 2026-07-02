@@ -5108,6 +5108,24 @@ fn test_fluent2_picker_radius_geometry_uses_tokens() {
 }
 
 #[test]
+fn test_fluent2_time_picker_clock_selection_uses_bounded_index() {
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/time-picker-base.slint"))
+        .expect("fluent2 should embed time-picker-base.slint");
+    let contents = source.read();
+    let source = std::str::from_utf8(&contents).unwrap();
+
+    assert!(
+        source.contains("if root.current-item >= 0 && root.current-item < root.model.length: Path"),
+        "fluent2 time picker clock hand should render only for a bounded selected index"
+    );
+    assert!(
+        !source
+            .contains("if root.current-item >= 0 || root.current-item < root.model.length: Path"),
+        "fluent2 time picker clock hand should not use an always-true lower/upper bound union"
+    );
+}
+
+#[test]
 fn test_fluent2_picker_icon_state_layer_radius_uses_tokens() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");

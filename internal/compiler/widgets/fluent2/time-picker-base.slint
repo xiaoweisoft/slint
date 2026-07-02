@@ -99,7 +99,7 @@ export component Clock {
         background: root.style.background;
     }
 
-    if root.current-item >= 0 || root.current-item < root.model.length: Path {
+    if root.current-item >= 0 && root.current-item < root.model.length: Path {
         stroke: root.style.foreground;
         stroke-width: Fluent2SizeSettings.time-clock-stroke-width;
         viewbox-width: self.width / 1px;
