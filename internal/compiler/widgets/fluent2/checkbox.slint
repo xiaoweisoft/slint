@@ -65,7 +65,7 @@ export component CheckBox {
 
             border := Rectangle {
                 border-color: Fluent2Palette.checkbox-border;
-                border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.checkbox-border-width;
+                border-width: root.checked ? Fluent2SizeSettings.checkbox-hidden-border-width : Fluent2SizeSettings.checkbox-border-width;
                 border-radius: parent.border-radius;
 
                 animate border-color { duration: Fluent2SizeSettings.checkbox-motion-duration; }

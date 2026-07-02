@@ -1009,7 +1009,7 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
         "background.background: Fluent2Palette.checkbox-checked-background",
         "background: Fluent2Palette.checkbox-background",
         "border-color: Fluent2Palette.checkbox-border",
-        "border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.checkbox-border-width",
+        "border-width: root.checked ? Fluent2SizeSettings.checkbox-hidden-border-width : Fluent2SizeSettings.checkbox-border-width",
         "colorize: Fluent2Palette.checkbox-checkmark-foreground",
     ] {
         assert!(checkbox.contains(expected), "fluent2 CheckBox should use {expected}");
@@ -1027,6 +1027,7 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
         "background.background: Fluent2Palette.accent-background",
         "background: Fluent2Palette.control-alt-secondary",
         "border-color: Fluent2Palette.control-strong-stroke",
+        "border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.checkbox-border-width",
         "border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.stroke-width",
         "colorize: Fluent2Palette.accent-foreground",
     ] {
@@ -3650,7 +3651,7 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
         "fluent2 TabImpl selected surface offset should use the semantic tab border width token"
     );
     assert!(
-        tab_impl.contains("border-width: root.is-current ? Fluent2SizeSettings.tab-border-width : Fluent2SizeSettings.control-hidden-stroke-width"),
+        tab_impl.contains("border-width: root.is-current ? Fluent2SizeSettings.tab-border-width : Fluent2SizeSettings.tab-hidden-border-width"),
         "fluent2 TabImpl selected border should use the semantic tab border width token"
     );
     assert!(
@@ -3712,22 +3713,37 @@ fn test_fluent2_hidden_strokes_use_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    assert!(
-        styling.contains("control-hidden-stroke-width"),
-        "fluent2 styling should expose control-hidden-stroke-width"
-    );
+    for token in [
+        "control-hidden-stroke-width",
+        "checkbox-hidden-border-width",
+        "switch-hidden-thumb-border-width",
+        "switch-hidden-rail-border-width",
+        "tab-hidden-border-width",
+    ] {
+        assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
 
-    for control in ["checkbox.slint", "switch.slint", "tabwidget.slint"] {
+    for (control, expected_tokens) in [
+        ("checkbox.slint", &["Fluent2SizeSettings.checkbox-hidden-border-width"][..]),
+        (
+            "switch.slint",
+            &[
+                "Fluent2SizeSettings.switch-hidden-thumb-border-width",
+                "Fluent2SizeSettings.switch-hidden-rail-border-width",
+            ][..],
+        ),
+        ("tabwidget.slint", &["Fluent2SizeSettings.tab-hidden-border-width"][..]),
+    ] {
         let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{control}")))
             .unwrap_or_else(|| panic!("fluent2 should embed {control}"));
         let source_contents = source.read();
         let source = std::str::from_utf8(&source_contents).unwrap();
 
-        assert!(
-            source.contains("Fluent2SizeSettings.control-hidden-stroke-width"),
-            "fluent2 {control} should use the hidden stroke token"
-        );
+        for token in expected_tokens {
+            assert!(source.contains(token), "fluent2 {control} should use {token}");
+        }
         for copied_literal in [
+            "Fluent2SizeSettings.control-hidden-stroke-width",
             "? 0 : Fluent2SizeSettings.stroke-width",
             "? Fluent2SizeSettings.stroke-width : 0",
             "? Fluent2SizeSettings.stroke-width : 0px",
@@ -4046,7 +4062,7 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
         "thumb.border-color: Fluent2Palette.switch-thumb-border",
         "thumb.border-width: Fluent2SizeSettings.switch-thumb-border-width",
         "thumb.background: Fluent2Palette.switch-thumb-checked-background",
-        "border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.switch-rail-border-width",
+        "border-width: root.checked ? Fluent2SizeSettings.switch-hidden-rail-border-width : Fluent2SizeSettings.switch-rail-border-width",
         "border-color: Fluent2Palette.switch-rail-border",
         "background: Fluent2Palette.switch-rail-background",
         "background: Fluent2Palette.switch-thumb-background",
@@ -4056,7 +4072,9 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
 
     for copied_literal in [
         "thumb.border-width: root.checked ? Fluent2SizeSettings.stroke-width : Fluent2SizeSettings.control-hidden-stroke-width",
+        "thumb.border-width: root.checked ? Fluent2SizeSettings.switch-thumb-border-width : Fluent2SizeSettings.control-hidden-stroke-width",
         "thumb.border-width: Fluent2SizeSettings.stroke-width",
+        "border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.switch-rail-border-width",
         "border-width: root.checked ? Fluent2SizeSettings.control-hidden-stroke-width : Fluent2SizeSettings.stroke-width",
     ] {
         assert!(

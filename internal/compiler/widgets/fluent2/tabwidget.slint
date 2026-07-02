@@ -65,7 +65,7 @@ export component TabImpl inherits Rectangle {
             width: 100%;
             height: parent.height + self.border-radius;
             border-radius: Fluent2SizeSettings.tab-radius;
-            border-width: root.is-current ? Fluent2SizeSettings.tab-border-width : Fluent2SizeSettings.control-hidden-stroke-width;
+            border-width: root.is-current ? Fluent2SizeSettings.tab-border-width : Fluent2SizeSettings.tab-hidden-border-width;
             border-color: Fluent2Palette.tab-border;
             background: i-touch-area.pressed ? Fluent2Palette.tab-pressed-background : root.is-current ? Fluent2Palette.tab-selected-background : i-touch-area.has-hover ? Fluent2Palette.tab-hover-background : Fluent2Palette.tab-background;
         }
