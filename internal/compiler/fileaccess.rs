@@ -1035,6 +1035,41 @@ fn test_fluent2_switch_uses_focus_touch_area() {
 }
 
 #[test]
+fn test_fluent2_tabs_use_focus_touch_area() {
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/tabwidget.slint"))
+        .expect("fluent2 should embed tabwidget.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+
+    assert!(
+        source.contains("FocusTouchArea"),
+        "fluent2 tabs should import the Fluent2 interaction helper"
+    );
+
+    let block = source
+        .split("export component TabImpl")
+        .nth(1)
+        .and_then(|after| after.split("component FluentTabBarBase").next())
+        .expect("fluent2 should define TabImpl");
+
+    for expected in [
+        "out property <bool> has-focus: root.current-focused == root.tab-index || i-touch-area.has-focus",
+        "forward-focus: i-touch-area",
+        "i-touch-area := FocusTouchArea",
+        "enabled <=> root.enabled",
+        "clicked =>",
+        "root.current = root.tab-index",
+    ] {
+        assert!(block.contains(expected), "fluent2 TabImpl should use {expected}");
+    }
+
+    assert!(
+        !block.lines().any(|line| line.trim_start().starts_with("i-touch-area := TouchArea")),
+        "fluent2 TabImpl should use FocusTouchArea instead of a bare TouchArea"
+    );
+}
+
+#[test]
 fn test_fluent2_owns_lineedit_base_geometry() {
     let base = load_file(&std::path::PathBuf::from("builtin:/fluent2/lineedit-base.slint"))
         .expect("fluent2 should own lineedit-base.slint");

@@ -3,12 +3,14 @@
 
 import { Fluent2Palette, Fluent2FontSettings, Fluent2SizeSettings, Icons } from "styling.slint";
 import { SpinBoxBase } from "spinbox-base.slint";
+import { FocusTouchArea } from "internal-components.slint";
 
 component SpinBoxButton {
     callback clicked <=> touch-area.clicked;
 
     in property <image> icon <=> icon.source;
     in property <bool> enabled: true;
+    out property <bool> has-focus: touch-area.has-focus;
 
     min-width: Fluent2SizeSettings.compact-control-height;
     horizontal-stretch: 0;
@@ -41,7 +43,7 @@ component SpinBoxButton {
         }
     }
 
-    touch-area := TouchArea {
+    touch-area := FocusTouchArea {
         enabled: root.enabled;
     }
 }
