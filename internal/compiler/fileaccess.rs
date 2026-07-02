@@ -5730,9 +5730,23 @@ fn test_fluent2_owns_lineedit_base_geometry() {
 
     let base_contents = base.read();
     let base = std::str::from_utf8(&base_contents).unwrap();
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
     assert!(
-        base.contains("Fluent2SizeSettings.input-min-focusable-width"),
-        "fluent2 line edit base should use the minimum focusable width token"
+        styling.lines().any(|line| line.trim()
+            == "out property <length> lineedit-min-focusable-width: input-min-focusable-width;"),
+        "fluent2 styling should expose a line edit semantic focusable-width token"
+    );
+
+    assert!(
+        base.contains("Fluent2SizeSettings.lineedit-min-focusable-width"),
+        "fluent2 line edit base should use the semantic minimum focusable width token"
+    );
+    assert!(
+        !base.contains("Fluent2SizeSettings.input-min-focusable-width"),
+        "fluent2 line edit base should not bind directly to the broad input focusable-width token"
     );
     assert!(
         !base.contains("min-width: 1px"),
