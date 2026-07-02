@@ -923,6 +923,67 @@ fn test_fluent2_combobox_popup_items_use_focus_touch_area() {
 }
 
 #[test]
+fn test_fluent2_list_items_use_focus_touch_area() {
+    let helper = load_file(&std::path::PathBuf::from("builtin:/fluent2/internal-components.slint"))
+        .expect("fluent2 should embed internal-components.slint");
+    let helper_contents = helper.read();
+    let helper = std::str::from_utf8(&helper_contents).unwrap();
+    let helper_block = helper
+        .split("export component FocusTouchArea")
+        .nth(1)
+        .and_then(|after| after.split("export component IconButton").next())
+        .expect("fluent2 should define FocusTouchArea");
+
+    for expected in [
+        "out property <length> pressed-x <=> touch-area.pressed-x",
+        "out property <length> pressed-y <=> touch-area.pressed-y",
+        "out property <length> mouse-x <=> touch-area.mouse-x",
+        "out property <length> mouse-y <=> touch-area.mouse-y",
+        "callback pointer-event <=> touch-area.pointer-event",
+    ] {
+        assert!(helper_block.contains(expected), "fluent2 FocusTouchArea should expose {expected}");
+    }
+
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/listview.slint"))
+        .expect("fluent2 should embed listview.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+
+    assert!(
+        source.contains("FocusTouchArea"),
+        "fluent2 StandardListView should import the Fluent2 interaction helper"
+    );
+
+    let block = source
+        .split("for item[index] in root.model : ListItem")
+        .nth(1)
+        .and_then(|after| after.split("export component StandardListView").next())
+        .expect("fluent2 should define StandardListView item delegates");
+
+    for expected in [
+        "has-focus: i-touch-area.has-focus || (root.has-focus && index == root.focus-item)",
+        "has-hover: i-touch-area.has-hover",
+        "pressed: i-touch-area.pressed",
+        "pressed-x: i-touch-area.pressed-x",
+        "pressed-y: i-touch-area.pressed-y",
+        "i-touch-area := FocusTouchArea",
+        "enabled: true",
+        "clicked =>",
+        "root.set-current-item(index)",
+        "pointer-event(pe) =>",
+        "self.mouse-x - root.absolute-position.x",
+        "self.mouse-y - root.absolute-position.y",
+    ] {
+        assert!(block.contains(expected), "fluent2 StandardListView item should use {expected}");
+    }
+
+    assert!(
+        !block.lines().any(|line| line.trim_start().starts_with("i-touch-area := TouchArea")),
+        "fluent2 StandardListView items should use FocusTouchArea instead of a bare TouchArea"
+    );
+}
+
+#[test]
 fn test_fluent2_button_uses_focus_touch_area() {
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/button.slint"))
         .expect("fluent2 should embed button.slint");

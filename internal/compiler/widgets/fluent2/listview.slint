@@ -3,6 +3,7 @@
 
 import { ListItem, ScrollView } from "std-widgets-impl.slint";
 import { Fluent2SizeSettings } from "styling.slint";
+import { FocusTouchArea } from "internal-components.slint";
 
 export component ListView inherits ScrollView {
     @children
@@ -136,14 +137,16 @@ component StandardListViewBase inherits ListView {
         item: item;
         index: index;
         is-selected: index == root.current-item;
-        has-focus: root.has-focus && index == root.focus-item;
+        has-focus: i-touch-area.has-focus || (root.has-focus && index == root.focus-item);
         has-hover: i-touch-area.has-hover;
         pressed: i-touch-area.pressed;
         pressed-x: i-touch-area.pressed-x;
         pressed-y: i-touch-area.pressed-y;
         accessible-action-default => { i-touch-area.clicked(); }
 
-        i-touch-area := TouchArea {
+        i-touch-area := FocusTouchArea {
+            enabled: true;
+
             clicked => {
                 root.set-current-item(index);
             }

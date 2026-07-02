@@ -31,8 +31,13 @@ export component FocusTouchArea {
     out property <bool> pressed <=> touch-area.pressed;
     out property <bool> has-hover <=> touch-area.has-hover;
     out property <bool> has-focus <=> focus-scope.has-focus;
+    out property <length> pressed-x <=> touch-area.pressed-x;
+    out property <length> pressed-y <=> touch-area.pressed-y;
+    out property <length> mouse-x <=> touch-area.mouse-x;
+    out property <length> mouse-y <=> touch-area.mouse-y;
 
     callback clicked <=> touch-area.clicked;
+    callback pointer-event <=> touch-area.pointer-event;
 
     forward-focus: focus-scope;
 
