@@ -284,6 +284,92 @@ fn test_fluent2_render_fixture_covers_menu_chrome() {
 }
 
 #[test]
+fn test_fluent2_render_fixture_covers_menu_states() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    let menu_states_path = fixture_root.join("fluent2-menu-states.md");
+    let menu_states = std::fs::read_to_string(&menu_states_path)
+        .unwrap_or_else(|err| panic!("failed to read {menu_states_path:?}: {err}"));
+
+    for expected in [
+        "imagePath=\"../assets/generated/fluent2-render-fixtures/fluent2-menu-states.png\"",
+        "MenuBar {",
+        "Menu { title: \"View\";",
+        "MenuItem { title: \"Checked item\"; checkable: true; checked: true; }",
+        "MenuSeparator { }",
+        "MenuItem { title: \"Disabled item\"; enabled: false; }",
+        "Menu { title: \"Nested\";",
+        "MenuItem { title: \"Nested item\"; }",
+    ] {
+        assert!(
+            menu_states.contains(expected),
+            "fluent2 menu states render fixture should include {expected}"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_render_fixture_covers_vertical_tab_chrome() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    let tabs_path = fixture_root.join("fluent2-tabs.md");
+    let tabs = std::fs::read_to_string(&tabs_path)
+        .unwrap_or_else(|err| panic!("failed to read {tabs_path:?}: {err}"));
+
+    for expected in [
+        "imagePath=\"../assets/generated/fluent2-render-fixtures/fluent2-tabs.png\"",
+        "TabBarVerticalImpl {",
+        "current-focused: 0;",
+        "TabImpl { title: \"Overview\"; current: 0; current-focused: 0; tab-index: 0; num-tabs: 3; }",
+        "TabImpl { title: \"Details\"; current: 0; current-focused: 0; tab-index: 1; num-tabs: 3; }",
+        "TabBarHorizontalImpl {",
+        "TabImpl { title: \"History\"; current: 0; current-focused: 0; tab-index: 0; num-tabs: 3; }",
+    ] {
+        assert!(tabs.contains(expected), "fluent2 tabs render fixture should include {expected}");
+    }
+}
+
+#[test]
+fn test_fluent2_render_fixture_covers_picker_surfaces() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    let pickers_path = fixture_root.join("fluent2-pickers.md");
+    let pickers = std::fs::read_to_string(&pickers_path)
+        .unwrap_or_else(|err| panic!("failed to read {pickers_path:?}: {err}"));
+
+    for expected in [
+        "imagePath=\"../assets/generated/fluent2-render-fixtures/fluent2-pickers.png\"",
+        "DatePickerPopup {",
+        "title: \"Pick a date\";",
+        "date: { year: 2026, month: 7, day: 2 };",
+        "TimePickerPopup {",
+        "title: \"Pick a time\";",
+        "time: { hour: 10, minute: 30, second: 0 };",
+        "use-24-hour-format: true;",
+    ] {
+        assert!(
+            pickers.contains(expected),
+            "fluent2 picker render fixture should include {expected}"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_alias_render_fixtures_cover_light_and_dark_schemes() {
     let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let fixture_root = manifest_dir
@@ -363,6 +449,86 @@ fn test_fluent2_alias_render_fixtures_cover_representative_controls() {
         assert!(
             source.contains("AboutSlint { width: 280px; height: 80px; }"),
             "{scheme} controls fixture should cover support widget rendering"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_alias_render_fixtures_cover_menu_states() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    let light_path = fixture_root.join("fluent2-menu-states-light.md");
+    let dark_path = fixture_root.join("fluent2-menu-states-dark.md");
+    let light = std::fs::read_to_string(&light_path)
+        .unwrap_or_else(|err| panic!("failed to read {light_path:?}: {err}"));
+    let dark = std::fs::read_to_string(&dark_path)
+        .unwrap_or_else(|err| panic!("failed to read {dark_path:?}: {err}"));
+
+    for (source, scheme, image) in [
+        (&light, "fluent2-light", "fluent2-menu-states-light.png"),
+        (&dark, "fluent2-dark", "fluent2-menu-states-dark.png"),
+    ] {
+        assert!(
+            source.contains(&format!(
+                "imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""
+            )),
+            "{scheme} menu-state render fixture should write to its scheme-specific image"
+        );
+        assert!(source.contains("MenuBar {"), "{scheme} fixture should cover menu chrome");
+        assert!(
+            source
+                .contains("MenuItem { title: \"Checked item\"; checkable: true; checked: true; }"),
+            "{scheme} fixture should cover checked menu item rendering"
+        );
+        assert!(
+            source.contains("MenuItem { title: \"Disabled item\"; enabled: false; }"),
+            "{scheme} fixture should cover disabled menu item rendering"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_alias_render_fixtures_cover_tabs() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    let light_path = fixture_root.join("fluent2-tabs-light.md");
+    let dark_path = fixture_root.join("fluent2-tabs-dark.md");
+    let light = std::fs::read_to_string(&light_path)
+        .unwrap_or_else(|err| panic!("failed to read {light_path:?}: {err}"));
+    let dark = std::fs::read_to_string(&dark_path)
+        .unwrap_or_else(|err| panic!("failed to read {dark_path:?}: {err}"));
+
+    for (source, scheme, image) in [
+        (&light, "fluent2-light", "fluent2-tabs-light.png"),
+        (&dark, "fluent2-dark", "fluent2-tabs-dark.png"),
+    ] {
+        assert!(
+            source.contains(&format!(
+                "imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""
+            )),
+            "{scheme} tab render fixture should write to its scheme-specific image"
+        );
+        assert!(
+            source.contains("TabBarVerticalImpl {"),
+            "{scheme} fixture should cover vertical tab bar rendering"
+        );
+        assert!(
+            source.contains("TabBarHorizontalImpl {"),
+            "{scheme} fixture should cover horizontal tab bar rendering"
+        );
+        assert!(
+            source.contains("TabImpl { title: \"Advanced\"; current: 0; current-focused: 0; tab-index: 2; num-tabs: 3; enabled: false; }"),
+            "{scheme} fixture should cover disabled tab rendering"
         );
     }
 }
