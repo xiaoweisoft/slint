@@ -397,6 +397,399 @@ fn test_fluent2_render_fixture_covers_picker_surfaces() {
 }
 
 #[test]
+fn test_fluent2_render_fixture_covers_standard_button_kinds() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    let standard_buttons_path = fixture_root.join("fluent2-standard-buttons.md");
+    let standard_buttons = std::fs::read_to_string(&standard_buttons_path)
+        .unwrap_or_else(|err| panic!("failed to read {standard_buttons_path:?}: {err}"));
+
+    for expected in [
+        "imagePath=\"../assets/generated/fluent2-render-fixtures/fluent2-standard-buttons.png\"",
+        "import { Palette, StandardButton, VerticalBox, HorizontalBox } from \"std-widgets.slint\";",
+        "StandardButton { kind: ok; primary: true; }",
+        "StandardButton { kind: cancel; }",
+        "StandardButton { kind: apply; }",
+        "StandardButton { kind: close; }",
+        "StandardButton { kind: reset; }",
+        "StandardButton { kind: help; }",
+        "StandardButton { kind: yes; primary: true; }",
+        "StandardButton { kind: no; }",
+        "StandardButton { kind: abort; }",
+        "StandardButton { kind: retry; }",
+        "StandardButton { kind: ignore; enabled: false; }",
+    ] {
+        assert!(
+            standard_buttons.contains(expected),
+            "fluent2 standard button render fixture should include {expected}"
+        );
+    }
+}
+
+#[test]
+fn test_fluent2_render_fixture_covers_about_slint_support_widget() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    for (fixture, image) in [
+        ("fluent2-about-slint.md", "fluent2-about-slint.png"),
+        ("fluent2-about-slint-light.md", "fluent2-about-slint-light.png"),
+        ("fluent2-about-slint-dark.md", "fluent2-about-slint-dark.png"),
+    ] {
+        let fixture_path = fixture_root.join(fixture);
+        let source = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|err| panic!("failed to read {fixture_path:?}: {err}"));
+
+        for expected in [
+            format!("imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""),
+            "import { AboutSlint, Palette } from \"std-widgets.slint\";".into(),
+            "background: Palette.background;".into(),
+            "AboutSlint {".into(),
+            "width: 320px;".into(),
+            "height: 120px;".into(),
+        ] {
+            assert!(
+                source.contains(&expected),
+                "fluent2 AboutSlint render fixture {fixture} should include {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_fluent2_render_fixture_covers_list_and_table_surfaces() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    for (fixture, image) in [
+        ("fluent2-list-table.md", "fluent2-list-table.png"),
+        ("fluent2-list-table-light.md", "fluent2-list-table-light.png"),
+        ("fluent2-list-table-dark.md", "fluent2-list-table-dark.png"),
+    ] {
+        let fixture_path = fixture_root.join(fixture);
+        let source = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|err| panic!("failed to read {fixture_path:?}: {err}"));
+
+        for expected in [
+            format!("imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""),
+            "import { Palette, StandardListView, StandardTableView, VerticalBox, HorizontalBox } from \"std-widgets.slint\";".into(),
+            "StandardListView {".into(),
+            "current-item: 1;".into(),
+            "StandardTableView {".into(),
+            "sort-order: SortOrder.ascending".into(),
+            "[ { text: \"Alpha\" }, { text: \"Ready\" }, { text: \"12 ms\" } ]".into(),
+            "[ { text: \"Gamma\" }, { text: \"Disabled\" }, { text: \"48 ms\" } ]".into(),
+        ] {
+            assert!(
+                source.contains(&expected),
+                "fluent2 list/table render fixture {fixture} should include {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_fluent2_render_fixture_covers_focused_text_inputs() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    for (fixture, image, focus_call) in [
+        (
+            "fluent2-focused-text-inputs.md",
+            "fluent2-focused-text-inputs.png",
+            "init => { focused-line.focus(); }",
+        ),
+        (
+            "fluent2-focused-text-inputs-light.md",
+            "fluent2-focused-text-inputs-light.png",
+            "init => { focused-spin.focus(); }",
+        ),
+        (
+            "fluent2-focused-text-inputs-dark.md",
+            "fluent2-focused-text-inputs-dark.png",
+            "init => { focused-combo.focus(); }",
+        ),
+    ] {
+        let fixture_path = fixture_root.join(fixture);
+        let source = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|err| panic!("failed to read {fixture_path:?}: {err}"));
+
+        for expected in [
+            format!("imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""),
+            "import { Palette, ComboBox, LineEdit, SpinBox, TextEdit, VerticalBox, HorizontalBox } from \"std-widgets.slint\";".into(),
+            focus_call.into(),
+            "focused-line := LineEdit {".into(),
+            "input-type: InputType.password;".into(),
+            "LineEdit { placeholder-text: \"Placeholder\"; }".into(),
+            "TextEdit {".into(),
+            "text: \"Focused multiline text\";".into(),
+        ] {
+            assert!(
+                source.contains(&expected),
+                "fluent2 focused text-input render fixture {fixture} should include {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_fluent2_focused_text_input_fixture_covers_combo_and_spinbox_focus() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    for (fixture, focus_call) in [
+        ("fluent2-focused-text-inputs.md", "focused-line.focus();"),
+        ("fluent2-focused-text-inputs-light.md", "focused-spin.focus();"),
+        ("fluent2-focused-text-inputs-dark.md", "focused-combo.focus();"),
+    ] {
+        let fixture_path = fixture_root.join(fixture);
+        let source = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|err| panic!("failed to read {fixture_path:?}: {err}"));
+
+        for expected in [
+            "import { Palette, ComboBox, LineEdit, SpinBox, TextEdit, VerticalBox, HorizontalBox } from \"std-widgets.slint\";",
+            "focused-line := LineEdit {",
+            "focused-spin := SpinBox {",
+            "focused-combo := ComboBox {",
+            focus_call,
+            "ComboBox { model: [\"Alpha\", \"Beta\", \"Gamma\"]; current-index: 2; enabled: false; }",
+            "SpinBox { value: 64; minimum: 0; maximum: 100; enabled: false; }",
+        ] {
+            assert!(
+                source.contains(expected),
+                "fluent2 focused text-input render fixture {fixture} should include {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_fluent2_render_fixture_covers_progress_and_spinner_surfaces() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    for (fixture, image) in [
+        ("fluent2-progress-spinner.md", "fluent2-progress-spinner.png"),
+        ("fluent2-progress-spinner-light.md", "fluent2-progress-spinner-light.png"),
+        ("fluent2-progress-spinner-dark.md", "fluent2-progress-spinner-dark.png"),
+    ] {
+        let fixture_path = fixture_root.join(fixture);
+        let source = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|err| panic!("failed to read {fixture_path:?}: {err}"));
+
+        for expected in [
+            format!("imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""),
+            "import { Palette, ProgressIndicator, Spinner, VerticalBox, HorizontalBox } from \"std-widgets.slint\";".into(),
+            "ProgressIndicator { progress: 0.38; }".into(),
+            "ProgressIndicator { progress: 0.74; }".into(),
+            "ProgressIndicator { indeterminate: true; }".into(),
+            "Spinner { progress: 0.42; }".into(),
+            "Spinner { indeterminate: true; }".into(),
+        ] {
+            assert!(
+                source.contains(&expected),
+                "fluent2 progress/spinner render fixture {fixture} should include {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_fluent2_render_fixture_covers_value_and_choice_controls() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    for (fixture, image) in [
+        ("fluent2-value-choice-controls.md", "fluent2-value-choice-controls.png"),
+        ("fluent2-value-choice-controls-light.md", "fluent2-value-choice-controls-light.png"),
+        ("fluent2-value-choice-controls-dark.md", "fluent2-value-choice-controls-dark.png"),
+    ] {
+        let fixture_path = fixture_root.join(fixture);
+        let source = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|err| panic!("failed to read {fixture_path:?}: {err}"));
+
+        for expected in [
+            format!("imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""),
+            "import { Palette, CheckBox, ComboBox, Slider, SpinBox, Switch, VerticalBox, HorizontalBox } from \"std-widgets.slint\";".into(),
+            "CheckBox { text: \"Checked\"; checked: true; }".into(),
+            "CheckBox { text: \"Disabled\"; checked: true; enabled: false; }".into(),
+            "Switch { text: \"On\"; checked: true; }".into(),
+            "Switch { text: \"Disabled\"; checked: true; enabled: false; }".into(),
+            "Slider { value: 18; minimum: 0; maximum: 100; }".into(),
+            "Slider { value: 82; minimum: 0; maximum: 100; }".into(),
+            "Slider { value: 50; minimum: 0; maximum: 100; enabled: false; }".into(),
+            "SpinBox { value: 24; minimum: 0; maximum: 100; }".into(),
+            "SpinBox { value: 64; minimum: 0; maximum: 100; enabled: false; }".into(),
+            "ComboBox { model: [\"Alpha\", \"Beta\", \"Gamma\"]; current-index: 1; }".into(),
+            "ComboBox { model: [\"Alpha\", \"Beta\", \"Gamma\"]; current-index: 2; enabled: false; }".into(),
+        ] {
+            assert!(
+                source.contains(&expected),
+                "fluent2 value/choice render fixture {fixture} should include {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_fluent2_render_fixture_covers_groupbox_and_scrollview_surfaces() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    for (fixture, image) in [
+        ("fluent2-group-scroll.md", "fluent2-group-scroll.png"),
+        ("fluent2-group-scroll-light.md", "fluent2-group-scroll-light.png"),
+        ("fluent2-group-scroll-dark.md", "fluent2-group-scroll-dark.png"),
+    ] {
+        let fixture_path = fixture_root.join(fixture);
+        let source = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|err| panic!("failed to read {fixture_path:?}: {err}"));
+
+        for expected in [
+            format!("imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""),
+            "import { Palette, Button, GroupBox, ScrollView, VerticalBox, HorizontalBox } from \"std-widgets.slint\";".into(),
+            "GroupBox {".into(),
+            "title: \"Enabled group\";".into(),
+            "title: \"Disabled group\";".into(),
+            "enabled: false;".into(),
+            "ScrollView {".into(),
+            "viewport-width: 960px;".into(),
+            "viewport-height: 420px;".into(),
+            "Button { text: \"Scrollable action \" + row; }".into(),
+        ] {
+            assert!(
+                source.contains(&expected),
+                "fluent2 group/scroll render fixture {fixture} should include {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_fluent2_render_fixture_covers_button_states() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    for (fixture, image) in [
+        ("fluent2-button-states.md", "fluent2-button-states.png"),
+        ("fluent2-button-states-light.md", "fluent2-button-states-light.png"),
+        ("fluent2-button-states-dark.md", "fluent2-button-states-dark.png"),
+    ] {
+        let fixture_path = fixture_root.join(fixture);
+        let source = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|err| panic!("failed to read {fixture_path:?}: {err}"));
+
+        for expected in [
+            format!("imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""),
+            "import { Palette, Button, VerticalBox, HorizontalBox } from \"std-widgets.slint\";".into(),
+            "Button { text: \"Primary\"; primary: true; }".into(),
+            "Button { text: \"Neutral\"; }".into(),
+            "Button { text: \"Checked\"; checkable: true; checked: true; }".into(),
+            "Button { text: \"Disabled primary\"; primary: true; enabled: false; }".into(),
+            "Button { text: \"Disabled neutral\"; enabled: false; }".into(),
+            "Button { text: \"Icon\"; icon: @image-url(\"fluent2-button-icon.svg\"); colorize-icon: true; }".into(),
+            "Button { icon: @image-url(\"fluent2-button-icon.svg\"); colorize-icon: true; }".into(),
+        ] {
+            assert!(
+                source.contains(&expected),
+                "fluent2 button render fixture {fixture} should include {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_fluent2_alias_render_fixtures_cover_standard_button_kinds() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    for (fixture, scheme, image) in [
+        (
+            "fluent2-standard-buttons-light.md",
+            "fluent2-light",
+            "fluent2-standard-buttons-light.png",
+        ),
+        ("fluent2-standard-buttons-dark.md", "fluent2-dark", "fluent2-standard-buttons-dark.png"),
+    ] {
+        let fixture_path = fixture_root.join(fixture);
+        let source = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|err| panic!("failed to read {fixture_path:?}: {err}"));
+
+        assert!(
+            source.contains(&format!(
+                "imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""
+            )),
+            "{scheme} StandardButton fixture should write to its scheme-specific image"
+        );
+        assert!(
+            source.contains(
+                "import { Palette, StandardButton, VerticalBox, HorizontalBox } from \"std-widgets.slint\";"
+            ),
+            "{scheme} StandardButton fixture should use std widgets"
+        );
+        for expected in [
+            "StandardButton { kind: ok; primary: true; }",
+            "StandardButton { kind: cancel; }",
+            "StandardButton { kind: apply; }",
+            "StandardButton { kind: close; }",
+            "StandardButton { kind: reset; }",
+            "StandardButton { kind: help; }",
+            "StandardButton { kind: yes; primary: true; }",
+            "StandardButton { kind: no; }",
+            "StandardButton { kind: abort; }",
+            "StandardButton { kind: retry; }",
+            "StandardButton { kind: ignore; enabled: false; }",
+        ] {
+            assert!(
+                source.contains(expected),
+                "{scheme} StandardButton fixture should include {expected}"
+            );
+        }
+    }
+}
+
+#[test]
 fn test_fluent2_alias_render_fixtures_cover_light_and_dark_schemes() {
     let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let fixture_root = manifest_dir
@@ -561,6 +954,56 @@ fn test_fluent2_alias_render_fixtures_cover_tabs() {
 }
 
 #[test]
+fn test_fluent2_alias_render_fixtures_cover_picker_surfaces() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    for (fixture, image, component, title) in [
+        (
+            "fluent2-date-picker-light.md",
+            "fluent2-date-picker-light.png",
+            "DatePickerPopup {",
+            "Pick a date",
+        ),
+        (
+            "fluent2-date-picker-dark.md",
+            "fluent2-date-picker-dark.png",
+            "DatePickerPopup {",
+            "Pick a date",
+        ),
+        (
+            "fluent2-time-picker-light.md",
+            "fluent2-time-picker-light.png",
+            "TimePickerPopup {",
+            "Pick a time",
+        ),
+        (
+            "fluent2-time-picker-dark.md",
+            "fluent2-time-picker-dark.png",
+            "TimePickerPopup {",
+            "Pick a time",
+        ),
+    ] {
+        let fixture_path = fixture_root.join(fixture);
+        let source = std::fs::read_to_string(&fixture_path)
+            .unwrap_or_else(|err| panic!("failed to read {fixture_path:?}: {err}"));
+        assert!(
+            source.contains(&format!(
+                "imagePath=\"../assets/generated/fluent2-render-fixtures/{image}\""
+            )),
+            "{fixture} should write to its scheme-specific image"
+        );
+        assert!(source.contains("init => {"), "{fixture} should open its popup in init");
+        assert!(source.contains(component), "{fixture} should cover {component}");
+        assert!(source.contains(&format!("title: \"{title}\";")), "{fixture} should set title");
+    }
+}
+
+#[test]
 fn test_fluent2_light_dark_aliases_select_color_scheme() {
     let source = r#"
         import { ColorSchemeSelector } from "color-scheme.slint";
@@ -670,8 +1113,12 @@ fn test_fluent2_style_metrics_textedit_background_matches_input_surface() {
     let source = std::str::from_utf8(&source_contents).unwrap();
 
     assert!(
-        source.contains("textedit-background: Fluent2Palette.control-background"),
+        source.contains("textedit-background: Fluent2Palette.text-input-background"),
         "fluent2 StyleMetrics textedit-background should match the Fluent2 text input resting surface"
+    );
+    assert!(
+        !source.contains("textedit-background: Fluent2Palette.control-background"),
+        "fluent2 StyleMetrics textedit-background should not report the generic control bridge"
     );
     assert!(
         !source.contains("textedit-background: Fluent2Palette.background"),
@@ -707,6 +1154,41 @@ fn test_fluent2_style_metrics_textedit_background_matches_input_surface() {
     assert!(
         !source.contains("textedit-text-color-disabled: Fluent2Palette.text-disabled"),
         "fluent2 StyleMetrics textedit-text-color-disabled should not report the generic disabled text primitive"
+    );
+}
+
+#[test]
+fn test_fluent2_about_slint_spacing_uses_direct_token() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <length> about-layout-spacing: 8px;"),
+        "fluent2 AboutSlint spacing should own a direct Fluent2 value"
+    );
+    assert!(
+        !styling.lines().any(|line| {
+            line.trim() == "out property <length> about-layout-spacing: control-spacing;"
+        }),
+        "fluent2 AboutSlint spacing should not alias through copied control-spacing"
+    );
+
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/about-slint.slint"))
+        .expect("fluent2 should embed about-slint.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+
+    assert!(
+        source.contains("spacing: Fluent2SizeSettings.about-layout-spacing"),
+        "fluent2 AboutSlint should consume the semantic spacing token"
+    );
+    assert!(
+        !source.contains("spacing: Fluent2SizeSettings.control-spacing"),
+        "fluent2 AboutSlint should not consume copied generic control spacing"
     );
 }
 
@@ -792,15 +1274,19 @@ fn test_fluent2_disabled_border_tokens_use_disabled_stroke_primitive() {
         "fluent2 styling should centralize disabled stroke color in a neutral-stroke-disabled primitive"
     );
 
-    for expected in [
-        "combobox-disabled-border: neutral-stroke-disabled",
-        "switch-rail-disabled-border: neutral-stroke-disabled",
-        "text-input-disabled-border: neutral-stroke-disabled",
-        "spinbox-disabled-border: neutral-stroke-disabled",
-        "control-strong-stroke-disabled: neutral-stroke-disabled",
-        "checkbox-disabled-border: neutral-stroke-disabled",
+    for (expected, property_kind) in [
+        ("combobox-disabled-border-stroke: neutral-stroke-disabled", "property"),
+        ("combobox-disabled-border: combobox-disabled-border-stroke", "out property"),
+        ("switch-rail-disabled-border-fill: neutral-stroke-disabled", "property"),
+        ("switch-rail-disabled-border: switch-rail-disabled-border-fill", "out property"),
+        ("text-input-disabled-border-stroke: neutral-stroke-disabled", "property"),
+        ("text-input-disabled-border: text-input-disabled-border-stroke", "out property"),
+        ("spinbox-disabled-border-stroke: neutral-stroke-disabled", "property"),
+        ("spinbox-disabled-border: spinbox-disabled-border-stroke", "out property"),
+        ("control-strong-stroke-disabled: neutral-stroke-disabled", "out property"),
+        ("checkbox-disabled-border-fill: neutral-stroke-disabled", "property"),
     ] {
-        let expected_line = format!("out property <brush> {expected};");
+        let expected_line = format!("{property_kind} <brush> {expected};");
         assert!(
             styling.lines().any(|line| line.trim() == expected_line),
             "fluent2 disabled border semantic token should use neutral-stroke-disabled: {expected}"
@@ -809,11 +1295,14 @@ fn test_fluent2_disabled_border_tokens_use_disabled_stroke_primitive() {
 
     for copied_literal in [
         "combobox-disabled-border: dark-color-scheme ? #FFFFFF29 : #00000038",
+        "combobox-disabled-border: neutral-stroke-disabled",
         "switch-rail-disabled-border: dark-color-scheme ? #FFFFFF29 : #00000038",
         "text-input-disabled-border: dark-color-scheme ? #FFFFFF29 : #00000038",
+        "text-input-disabled-border: neutral-stroke-disabled",
         "spinbox-disabled-border: dark-color-scheme ? #FFFFFF29 : #00000038",
+        "spinbox-disabled-border: neutral-stroke-disabled",
         "control-strong-stroke-disabled: dark-color-scheme ? #FFFFFF29 : #00000038",
-        "checkbox-disabled-border: dark-color-scheme ? #FFFFFF29 : #00000038",
+        "checkbox-disabled-border-fill: dark-color-scheme ? #FFFFFF29 : #00000038",
     ] {
         let copied_literal_line = format!("out property <brush> {copied_literal};");
         assert!(
@@ -837,12 +1326,13 @@ fn test_fluent2_strong_border_tokens_use_strong_stroke_primitive() {
         "fluent2 styling should centralize strong neutral stroke color in neutral-stroke-strong"
     );
 
-    for expected in [
-        "switch-rail-border: neutral-stroke-strong",
-        "control-strong-stroke: neutral-stroke-strong",
-        "checkbox-border: neutral-stroke-strong",
+    for (expected, property_kind) in [
+        ("switch-rail-border-fill: neutral-stroke-strong", "property"),
+        ("switch-rail-border: switch-rail-border-fill", "out property"),
+        ("control-strong-stroke: neutral-stroke-strong", "out property"),
+        ("checkbox-border-fill: neutral-stroke-strong", "property"),
     ] {
-        let expected_line = format!("out property <brush> {expected};");
+        let expected_line = format!("{property_kind} <brush> {expected};");
         assert!(
             styling.lines().any(|line| line.trim() == expected_line),
             "fluent2 strong border semantic token should use neutral-stroke-strong: {expected}"
@@ -852,7 +1342,7 @@ fn test_fluent2_strong_border_tokens_use_strong_stroke_primitive() {
     for copied_literal in [
         "switch-rail-border: dark-color-scheme ? #FFFFFF99 : #00000099",
         "control-strong-stroke: dark-color-scheme ? #FFFFFF99 : #00000099",
-        "checkbox-border: dark-color-scheme ? #FFFFFF99 : #00000099",
+        "checkbox-border-fill: dark-color-scheme ? #FFFFFF99 : #00000099",
     ] {
         let copied_literal_line = format!("out property <brush> {copied_literal};");
         assert!(
@@ -877,13 +1367,14 @@ fn test_fluent2_circle_border_tokens_use_circle_stroke_primitive() {
     );
 
     for expected in [
-        "switch-thumb-border: neutral-stroke-circle",
-        "slider-thumb-border: neutral-stroke-circle",
-        "circle-border: neutral-stroke-circle",
+        "property <brush> switch-thumb-stroke-fill: neutral-stroke-circle;",
+        "out property <brush> switch-thumb-border: switch-thumb-stroke-fill;",
+        "property <brush> slider-thumb-border-fill: neutral-stroke-circle;",
+        "out property <brush> slider-thumb-border: slider-thumb-border-fill;",
+        "out property <brush> circle-border: neutral-stroke-circle;",
     ] {
-        let expected_line = format!("out property <brush> {expected};");
         assert!(
-            styling.lines().any(|line| line.trim() == expected_line),
+            styling.lines().any(|line| line.trim() == expected),
             "fluent2 circular border semantic token should use neutral-stroke-circle: {expected}"
         );
     }
@@ -915,12 +1406,12 @@ fn test_fluent2_pressed_accent_foregrounds_use_pressed_accent_primitive() {
         "fluent2 styling should centralize pressed accent foreground color in accent-foreground-pressed"
     );
 
-    for expected in [
-        "button-primary-pressed-foreground: accent-foreground-pressed",
-        "text-accent-foreground-secondary: accent-foreground-pressed",
-        "checkbox-checkmark-pressed-foreground: accent-foreground-pressed",
+    for (expected, property_kind) in [
+        ("button-primary-pressed-foreground-fill: accent-foreground-pressed", "property"),
+        ("text-accent-foreground-secondary: accent-foreground-pressed", "out property"),
+        ("checkbox-checkmark-pressed-fill: accent-foreground-pressed", "property"),
     ] {
-        let expected_line = format!("out property <brush> {expected};");
+        let expected_line = format!("{property_kind} <brush> {expected};");
         assert!(
             styling.lines().any(|line| line.trim() == expected_line),
             "fluent2 pressed accent foreground semantic token should use accent-foreground-pressed: {expected}"
@@ -930,7 +1421,7 @@ fn test_fluent2_pressed_accent_foregrounds_use_pressed_accent_primitive() {
     for copied_literal in [
         "button-primary-pressed-foreground: dark-color-scheme ? #00000080 : #FFFFFFB3",
         "text-accent-foreground-secondary: dark-color-scheme ? #00000080 : #FFFFFFB3",
-        "checkbox-checkmark-pressed-foreground: dark-color-scheme ? #00000080 : #FFFFFFB3",
+        "checkbox-checkmark-pressed-fill: dark-color-scheme ? #00000080 : #FFFFFFB3",
     ] {
         let copied_literal_line = format!("out property <brush> {copied_literal};");
         assert!(
@@ -938,6 +1429,36 @@ fn test_fluent2_pressed_accent_foregrounds_use_pressed_accent_primitive() {
             "fluent2 pressed accent foreground semantic token should not repeat pressed accent foreground literals: {copied_literal}"
         );
     }
+}
+
+#[test]
+fn test_fluent2_disabled_accent_foreground_bridge_uses_private_primitive() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim()
+                == "property <brush> text-accent-foreground-disabled-fill: accent-foreground-disabled;"),
+        "fluent2 styling should keep the disabled accent foreground bridge behind a Fluent2-private primitive"
+    );
+
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim()
+                == "out property <brush> text-accent-foreground-disabled: text-accent-foreground-disabled-fill;"),
+        "fluent2 public disabled accent foreground bridge should route through the private primitive"
+    );
+
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <brush> text-accent-foreground-disabled: accent-foreground-disabled;"),
+        "fluent2 public disabled accent foreground bridge should not bind directly to the generic accent primitive"
+    );
 }
 
 #[test]
@@ -949,8 +1470,10 @@ fn test_fluent2_surface_bridge_tokens_use_surface_primitives() {
 
     for expected in [
         "property <brush> surface-layer-fill-alt: dark-color-scheme ? #3A3A3A73 : #FFFFFFB3;",
+        "property <brush> surface-layer-fill-alt-secondary: dark-color-scheme ? #FFFFFF0F : #0000000A;",
         "property <brush> surface-card-stroke: dark-color-scheme ? #0000001A : #0000000F;",
         "out property <brush> layer-on-mica-base-alt: surface-layer-fill-alt;",
+        "out property <brush> layer-on-mica-base-alt-secondary: surface-layer-fill-alt-secondary;",
         "out property <brush> card-stroke: surface-card-stroke;",
     ] {
         assert!(
@@ -961,6 +1484,7 @@ fn test_fluent2_surface_bridge_tokens_use_surface_primitives() {
 
     for copied_literal in [
         "out property <brush> layer-on-mica-base-alt: dark-color-scheme ? #3A3A3A73 : #FFFFFFB3",
+        "out property <brush> layer-on-mica-base-alt-secondary: control-fill-subtle",
         "out property <brush> card-stroke: dark-color-scheme ? #0000001A : #0000000F",
     ] {
         assert!(
@@ -982,9 +1506,11 @@ fn test_fluent2_gradient_border_tokens_use_border_primitives() {
         "property <brush> neutral-stroke-control: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF17 0%, #00000012 8.33%) : @linear-gradient(180deg, #0000000F 90.58%, #00000029 100%);",
         "property <brush> neutral-stroke-control-active: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF14 99.98%, #FFFFFF8A 100%, #FFFFFF8A 100%) : @linear-gradient(180deg, #0000000F 99.99%, #00000073 100%, #00000073 100%);",
         "out property <brush> accent-control-border: accent-stroke-control;",
-        "out property <brush> button-primary-border: accent-stroke-control;",
+        "property <brush> button-primary-border-stroke: accent-stroke-control;",
+        "out property <brush> button-primary-border: button-primary-border-stroke;",
         "out property <brush> control-border: neutral-stroke-control;",
-        "out property <brush> text-control-border: neutral-stroke-control-active;",
+        "property <brush> text-control-border-stroke: neutral-stroke-control-active;",
+        "out property <brush> text-control-border: text-control-border-stroke;",
     ] {
         assert!(
             styling.lines().any(|line| line.trim() == expected),
@@ -997,6 +1523,7 @@ fn test_fluent2_gradient_border_tokens_use_border_primitives() {
         "out property <brush> button-primary-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF14 90.67%, #00000024 100%) : @linear-gradient(180deg, #FFFFFF14 90.67%, #00000066 100%)",
         "out property <brush> control-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF17 0%, #00000012 8.33%) : @linear-gradient(180deg, #0000000F 90.58%, #00000029 100%)",
         "out property <brush> text-control-border: dark-color-scheme ? @linear-gradient(180deg, #FFFFFF14 99.98%, #FFFFFF8A 100%, #FFFFFF8A 100%) : @linear-gradient(180deg, #0000000F 99.99%, #00000073 100%, #00000073 100%)",
+        "out property <brush> text-control-border: neutral-stroke-control-active",
     ] {
         assert!(
             !styling.lines().any(|line| line.trim() == copied_literal),
@@ -1148,7 +1675,46 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "out property <length> combobox-min-width: 160px;",
+        "out property <length> combobox-height: 32px;",
+        "out property <length> combobox-radius: 4px;",
+        "out property <length> combobox-border-width: 1px;",
+        "out property <length> combobox-icon-size: 12px;",
+        "out property <length> combobox-horizontal-padding: 12px;",
+        "out property <length> combobox-content-spacing: 8px;",
+        "out property <length> combobox-popup-padding: 4px;",
+        "out property <length> combobox-popup-item-height: 36px;",
+        "out property <duration> combobox-motion-duration: 150ms;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 combobox geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> combobox-min-width: input-min-width;",
+        "out property <length> combobox-height: control-height;",
+        "out property <length> combobox-radius: control-radius;",
+        "out property <length> combobox-border-width: stroke-width;",
+        "out property <length> combobox-icon-size: icon-size;",
+        "out property <length> combobox-horizontal-padding: control-horizontal-padding;",
+        "out property <length> combobox-content-spacing: control-spacing;",
+        "out property <length> combobox-popup-padding: overlay-padding;",
+        "out property <length> combobox-popup-item-height: item-height;",
+        "out property <duration> combobox-motion-duration: control-motion-duration;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 combobox geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
+    }
+
     for copied_bridge in [
+        "combobox-background: control-fill",
+        "combobox-disabled-background: control-fill-disabled",
+        "combobox-hover-background: control-fill-hover",
         "combobox-background: control-background",
         "combobox-disabled-background: control-disabled",
         "combobox-disabled-border: control-strong-stroke-disabled",
@@ -1163,6 +1729,53 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
         assert!(
             !styling.lines().any(|line| line.trim() == copied_bridge_line),
             "fluent2 combobox semantic tokens should not alias through copied bridge {copied_bridge}"
+        );
+    }
+
+    for expected in [
+        "property <brush> combobox-border-stroke: neutral-stroke-1;",
+        "property <brush> combobox-fill: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "property <brush> combobox-disabled-fill: dark-color-scheme ? #FFFFFF0A : #F5F5F5;",
+        "property <brush> combobox-hover-fill: dark-color-scheme ? #FFFFFF14 : #F5F5F5;",
+        "property <brush> combobox-pressed-fill: dark-color-scheme ? #FFFFFF0A : #0000000F;",
+        "property <brush> combobox-foreground-fill: neutral-foreground-1;",
+        "property <brush> combobox-disabled-foreground-fill: neutral-foreground-disabled;",
+        "property <brush> combobox-pressed-foreground-fill: neutral-foreground-2;",
+        "property <brush> combobox-disabled-icon-foreground-fill: neutral-foreground-disabled;",
+        "out property <brush> combobox-border: combobox-border-stroke;",
+        "out property <brush> combobox-background: combobox-fill;",
+        "out property <brush> combobox-disabled-background: combobox-disabled-fill;",
+        "out property <brush> combobox-hover-background: combobox-hover-fill;",
+        "out property <brush> combobox-pressed-background: combobox-pressed-fill;",
+        "out property <brush> combobox-foreground: combobox-foreground-fill;",
+        "out property <brush> combobox-disabled-foreground: combobox-disabled-foreground-fill;",
+        "out property <brush> combobox-pressed-foreground: combobox-pressed-foreground-fill;",
+        "out property <brush> combobox-disabled-icon-foreground: combobox-disabled-icon-foreground-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 combobox tokens should route through combobox-owned primitives: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "property <brush> combobox-fill: control-fill;",
+        "property <brush> combobox-disabled-fill: control-fill-disabled;",
+        "property <brush> combobox-hover-fill: control-fill-hover;",
+        "property <brush> combobox-pressed-fill: control-alt-fill-tertiary;",
+        "out property <brush> combobox-background: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "out property <brush> combobox-disabled-background: dark-color-scheme ? #FFFFFF0A : #F5F5F5;",
+        "out property <brush> combobox-hover-background: dark-color-scheme ? #FFFFFF14 : #F5F5F5;",
+        "out property <brush> combobox-pressed-background: dark-color-scheme ? #FFFFFF0A : #0000000F;",
+        "out property <brush> combobox-border: neutral-stroke-1;",
+        "out property <brush> combobox-foreground: neutral-foreground-1;",
+        "out property <brush> combobox-disabled-foreground: neutral-foreground-disabled;",
+        "out property <brush> combobox-pressed-foreground: neutral-foreground-2;",
+        "out property <brush> combobox-disabled-icon-foreground: neutral-foreground-disabled;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 exported combobox tokens should bind through combobox-owned primitives, not direct generic primitives: {copied_direct_export}"
         );
     }
 
@@ -1190,7 +1803,7 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
         "spacing: Fluent2SizeSettings.combobox-content-spacing",
         "property <length> popup-padding: Fluent2SizeSettings.combobox-popup-padding",
         "height: root.visible-items * Fluent2SizeSettings.combobox-popup-item-height +  2 * root.popup-padding",
-        "animate border-color { duration: Fluent2SizeSettings.combobox-motion-duration",
+        "animate background, border-color { duration: Fluent2SizeSettings.combobox-motion-duration",
         "animate colorize { duration: Fluent2SizeSettings.combobox-motion-duration",
     ] {
         assert!(combobox.contains(expected), "fluent2 ComboBox should use {expected}");
@@ -1198,14 +1811,15 @@ fn test_fluent2_combobox_colors_use_semantic_tokens() {
 
     assert!(
         styling.lines().any(|line| line.trim()
-            == "out property <brush> combobox-pressed-background: control-alt-fill-tertiary;"),
-        "fluent2 combobox pressed background should bind directly to the Fluent2 control-alt fill primitive"
+            == "property <brush> combobox-pressed-fill: dark-color-scheme ? #FFFFFF0A : #0000000F;"),
+        "fluent2 combobox pressed fill should own its component-specific Fluent2 primitive"
     );
 
     for copied_literal in [
         "background.background: Fluent2Palette.control-secondary",
         "background.background: Fluent2Palette.control-alt-tertiary",
         "background: Fluent2Palette.control-background",
+        "combobox-pressed-background: control-alt-fill-tertiary",
         "text.color: Fluent2Palette.text-disabled",
         "icon.colorize: Fluent2Palette.text-disabled",
         "text.color: Fluent2Palette.text-secondary",
@@ -1235,16 +1849,26 @@ fn test_fluent2_groupbox_title_colors_use_semantic_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for token in ["groupbox-title-foreground", "groupbox-title-disabled-foreground"] {
-        assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    for expected in [
+        "property <brush> groupbox-title-foreground-fill: neutral-foreground-1;",
+        "property <brush> groupbox-title-disabled-foreground-fill: neutral-foreground-disabled;",
+        "out property <brush> groupbox-title-foreground: groupbox-title-foreground-fill;",
+        "out property <brush> groupbox-title-disabled-foreground: groupbox-title-disabled-foreground-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 GroupBox title tokens should route through GroupBox-owned primitives: {expected}"
+        );
     }
 
     for copied_bridge in [
         "groupbox-title-foreground: control-foreground",
         "groupbox-title-disabled-foreground: text-disabled",
+        "out property <brush> groupbox-title-foreground: neutral-foreground-1;",
+        "out property <brush> groupbox-title-disabled-foreground: neutral-foreground-disabled;",
     ] {
         assert!(
-            !styling.contains(copied_bridge),
+            !styling.lines().any(|line| line.trim() == copied_bridge),
             "fluent2 GroupBox title semantic tokens should not alias through copied bridge {copied_bridge}"
         );
     }
@@ -1275,6 +1899,48 @@ fn test_fluent2_groupbox_title_colors_use_semantic_tokens() {
 }
 
 #[test]
+fn test_fluent2_combobox_uses_text_field_focus_indicator() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for expected in [
+        "property <brush> combobox-focus-indicator-fill: accent-fill;",
+        "out property <brush> combobox-focus-indicator-background: combobox-focus-indicator-fill;",
+        "out property <length> combobox-focus-indicator-height: 2px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 combobox should expose text-field focus indicator token: {expected}"
+        );
+    }
+
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <brush> combobox-focus-indicator-background: accent-fill;"),
+        "fluent2 combobox focus indicator should bind through a combobox-owned accent primitive"
+    );
+
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/combobox.slint"))
+        .expect("fluent2 should embed combobox.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+
+    for expected in [
+        "focus-border.background: Fluent2Palette.combobox-focus-indicator-background;",
+        "height: Fluent2SizeSettings.combobox-focus-indicator-height;",
+        "x: Fluent2SizeSettings.text-input-focus-indicator-horizontal-inset;",
+        "width: parent.width - 2 * Fluent2SizeSettings.text-input-focus-indicator-horizontal-inset;",
+    ] {
+        assert!(
+            source.contains(expected),
+            "fluent2 combobox should draw the Fluent2 text-field bottom focus indicator: {expected}"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_checkbox_colors_use_semantic_tokens() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");
@@ -1285,6 +1951,10 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
         "checkbox-foreground",
         "checkbox-disabled-foreground",
         "checkbox-background",
+        "checkbox-checked-fill",
+        "checkbox-checked-hover-fill",
+        "checkbox-checked-pressed-fill",
+        "checkbox-checked-disabled-fill",
         "checkbox-checked-background",
         "checkbox-checked-hover-background",
         "checkbox-checked-pressed-background",
@@ -1294,12 +1964,100 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
         "checkbox-pressed-background",
         "checkbox-border",
         "checkbox-border-width",
+        "checkbox-hidden-border-width",
+        "checkbox-checkmark-size",
+        "checkbox-focus-radius",
         "checkbox-disabled-border",
         "checkbox-checkmark-foreground",
         "checkbox-checkmark-disabled-foreground",
         "checkbox-checkmark-pressed-foreground",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    for expected in [
+        "out property <length> checkbox-border-width: 1px;",
+        "out property <length> checkbox-hidden-border-width: 0px;",
+        "out property <length> checkbox-checkmark-size: 12px;",
+        "out property <length> checkbox-focus-radius: 4px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 checkbox geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> checkbox-border-width: stroke-width;",
+        "out property <length> checkbox-hidden-border-width: control-hidden-stroke-width;",
+        "out property <length> checkbox-checkmark-size: icon-size;",
+        "out property <length> checkbox-focus-radius: control-radius;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 checkbox geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
+    }
+
+    for expected in [
+        "property <brush> checkbox-foreground-fill: neutral-foreground-1;",
+        "property <brush> checkbox-disabled-foreground-fill: neutral-foreground-disabled;",
+        "property <brush> checkbox-fill: dark-color-scheme ? #0000001A : #00000005;",
+        "property <brush> checkbox-hover-fill: dark-color-scheme ? #FFFFFF0A : #0000000F;",
+        "property <brush> checkbox-pressed-fill: dark-color-scheme ? #FFFFFF12 : #00000017;",
+        "property <brush> checkbox-checked-fill: accent-fill;",
+        "property <brush> checkbox-checked-hover-fill: accent-fill-hover;",
+        "property <brush> checkbox-checked-pressed-fill: accent-fill-pressed;",
+        "property <brush> checkbox-checked-disabled-fill: accent-fill-disabled;",
+        "property <brush> checkbox-checkmark-fill: accent-foreground-1;",
+        "property <brush> checkbox-checkmark-disabled-fill: accent-foreground-disabled;",
+        "property <brush> checkbox-disabled-fill: control-fill-transparent;",
+        "property <brush> checkbox-border-fill: neutral-stroke-strong;",
+        "property <brush> checkbox-disabled-border-fill: neutral-stroke-disabled;",
+        "property <brush> checkbox-checkmark-pressed-fill: accent-foreground-pressed;",
+        "out property <brush> checkbox-foreground: checkbox-foreground-fill;",
+        "out property <brush> checkbox-disabled-foreground: checkbox-disabled-foreground-fill;",
+        "out property <brush> checkbox-background: checkbox-fill;",
+        "out property <brush> checkbox-checked-background: checkbox-checked-fill;",
+        "out property <brush> checkbox-checked-hover-background: checkbox-checked-hover-fill;",
+        "out property <brush> checkbox-checked-pressed-background: checkbox-checked-pressed-fill;",
+        "out property <brush> checkbox-checked-disabled-background: checkbox-checked-disabled-fill;",
+        "out property <brush> checkbox-disabled-background: checkbox-disabled-fill;",
+        "out property <brush> checkbox-hover-background: checkbox-hover-fill;",
+        "out property <brush> checkbox-pressed-background: checkbox-pressed-fill;",
+        "out property <brush> checkbox-border: checkbox-border-fill;",
+        "out property <brush> checkbox-disabled-border: checkbox-disabled-border-fill;",
+        "out property <brush> checkbox-checkmark-foreground: checkbox-checkmark-fill;",
+        "out property <brush> checkbox-checkmark-disabled-foreground: checkbox-checkmark-disabled-fill;",
+        "out property <brush> checkbox-checkmark-pressed-foreground: checkbox-checkmark-pressed-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 checkbox tokens should route through checkbox-owned primitives: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> checkbox-foreground: neutral-foreground-1;",
+        "out property <brush> checkbox-disabled-foreground: neutral-foreground-disabled;",
+        "out property <brush> checkbox-background: dark-color-scheme ? #0000001A : #00000005;",
+        "out property <brush> checkbox-checked-background: accent-fill;",
+        "out property <brush> checkbox-checked-hover-background: accent-fill-hover;",
+        "out property <brush> checkbox-checked-pressed-background: accent-fill-pressed;",
+        "out property <brush> checkbox-checked-disabled-background: accent-fill-disabled;",
+        "out property <brush> checkbox-disabled-background: control-fill-transparent;",
+        "out property <brush> checkbox-hover-background: dark-color-scheme ? #FFFFFF0A : #0000000F;",
+        "out property <brush> checkbox-pressed-background: dark-color-scheme ? #FFFFFF12 : #00000017;",
+        "out property <brush> checkbox-border: neutral-stroke-strong;",
+        "out property <brush> checkbox-disabled-border: neutral-stroke-disabled;",
+        "out property <brush> checkbox-checkmark-foreground: accent-foreground-1;",
+        "out property <brush> checkbox-checkmark-disabled-foreground: accent-foreground-disabled;",
+        "out property <brush> checkbox-checkmark-pressed-foreground: accent-foreground-pressed;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 exported checkbox tokens should bind through checkbox-owned primitives, not direct generic primitives: {copied_direct_export}"
+        );
     }
 
     for copied_alias in [
@@ -1323,30 +2081,29 @@ fn test_fluent2_checkbox_colors_use_semantic_tokens() {
         );
     }
 
-    for expected in [
-        "checkbox-background: control-alt-fill-secondary",
-        "checkbox-hover-background: control-alt-fill-tertiary",
-        "checkbox-pressed-background: control-alt-fill-quaternary",
-    ] {
-        let expected_line = format!("out property <brush> {expected};");
-        assert!(
-            styling.lines().any(|line| line.trim() == expected_line),
-            "fluent2 checkbox alternate fills should use the corrected control-alt primitive path: {expected}"
-        );
-    }
-
     for copied_literal in [
         "checkbox-background: control-alt-secondary",
         "checkbox-hover-background: control-alt-tertiary",
         "checkbox-pressed-background: control-alt-quaternary",
-        "checkbox-background: dark-color-scheme ? #0000001A : #00000005",
-        "checkbox-hover-background: dark-color-scheme ? #FFFFFF0A : #0000000F",
-        "checkbox-pressed-background: dark-color-scheme ? #FFFFFF12 : #00000017",
+        "checkbox-background: control-alt-fill-secondary",
+        "checkbox-hover-background: control-alt-fill-tertiary",
+        "checkbox-pressed-background: control-alt-fill-quaternary",
     ] {
         let copied_literal_line = format!("out property <brush> {copied_literal};");
         assert!(
             !styling.lines().any(|line| line.trim() == copied_literal_line),
             "fluent2 checkbox alternate fills should not repeat copied raw light/dark alpha branches: {copied_literal}"
+        );
+    }
+
+    for copied_private_alias in [
+        "property <brush> checkbox-fill: control-alt-fill-secondary;",
+        "property <brush> checkbox-hover-fill: control-alt-fill-tertiary;",
+        "property <brush> checkbox-pressed-fill: control-alt-fill-quaternary;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_private_alias),
+            "fluent2 checkbox private fills should own their values instead of aliasing broad control-alt fills: {copied_private_alias}"
         );
     }
 
@@ -1407,6 +2164,16 @@ fn test_fluent2_checkbox_and_switch_label_spacing_use_tokens() {
 
     for token in ["checkbox-label-spacing", "switch-label-spacing"] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    for copied_alias in [
+        "out property <length> checkbox-label-spacing: control-label-spacing;",
+        "out property <length> switch-label-spacing: control-label-spacing;",
+    ] {
+        assert!(
+            !styling.contains(copied_alias),
+            "fluent2 label spacing tokens should own direct values instead of copied generic aliases"
+        );
     }
 
     let checkbox = load_file(&std::path::PathBuf::from("builtin:/fluent2/checkbox.slint"))
@@ -1509,6 +2276,17 @@ fn test_fluent2_checkbox_motion_uses_checkbox_token() {
         styling.contains("checkbox-motion-duration"),
         "fluent2 styling should expose checkbox-motion-duration"
     );
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <duration> checkbox-motion-duration: 150ms;"),
+        "fluent2 checkbox motion should own a direct duration"
+    );
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <duration> checkbox-motion-duration: control-motion-duration;"),
+        "fluent2 checkbox motion should not alias the generic control motion token"
+    );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/checkbox.slint"))
         .expect("fluent2 should embed checkbox.slint");
@@ -1589,6 +2367,10 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
     for token in [
         "text-input-background",
         "text-input-active-background",
+        "text-input-foreground-fill",
+        "text-input-disabled-foreground-fill",
+        "text-input-placeholder-foreground-fill",
+        "text-input-focused-placeholder-foreground-fill",
         "text-input-foreground",
         "text-input-disabled-foreground",
         "text-input-placeholder-foreground",
@@ -1607,23 +2389,104 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
     }
 
     for copied_bridge in [
+        "text-input-background: control-fill",
+        "text-input-active-background: input-fill-active",
+        "text-input-disabled-background: control-fill-disabled",
         "text-input-background: control-background",
         "text-input-active-background: control-input-active",
         "text-input-disabled-background: control-disabled",
         "text-input-disabled-border: control-strong-stroke-disabled",
         "text-input-foreground: foreground",
+        "text-input-foreground: neutral-foreground-1",
         "text-input-disabled-foreground: text-disabled",
+        "text-input-disabled-foreground: neutral-foreground-disabled",
         "text-input-placeholder-foreground: text-secondary",
+        "text-input-placeholder-foreground: neutral-foreground-2",
         "text-input-focused-placeholder-foreground: text-tertiary",
+        "text-input-focused-placeholder-foreground: neutral-foreground-3",
         "text-input-focus-indicator-background: accent-background",
+        "text-input-focus-indicator-background: accent-fill",
         "text-input-selection-background: selection-background",
+        "text-input-selection-background: accent-fill",
         "text-input-selection-foreground: accent-foreground",
+        "text-input-selection-foreground: accent-foreground-1",
         "text-input-disabled-selection-foreground: text-accent-foreground-disabled",
+        "text-input-disabled-selection-foreground: accent-foreground-disabled",
     ] {
         let copied_bridge_line = format!("out property <brush> {copied_bridge};");
         assert!(
             !styling.lines().any(|line| line.trim() == copied_bridge_line),
             "fluent2 text input semantic tokens should not alias through copied bridge {copied_bridge}"
+        );
+    }
+
+    for expected in [
+        "property <brush> text-input-focus-indicator-fill: accent-fill;",
+        "property <brush> text-input-foreground-fill: neutral-foreground-1;",
+        "property <brush> text-input-disabled-foreground-fill: neutral-foreground-disabled;",
+        "property <brush> text-input-placeholder-foreground-fill: neutral-foreground-2;",
+        "property <brush> text-input-focused-placeholder-foreground-fill: neutral-foreground-3;",
+        "property <brush> text-input-selection-fill: accent-fill;",
+        "property <brush> text-input-selection-foreground-fill: accent-foreground-1;",
+        "property <brush> text-input-disabled-selection-foreground-fill: accent-foreground-disabled;",
+        "property <brush> text-control-border-stroke: neutral-stroke-control-active;",
+        "property <brush> text-input-fill: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "property <brush> text-input-active-fill: dark-color-scheme ? #1E1E1E : #FFFFFF;",
+        "property <brush> text-input-disabled-fill: dark-color-scheme ? #FFFFFF0A : #F5F5F5;",
+        "out property <brush> text-control-border: text-control-border-stroke;",
+        "out property <brush> text-input-background: text-input-fill;",
+        "out property <brush> text-input-active-background: text-input-active-fill;",
+        "out property <brush> text-input-disabled-background: text-input-disabled-fill;",
+        "out property <brush> text-input-focus-indicator-background: text-input-focus-indicator-fill;",
+        "out property <brush> text-input-foreground: text-input-foreground-fill;",
+        "out property <brush> text-input-disabled-foreground: text-input-disabled-foreground-fill;",
+        "out property <brush> text-input-placeholder-foreground: text-input-placeholder-foreground-fill;",
+        "out property <brush> text-input-focused-placeholder-foreground: text-input-focused-placeholder-foreground-fill;",
+        "out property <brush> text-input-selection-background: text-input-selection-fill;",
+        "out property <brush> text-input-selection-foreground: text-input-selection-foreground-fill;",
+        "out property <brush> text-input-disabled-selection-foreground: text-input-disabled-selection-foreground-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 text input accent treatment should route through text-input-owned primitive {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> text-control-border: neutral-stroke-control-active;",
+        "out property <brush> text-input-background: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "out property <brush> text-input-active-background: dark-color-scheme ? #1E1E1E : #FFFFFF;",
+        "out property <brush> text-input-disabled-background: dark-color-scheme ? #FFFFFF0A : #F5F5F5;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 exported text input tokens should bind through text-input-owned primitives, not direct primitives: {copied_direct_export}"
+        );
+    }
+
+    for expected in [
+        "out property <length> text-input-min-width: 160px;",
+        "out property <length> text-input-height: 32px;",
+        "out property <length> text-input-horizontal-padding: 12px;",
+        "out property <length> text-input-vertical-padding: 4px;",
+        "out property <length> text-input-border-width: 1px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 text input geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> text-input-min-width: input-min-width;",
+        "out property <length> text-input-height: control-height;",
+        "out property <length> text-input-horizontal-padding: control-horizontal-padding;",
+        "out property <length> text-input-vertical-padding: control-vertical-padding;",
+        "out property <length> text-input-border-width: stroke-width;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 text input geometry tokens should not alias through copied generic geometry: {copied_alias}"
         );
     }
 
@@ -1733,6 +2596,26 @@ fn test_fluent2_text_input_focus_indicator_geometry_uses_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "out property <length> text-input-focus-indicator-height: 2px;",
+        "out property <length> text-input-focus-indicator-horizontal-inset: 4px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 text input focus indicator tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> text-input-focus-indicator-height: input-focus-indicator-height;",
+        "out property <length> text-input-focus-indicator-horizontal-inset: control-radius;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 text input focus indicator tokens should not alias through copied generic geometry: {copied_alias}"
+        );
+    }
+
     for (control, expected_height) in [
         ("lineedit.slint", "Fluent2SizeSettings.text-input-focus-indicator-height"),
         ("textedit.slint", "Fluent2SizeSettings.text-input-focus-indicator-height"),
@@ -1764,6 +2647,71 @@ fn test_fluent2_text_input_focus_indicator_geometry_uses_tokens() {
 }
 
 #[test]
+fn test_fluent2_text_field_focus_indicator_motion_uses_tokens() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for expected in [
+        "out property <duration> text-input-motion-duration: 150ms;",
+        "out property <duration> spinbox-motion-duration: 150ms;",
+        "out property <duration> combobox-motion-duration: 150ms;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 text field motion tokens should own direct values: {expected}"
+        );
+    }
+
+    for (control, motion_token, indicator_marker) in [
+        (
+            "lineedit.slint",
+            "Fluent2SizeSettings.text-input-motion-duration",
+            "focus-border := Rectangle",
+        ),
+        (
+            "textedit.slint",
+            "Fluent2SizeSettings.text-input-motion-duration",
+            "i-focus-border := Rectangle",
+        ),
+        (
+            "spinbox.slint",
+            "Fluent2SizeSettings.spinbox-motion-duration",
+            "focus-border := Rectangle",
+        ),
+        (
+            "combobox.slint",
+            "Fluent2SizeSettings.combobox-motion-duration",
+            "focus-border := Rectangle",
+        ),
+    ] {
+        let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{control}")))
+            .unwrap_or_else(|| panic!("fluent2 should embed {control}"));
+        let source_contents = source.read();
+        let source = std::str::from_utf8(&source_contents).unwrap();
+        let focus_indicator = source
+            .split(indicator_marker)
+            .nth(1)
+            .map(|after| &after[..after.len().min(600)])
+            .unwrap_or_else(|| panic!("fluent2 {control} should define {indicator_marker}"));
+
+        assert!(
+            focus_indicator
+                .contains(&format!("animate background {{ duration: {motion_token}; }}")),
+            "fluent2 {control} focus indicator should animate background with {motion_token}"
+        );
+
+        assert!(
+            source.contains(&format!(
+                "animate background, border-color {{ duration: {motion_token}; }}"
+            )),
+            "fluent2 {control} text-field surface should animate fill and stroke with {motion_token}"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_text_entry_radius_uses_semantic_tokens() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");
@@ -1772,6 +2720,14 @@ fn test_fluent2_text_entry_radius_uses_semantic_tokens() {
 
     for token in ["text-input-radius", "spinbox-radius"] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    for copied_alias in ["text-input-radius: control-radius", "spinbox-radius: text-input-radius"] {
+        let copied_alias_line = format!("out property <length> {copied_alias};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias_line),
+            "fluent2 text-entry radius tokens should not alias through copied generic geometry {copied_alias}"
+        );
     }
 
     for (control, surface_marker, end_marker, expected, copied_literal) in [
@@ -1840,7 +2796,36 @@ fn test_fluent2_spinbox_input_colors_use_semantic_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "out property <length> spinbox-height: 32px;",
+        "out property <length> spinbox-horizontal-padding: 12px;",
+        "out property <length> spinbox-vertical-padding: 4px;",
+        "out property <length> spinbox-border-width: 1px;",
+        "out property <length> spinbox-focus-indicator-height: 2px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 spinbox geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> spinbox-height: control-height;",
+        "out property <length> spinbox-horizontal-padding: control-horizontal-padding;",
+        "out property <length> spinbox-vertical-padding: control-vertical-padding;",
+        "out property <length> spinbox-border-width: text-input-border-width;",
+        "out property <length> spinbox-focus-indicator-height: input-focus-indicator-height;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 spinbox geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
+    }
+
     for copied_bridge in [
+        "spinbox-background: control-fill",
+        "spinbox-active-background: input-fill-active",
+        "spinbox-disabled-background: control-fill-disabled",
         "spinbox-background: control-background",
         "spinbox-active-background: control-input-active",
         "spinbox-disabled-background: control-disabled",
@@ -1848,14 +2833,60 @@ fn test_fluent2_spinbox_input_colors_use_semantic_tokens() {
         "spinbox-foreground: control-foreground",
         "spinbox-disabled-foreground: text-disabled",
         "spinbox-focus-indicator-background: accent-background",
+        "spinbox-focus-indicator-background: accent-fill",
         "spinbox-selection-background: selection-background",
+        "spinbox-selection-background: accent-fill",
         "spinbox-selection-foreground: accent-foreground",
+        "spinbox-selection-foreground: accent-foreground-1",
         "spinbox-disabled-selection-foreground: text-accent-foreground-disabled",
+        "spinbox-disabled-selection-foreground: accent-foreground-disabled",
     ] {
         let copied_bridge_line = format!("out property <brush> {copied_bridge};");
         assert!(
             !styling.lines().any(|line| line.trim() == copied_bridge_line),
             "fluent2 spinbox semantic tokens should not alias through copied bridge {copied_bridge}"
+        );
+    }
+
+    for expected in [
+        "property <brush> spinbox-fill: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "property <brush> spinbox-active-fill: dark-color-scheme ? #1E1E1E : #FFFFFF;",
+        "property <brush> spinbox-disabled-fill: dark-color-scheme ? #FFFFFF0A : #F5F5F5;",
+        "property <brush> spinbox-foreground-fill: neutral-foreground-1;",
+        "property <brush> spinbox-disabled-foreground-fill: neutral-foreground-disabled;",
+        "property <brush> spinbox-focus-indicator-fill: accent-fill;",
+        "property <brush> spinbox-selection-fill: accent-fill;",
+        "property <brush> spinbox-selection-foreground-fill: accent-foreground-1;",
+        "property <brush> spinbox-disabled-selection-foreground-fill: accent-foreground-disabled;",
+        "out property <brush> spinbox-background: spinbox-fill;",
+        "out property <brush> spinbox-active-background: spinbox-active-fill;",
+        "out property <brush> spinbox-disabled-background: spinbox-disabled-fill;",
+        "out property <brush> spinbox-foreground: spinbox-foreground-fill;",
+        "out property <brush> spinbox-disabled-foreground: spinbox-disabled-foreground-fill;",
+        "out property <brush> spinbox-focus-indicator-background: spinbox-focus-indicator-fill;",
+        "out property <brush> spinbox-selection-background: spinbox-selection-fill;",
+        "out property <brush> spinbox-selection-foreground: spinbox-selection-foreground-fill;",
+        "out property <brush> spinbox-disabled-selection-foreground: spinbox-disabled-selection-foreground-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 spinbox accent treatment should route through spinbox-owned primitive {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "property <brush> spinbox-fill: control-fill;",
+        "property <brush> spinbox-active-fill: input-fill-active;",
+        "property <brush> spinbox-disabled-fill: control-fill-disabled;",
+        "out property <brush> spinbox-background: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "out property <brush> spinbox-active-background: dark-color-scheme ? #1E1E1E : #FFFFFF;",
+        "out property <brush> spinbox-disabled-background: dark-color-scheme ? #FFFFFF0A : #F5F5F5;",
+        "out property <brush> spinbox-foreground: neutral-foreground-1;",
+        "out property <brush> spinbox-disabled-foreground: neutral-foreground-disabled;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 exported spinbox tokens should bind through spinbox-owned primitives, not direct generic primitives: {copied_direct_export}"
         );
     }
 
@@ -1974,9 +3005,34 @@ fn test_fluent2_progress_indicator_geometry_uses_tokens() {
         "progress-track-background",
         "progress-rail-radius",
         "progress-track-radius",
+        "progress-track-height",
         "progress-determinate-track-offset",
     ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
+    }
+
+    for expected in [
+        "property <brush> progress-track-fill: neutral-stroke-subtle;",
+        "out property <brush> progress-track-background: progress-track-fill;",
+        "out property <length> progress-track-radius: 3px;",
+        "out property <length> progress-track-height: 3px;",
+        "out property <length> progress-determinate-track-offset: 0px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 progress geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <brush> progress-track-background: neutral-stroke-subtle;",
+        "out property <length> progress-track-radius: progress-height;",
+        "out property <length> progress-determinate-track-offset: interaction-receiver-size;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 progress geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
     }
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/progressindicator.slint"))
@@ -1987,6 +3043,7 @@ fn test_fluent2_progress_indicator_geometry_uses_tokens() {
     for expected in [
         "background: Fluent2Palette.progress-track-background",
         "border-radius: Fluent2SizeSettings.progress-rail-radius",
+        "height: Fluent2SizeSettings.progress-track-height",
         "border-radius: Fluent2SizeSettings.progress-track-radius",
         "x: !root.indeterminate ? Fluent2SizeSettings.progress-determinate-track-offset",
     ] {
@@ -2001,6 +3058,10 @@ fn test_fluent2_progress_indicator_geometry_uses_tokens() {
     assert!(
         !source.contains("border-radius: Fluent2SizeSettings.progress-height"),
         "fluent2 progress indicator track radius should not be derived from progress height"
+    );
+    assert!(
+        !source.contains("height: 100%"),
+        "fluent2 progress indicator active track should use an explicit Fluent2 height token"
     );
     assert!(
         !source.contains("x: !root.indeterminate ? 0px"),
@@ -2019,9 +3080,23 @@ fn test_fluent2_progress_indicators_use_semantic_active_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "property <brush> progress-indicator-active-fill: accent-fill;",
+        "property <brush> spinner-active-fill: accent-fill;",
+        "out property <brush> progress-indicator-active-background: progress-indicator-active-fill;",
+        "out property <brush> spinner-active-stroke: spinner-active-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 styling should keep progress/spinner accent treatment behind control-owned primitive {expected}"
+        );
+    }
+
     for copied_alias in [
         "progress-indicator-active-background: accent-background",
+        "progress-indicator-active-background: accent-fill",
         "spinner-active-stroke: accent-background",
+        "spinner-active-stroke: accent-fill",
     ] {
         let copied_alias_line = format!("out property <brush> {copied_alias};");
         assert!(
@@ -2069,6 +3144,16 @@ fn test_fluent2_spinner_geometry_uses_tokens() {
     assert!(
         styling.contains("spinner-radius"),
         "fluent2 styling should expose a spinner radius token"
+    );
+    assert!(
+        styling.lines().any(|line| line.trim() == "out property <float> spinner-radius: 50;"),
+        "fluent2 spinner radius should own a direct visual value"
+    );
+    assert!(
+        !styling.lines().any(|line| {
+            line.trim() == "out property <float> spinner-radius: spinner-viewbox-size / 2;"
+        }),
+        "fluent2 spinner radius should not alias through copied viewbox geometry"
     );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/spinner-base.slint"))
@@ -2136,22 +3221,63 @@ fn test_fluent2_surface_elevation_uses_semantic_tokens() {
 }
 
 #[test]
-fn test_fluent2_shadow_bridge_uses_rest_elevation_token() {
+fn test_fluent2_removes_copied_shadow_bridge() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
     assert!(
-        styling
-            .lines()
-            .any(|line| line.trim() == "out property <brush> shadow: elevation-shadow-rest-color;"),
-        "fluent2 legacy shadow bridge should use the semantic rest elevation color token"
+        !styling.lines().any(|line| line.trim().starts_with("out property <brush> shadow:")),
+        "fluent2 styling should remove the copied generic shadow bridge"
     );
     assert!(
-        !styling.lines().any(|line| line.trim() == "out property <brush> shadow: shadow-ambient;"),
-        "fluent2 legacy shadow bridge should not bypass semantic elevation tokens"
+        styling.contains("elevation-shadow-rest-color")
+            && styling.contains("elevation-shadow-flyout-color"),
+        "fluent2 styling should retain semantic elevation shadow tokens"
     );
+}
+
+#[test]
+fn test_fluent2_removes_unused_copied_palette_bridges() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for copied_bridge in [
+        "text-secondary",
+        "text-tertiary",
+        "text-disabled",
+        "control-secondary",
+        "control-tertiary",
+        "control-disabled",
+        "subtle",
+        "subtle-secondary",
+        "subtle-tertiary",
+        "divider",
+    ] {
+        let prefix = format!("out property <brush> {copied_bridge}:");
+        assert!(
+            !styling.lines().any(|line| line.trim().starts_with(&prefix)),
+            "fluent2 styling should remove unused copied palette bridge {copied_bridge}"
+        );
+    }
+
+    for primitive in [
+        "neutral-foreground-2",
+        "neutral-foreground-3",
+        "neutral-foreground-disabled",
+        "control-fill-hover",
+        "control-fill-pressed",
+        "control-fill-disabled",
+        "control-fill-subtle",
+        "control-fill-subtle-hover",
+        "control-fill-subtle-pressed",
+        "neutral-stroke-subtle",
+    ] {
+        assert!(styling.contains(primitive), "fluent2 primitive token {primitive} should remain");
+    }
 }
 
 #[test]
@@ -2163,6 +3289,26 @@ fn test_fluent2_focus_ring_geometry_uses_tokens() {
 
     for token in ["focus-ring-gap", "focus-ring-inner-stroke-width", "focus-ring-radius-adjust"] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    for expected in [
+        "out property <length> focus-ring-inner-stroke-width: 1px;",
+        "out property <length> focus-ring-radius-adjust: 2px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 focus ring geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> focus-ring-inner-stroke-width: stroke-width;",
+        "out property <length> focus-ring-radius-adjust: focus-ring-gap;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 focus ring geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
     }
 
     let components = load_file(&std::path::PathBuf::from("builtin:/fluent2/components.slint"))
@@ -2243,6 +3389,19 @@ fn test_fluent2_state_layer_motion_uses_tokens() {
         styling.contains("state-layer-motion-duration"),
         "fluent2 styling should expose a semantic state layer motion duration token"
     );
+    assert!(
+        styling.lines().any(
+            |line| line.trim() == "out property <duration> state-layer-motion-duration: 150ms;"
+        ),
+        "fluent2 state layer motion should own a direct Fluent2 duration"
+    );
+    assert!(
+        !styling.lines().any(|line| {
+            line.trim()
+                == "out property <duration> state-layer-motion-duration: control-motion-duration;"
+        }),
+        "fluent2 state layer motion should not alias the generic control motion token"
+    );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/internal-components.slint"))
         .expect("fluent2 should embed internal-components.slint");
@@ -2281,18 +3440,38 @@ fn test_fluent2_picker_state_brushes_use_state_layer_tokens() {
     }
 
     for expected in [
-        "date-picker-day-state-brush: state-layer-brush",
-        "date-picker-day-selected-state-brush: state-layer-on-accent-brush",
-        "date-picker-day-today-state-brush: state-layer-brush",
-        "date-picker-icon-state-brush: state-layer-brush",
-        "date-picker-selection-button-state-brush: state-layer-brush",
-        "time-picker-selector-state-brush: state-layer-brush",
-        "time-picker-selector-selected-state-brush: state-layer-on-accent-brush",
-        "time-picker-input-state-brush: state-layer-brush",
-        "time-picker-input-selected-state-brush: state-layer-on-accent-brush",
-        "time-picker-period-item-state-brush: state-layer-brush",
-        "time-picker-period-item-selected-state-brush: state-layer-on-accent-brush",
-        "lineedit-icon-state-brush: state-layer-brush",
+        "date-picker-day-state-brush-fill: state-layer-brush",
+        "date-picker-day-selected-state-brush-fill: state-layer-on-accent-brush",
+        "date-picker-day-today-state-brush-fill: state-layer-brush",
+        "date-picker-icon-state-brush-fill: state-layer-brush",
+        "date-picker-selection-button-state-brush-fill: state-layer-brush",
+        "time-picker-selector-state-brush-fill: state-layer-brush",
+        "time-picker-selector-selected-state-brush-fill: state-layer-on-accent-brush",
+        "time-picker-input-state-brush-fill: state-layer-brush",
+        "time-picker-input-selected-state-brush-fill: state-layer-on-accent-brush",
+        "time-picker-period-item-state-brush-fill: state-layer-brush",
+        "time-picker-period-item-selected-state-brush-fill: state-layer-on-accent-brush",
+    ] {
+        let expected_line = format!("property <brush> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 picker and time picker state brushes should use control-owned primitives backed by shared Fluent2 state-layer tokens: {expected}"
+        );
+    }
+
+    for expected in [
+        "date-picker-day-state-brush: date-picker-day-state-brush-fill",
+        "date-picker-day-selected-state-brush: date-picker-day-selected-state-brush-fill",
+        "date-picker-day-today-state-brush: date-picker-day-today-state-brush-fill",
+        "date-picker-icon-state-brush: date-picker-icon-state-brush-fill",
+        "date-picker-selection-button-state-brush: date-picker-selection-button-state-brush-fill",
+        "time-picker-selector-state-brush: time-picker-selector-state-brush-fill",
+        "time-picker-selector-selected-state-brush: time-picker-selector-selected-state-brush-fill",
+        "time-picker-input-state-brush: time-picker-input-state-brush-fill",
+        "time-picker-input-selected-state-brush: time-picker-input-selected-state-brush-fill",
+        "time-picker-period-item-state-brush: time-picker-period-item-state-brush-fill",
+        "time-picker-period-item-selected-state-brush: time-picker-period-item-selected-state-brush-fill",
+        "lineedit-icon-state-brush: lineedit-icon-state-brush-fill",
     ] {
         let expected_line = format!("out property <brush> {expected};");
         assert!(
@@ -2300,6 +3479,12 @@ fn test_fluent2_picker_state_brushes_use_state_layer_tokens() {
             "fluent2 picker and icon state brushes should use shared Fluent2 state-layer tokens: {expected}"
         );
     }
+
+    assert!(
+        styling.lines().any(|line| line.trim()
+            == "property <brush> lineedit-icon-state-brush-fill: state-layer-brush;"),
+        "fluent2 line edit icon state brush should use a local primitive backed by the shared Fluent2 state-layer token"
+    );
 
     for copied_literal in [
         "date-picker-day-state-brush: dark-color-scheme ? #FFFFFF : #000000",
@@ -2314,6 +3499,17 @@ fn test_fluent2_picker_state_brushes_use_state_layer_tokens() {
         "time-picker-period-item-state-brush: dark-color-scheme ? #FFFFFF : #000000",
         "time-picker-period-item-selected-state-brush: dark-color-scheme ? #000000 : #FFFFFF",
         "lineedit-icon-state-brush: dark-color-scheme ? #FFFFFF : #000000",
+        "date-picker-day-state-brush: state-layer-brush",
+        "date-picker-day-selected-state-brush: state-layer-on-accent-brush",
+        "date-picker-day-today-state-brush: state-layer-brush",
+        "date-picker-icon-state-brush: state-layer-brush",
+        "date-picker-selection-button-state-brush: state-layer-brush",
+        "time-picker-selector-state-brush: state-layer-brush",
+        "time-picker-selector-selected-state-brush: state-layer-on-accent-brush",
+        "time-picker-input-state-brush: state-layer-brush",
+        "time-picker-input-selected-state-brush: state-layer-on-accent-brush",
+        "time-picker-period-item-state-brush: state-layer-brush",
+        "time-picker-period-item-selected-state-brush: state-layer-on-accent-brush",
     ] {
         let copied_literal_line = format!("out property <brush> {copied_literal};");
         assert!(
@@ -2404,15 +3600,15 @@ fn test_fluent2_transparent_visuals_use_palette_token() {
     }
 
     assert!(
-        styling.contains(
-            "out property <brush> button-icon-transparent-foreground: control-fill-transparent"
-        ),
+        styling.contains("property <brush> button-icon-transparent-foreground-fill: control-fill-transparent")
+            && styling.contains("out property <brush> button-icon-transparent-foreground: button-icon-transparent-foreground-fill"),
         "fluent2 Button transparent icon fallback should stay backed by the transparent control fill token"
     );
     assert!(
-        styling.contains(
-            "out property <brush> menu-popup-window-background: control-fill-transparent"
-        ),
+        styling.contains("property <brush> menu-popup-window-fill: control-fill-transparent")
+            && styling.contains(
+                "out property <brush> menu-popup-window-background: menu-popup-window-fill",
+            ),
         "fluent2 PopupMenuImpl window background should stay backed by the transparent control fill token"
     );
     assert!(
@@ -2422,12 +3618,14 @@ fn test_fluent2_transparent_visuals_use_palette_token() {
     );
 
     for expected in [
-        "out property <brush> list-item-background: neutral-background-transparent",
-        "out property <brush> table-row-alternate-background: neutral-background-transparent",
+        "property <brush> list-item-fill: neutral-background-transparent",
+        "property <brush> table-row-alternate-fill: neutral-background-transparent",
+        "out property <brush> list-item-background: list-item-fill",
+        "out property <brush> table-row-alternate-background: table-row-alternate-fill",
     ] {
         assert!(
             styling.contains(expected),
-            "fluent2 semantic transparent visual token should use the Fluent2 transparent neutral background token: {expected}"
+            "fluent2 semantic transparent visual token should route through row-owned transparent primitives: {expected}"
         );
     }
 
@@ -2451,22 +3649,21 @@ fn test_fluent2_transparent_strokes_use_transparent_stroke_primitive() {
 
     for expected in [
         "property <brush> neutral-stroke-transparent: control-fill-transparent;",
-        "out property <brush> button-primary-disabled-border: neutral-stroke-transparent;",
-        "out property <brush> tab-background: neutral-stroke-transparent;",
+        "property <brush> button-primary-disabled-border-stroke: neutral-stroke-transparent;",
+        "out property <brush> button-primary-disabled-border: button-primary-disabled-border-stroke;",
     ] {
         assert!(
             styling.lines().any(|line| line.trim() == expected),
-            "fluent2 transparent stroke/background token should use the transparent stroke primitive: {expected}"
+            "fluent2 transparent stroke token should use the transparent stroke primitive: {expected}"
         );
     }
 
-    for copied_literal in [
-        "button-primary-disabled-border: neutral-background-1.transparentize(100%)",
-        "tab-background: neutral-background-1.transparentize(100%)",
-    ] {
+    for copied_literal in
+        ["button-primary-disabled-border: neutral-background-1.transparentize(100%)"]
+    {
         assert!(
             !styling.contains(copied_literal),
-            "fluent2 transparent stroke/background token should not derive transparency from a live background: {copied_literal}"
+            "fluent2 transparent stroke token should not derive transparency from a live background: {copied_literal}"
         );
     }
 }
@@ -2529,7 +3726,7 @@ fn test_fluent2_control_alt_quaternary_token_uses_fluent2_name() {
     }
 
     for expected in [
-        "property <brush> switch-rail-pressed-fill: control-alt-fill-quaternary;",
+        "property <brush> switch-rail-pressed-fill: dark-color-scheme ? #FFFFFF12 : #00000017;",
         "out property <brush> switch-rail-pressed-background: switch-rail-pressed-fill;",
     ] {
         assert!(
@@ -2539,10 +3736,8 @@ fn test_fluent2_control_alt_quaternary_token_uses_fluent2_name() {
     }
 
     assert!(
-        !styling.contains(
-            "out property <brush> switch-rail-pressed-background: dark-color-scheme ? #FFFFFF12 : #00000017"
-        ),
-        "fluent2 switch pressed rail token should not repeat the copied raw alpha branch"
+        !styling.contains("switch-rail-pressed-fill: control-alt-fill-quaternary"),
+        "fluent2 switch pressed rail primitive should not alias through the broad control-alt primitive"
     );
 }
 
@@ -2581,6 +3776,19 @@ fn test_fluent2_scrollbar_opacity_uses_tokens() {
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
+
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <duration> scrollbar-motion-duration: 150ms;"),
+        "fluent2 scrollbar motion token should own its literal duration"
+    );
+
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <duration> scrollbar-motion-duration: control-motion-duration;"),
+        "fluent2 scrollbar motion token should not alias the generic control motion token"
+    );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/scrollview.slint"))
         .expect("fluent2 should embed scrollview.slint");
@@ -2626,6 +3834,28 @@ fn test_fluent2_scrollbar_thumb_radius_uses_tokens() {
         "scrollbar-zero-range-thumb-size",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    for expected in [
+        "out property <length> scrollbar-track-radius: 8px;",
+        "out property <length> scrollbar-track-border-width: 1px;",
+        "out property <length> scrollbar-thumb-radius: 3px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 scrollbar geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> scrollbar-track-radius: overlay-radius;",
+        "out property <length> scrollbar-track-border-width: stroke-width;",
+        "out property <length> scrollbar-thumb-radius: scrollbar-expanded-size / 2;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 scrollbar geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
     }
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/scrollview.slint"))
@@ -2675,8 +3905,47 @@ fn test_fluent2_scrollbar_colors_use_semantic_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for token in ["scrollbar-button-foreground", "scrollbar-thumb-background"] {
+    for token in [
+        "scrollbar-track-hover-fill",
+        "scrollbar-button-foreground-fill",
+        "scrollbar-button-hover-foreground-fill",
+        "scrollbar-thumb-fill",
+        "scrollbar-track-hover-background",
+        "scrollbar-button-foreground",
+        "scrollbar-button-hover-foreground",
+        "scrollbar-thumb-background",
+    ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    for expected in [
+        "property <brush> scrollbar-track-hover-fill: neutral-background-3;",
+        "property <brush> scrollbar-button-foreground-fill: control-icon-border-foreground-fill;",
+        "property <brush> scrollbar-button-hover-foreground-fill: control-icon-foreground-fill;",
+        "property <brush> scrollbar-thumb-fill: control-stroke-subtle-fill;",
+        "out property <brush> scrollbar-track-hover-background: scrollbar-track-hover-fill;",
+        "out property <brush> scrollbar-button-foreground: scrollbar-button-foreground-fill;",
+        "out property <brush> scrollbar-button-hover-foreground: scrollbar-button-hover-foreground-fill;",
+        "out property <brush> scrollbar-thumb-background: scrollbar-thumb-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 scrollbar color exports should route through scrollbar-owned primitive {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "scrollbar-track-hover-background: neutral-background-3",
+        "scrollbar-button-foreground: control-icon-border-foreground-fill",
+        "scrollbar-button-hover-foreground: control-icon-foreground-fill",
+        "scrollbar-thumb-background: control-stroke-subtle-fill",
+        "scrollbar-thumb-background: neutral-stroke-1",
+    ] {
+        let copied_alias_line = format!("out property <brush> {copied_alias};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias_line),
+            "fluent2 scrollbar semantic tokens should not bind directly to generic primitives: {copied_alias}"
+        );
     }
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/scrollview.slint"))
@@ -2718,6 +3987,14 @@ fn test_fluent2_control_icons_use_semantic_foreground_tokens() {
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
     for token in [
+        "control-icon-foreground-fill",
+        "control-icon-pressed-foreground-fill",
+        "control-icon-border-foreground-fill",
+        "combobox-icon-foreground-fill",
+        "combobox-icon-pressed-foreground-fill",
+        "spinbox-button-icon-foreground-fill",
+        "spinbox-button-icon-pressed-foreground-fill",
+        "table-header-sort-icon-foreground-fill",
         "combobox-icon-foreground",
         "combobox-icon-pressed-foreground",
         "spinbox-button-icon-foreground",
@@ -2735,6 +4012,18 @@ fn test_fluent2_control_icons_use_semantic_foreground_tokens() {
         "spinbox-button-icon-pressed-foreground: text-tertiary",
         "table-sort-icon-foreground: text-secondary",
         "scrollbar-button-hover-foreground: text-secondary",
+        "combobox-icon-foreground: neutral-foreground-2",
+        "combobox-icon-pressed-foreground: neutral-foreground-3",
+        "spinbox-button-icon-foreground: neutral-foreground-2",
+        "spinbox-button-icon-pressed-foreground: neutral-foreground-3",
+        "table-sort-icon-foreground: neutral-foreground-2",
+        "scrollbar-button-hover-foreground: neutral-foreground-2",
+        "scrollbar-button-foreground: neutral-stroke-1",
+        "combobox-icon-foreground: control-icon-foreground-fill",
+        "combobox-icon-pressed-foreground: control-icon-pressed-foreground-fill",
+        "spinbox-button-icon-foreground: control-icon-foreground-fill",
+        "spinbox-button-icon-pressed-foreground: control-icon-pressed-foreground-fill",
+        "table-sort-icon-foreground: control-icon-foreground-fill",
     ] {
         let copied_alias_line = format!("out property <brush> {copied_alias};");
         assert!(
@@ -2878,6 +4167,18 @@ fn test_fluent2_selection_indicator_hidden_height_uses_tokens() {
         styling.contains("selection-indicator-hidden-height"),
         "fluent2 styling should expose selection-indicator-hidden-height"
     );
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim()
+                == "out property <length> selection-indicator-hidden-height: 0px;"),
+        "fluent2 hidden selection indicator height should own a direct zero value"
+    );
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <length> selection-indicator-hidden-height: interaction-receiver-size;"),
+        "fluent2 hidden selection indicator height should not alias through interaction receiver geometry"
+    );
 
     for control in ["components.slint", "tableview.slint"] {
         let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{control}")))
@@ -2906,6 +4207,17 @@ fn test_fluent2_selection_indicator_geometry_uses_tokens() {
     assert!(
         styling.contains("selection-indicator-offset"),
         "fluent2 should expose a token for selection indicator alignment"
+    );
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <length> selection-indicator-offset: 0px;"),
+        "fluent2 selection indicator offset should own a direct zero value"
+    );
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <length> selection-indicator-offset: interaction-receiver-size;"),
+        "fluent2 selection indicator offset should not alias through interaction receiver geometry"
     );
 
     for (file, component_marker) in [
@@ -2953,6 +4265,7 @@ fn test_fluent2_list_and_table_row_colors_use_semantic_tokens() {
         "list-item-selected-background",
         "list-item-selected-hover-background",
         "list-item-selected-pressed-background",
+        "list-item-selection-indicator-fill",
         "list-item-selection-indicator-background",
         "table-row-background",
         "table-row-alternate-background",
@@ -2963,9 +4276,110 @@ fn test_fluent2_list_and_table_row_colors_use_semantic_tokens() {
         "table-row-selected-background",
         "table-row-selected-hover-background",
         "table-row-selected-pressed-background",
+        "table-row-selection-indicator-fill",
         "table-row-selection-indicator-background",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    for expected in [
+        "property <brush> list-item-fill: neutral-background-transparent;",
+        "property <brush> list-item-foreground-fill: neutral-foreground-1;",
+        "property <brush> list-item-hover-foreground-fill: neutral-foreground-2;",
+        "property <brush> list-item-hover-fill: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "property <brush> list-item-pressed-fill: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "property <brush> list-item-selected-fill: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "property <brush> list-item-selected-hover-fill: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "property <brush> list-item-selected-pressed-fill: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "property <brush> list-item-selection-indicator-fill: accent-fill;",
+        "property <brush> table-row-fill: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "property <brush> table-row-alternate-fill: neutral-background-transparent;",
+        "property <brush> table-row-foreground-fill: neutral-foreground-1;",
+        "property <brush> table-row-alternate-foreground-fill: neutral-foreground-2;",
+        "property <brush> table-row-hover-fill: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "property <brush> table-row-pressed-fill: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "property <brush> table-row-selected-fill: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "property <brush> table-row-selected-hover-fill: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "property <brush> table-row-selected-pressed-fill: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "property <brush> table-row-selection-indicator-fill: accent-fill;",
+        "out property <brush> list-item-background: list-item-fill;",
+        "out property <brush> list-item-foreground: list-item-foreground-fill;",
+        "out property <brush> list-item-hover-foreground: list-item-hover-foreground-fill;",
+        "out property <brush> list-item-hover-background: list-item-hover-fill;",
+        "out property <brush> list-item-pressed-background: list-item-pressed-fill;",
+        "out property <brush> list-item-selected-background: list-item-selected-fill;",
+        "out property <brush> list-item-selected-hover-background: list-item-selected-hover-fill;",
+        "out property <brush> list-item-selected-pressed-background: list-item-selected-pressed-fill;",
+        "out property <brush> list-item-selection-indicator-background: list-item-selection-indicator-fill;",
+        "out property <brush> table-row-background: table-row-fill;",
+        "out property <brush> table-row-alternate-background: table-row-alternate-fill;",
+        "out property <brush> table-row-foreground: table-row-foreground-fill;",
+        "out property <brush> table-row-alternate-foreground: table-row-alternate-foreground-fill;",
+        "out property <brush> table-row-hover-background: table-row-hover-fill;",
+        "out property <brush> table-row-pressed-background: table-row-pressed-fill;",
+        "out property <brush> table-row-selected-background: table-row-selected-fill;",
+        "out property <brush> table-row-selected-hover-background: table-row-selected-hover-fill;",
+        "out property <brush> table-row-selected-pressed-background: table-row-selected-pressed-fill;",
+        "out property <brush> table-row-selection-indicator-background: table-row-selection-indicator-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 styling should keep list/table selection indicator accent treatment behind row-owned primitive {expected}"
+        );
+    }
+
+    for expected in
+        ["list-item-height: 36px", "list-item-radius: 4px", "list-item-content-spacing: 4px"]
+    {
+        let expected_line = format!("out property <length> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 list item geometry tokens should own their literal value: {expected}"
+        );
+    }
+
+    for copied_private_alias in [
+        "property <brush> list-item-hover-fill: control-fill-subtle-hover;",
+        "property <brush> list-item-pressed-fill: control-fill-subtle-pressed;",
+        "property <brush> list-item-selected-fill: control-fill-subtle-hover;",
+        "property <brush> list-item-selected-hover-fill: control-fill-subtle-pressed;",
+        "property <brush> list-item-selected-pressed-fill: control-fill-subtle-hover;",
+        "property <brush> table-row-fill: control-fill;",
+        "property <brush> table-row-hover-fill: control-fill-subtle-hover;",
+        "property <brush> table-row-pressed-fill: control-fill-subtle-pressed;",
+        "property <brush> table-row-selected-fill: control-fill-subtle-hover;",
+        "property <brush> table-row-selected-hover-fill: control-fill-subtle-pressed;",
+        "property <brush> table-row-selected-pressed-fill: control-fill-subtle-hover;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_private_alias),
+            "fluent2 row private fills should own direct values instead of aliasing broad control fills: {copied_private_alias}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> list-item-background: neutral-background-transparent;",
+        "out property <brush> list-item-foreground: neutral-foreground-1;",
+        "out property <brush> list-item-hover-foreground: neutral-foreground-2;",
+        "out property <brush> list-item-hover-background: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "out property <brush> list-item-pressed-background: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "out property <brush> list-item-selected-background: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "out property <brush> list-item-selected-hover-background: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "out property <brush> list-item-selected-pressed-background: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "out property <brush> table-row-background: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "out property <brush> table-row-alternate-background: neutral-background-transparent;",
+        "out property <brush> table-row-foreground: neutral-foreground-1;",
+        "out property <brush> table-row-alternate-foreground: neutral-foreground-2;",
+        "out property <brush> table-row-hover-background: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "out property <brush> table-row-pressed-background: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "out property <brush> table-row-selected-background: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "out property <brush> table-row-selected-hover-background: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "out property <brush> table-row-selected-pressed-background: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 exported list/table row tokens should bind through row-owned primitives, not direct generic primitives: {copied_direct_export}"
+        );
     }
 
     for copied_alias in [
@@ -2973,25 +4387,40 @@ fn test_fluent2_list_and_table_row_colors_use_semantic_tokens() {
         "list-item-foreground: control-foreground",
         "list-item-hover-foreground: text-secondary",
         "list-item-hover-background: subtle-secondary",
+        "list-item-hover-background: control-fill-subtle-hover",
         "list-item-pressed-background: subtle-tertiary",
+        "list-item-pressed-background: control-fill-subtle-pressed",
         "list-item-selected-background: subtle-secondary",
+        "list-item-selected-background: control-fill-subtle-hover",
         "list-item-selected-hover-background: subtle-tertiary",
+        "list-item-selected-hover-background: control-fill-subtle-pressed",
         "list-item-selected-pressed-background: subtle-secondary",
+        "list-item-selected-pressed-background: control-fill-subtle-hover",
         "list-item-selection-indicator-background: accent-background",
+        "list-item-selection-indicator-background: accent-fill",
         "table-row-background: control-background",
+        "table-row-background: control-fill",
         "table-row-alternate-background: control-fill-transparent",
         "table-row-foreground: control-foreground",
         "table-row-alternate-foreground: text-secondary",
         "table-row-hover-background: subtle-secondary",
+        "table-row-hover-background: control-fill-subtle-hover",
         "table-row-pressed-background: subtle-tertiary",
+        "table-row-pressed-background: control-fill-subtle-pressed",
         "table-row-selected-background: subtle-secondary",
+        "table-row-selected-background: control-fill-subtle-hover",
         "table-row-selected-hover-background: subtle-tertiary",
+        "table-row-selected-hover-background: control-fill-subtle-pressed",
         "table-row-selected-pressed-background: subtle-secondary",
+        "table-row-selected-pressed-background: control-fill-subtle-hover",
         "table-row-selection-indicator-background: accent-background",
+        "table-row-selection-indicator-background: accent-fill",
+        "list-item-height: item-height",
+        "list-item-radius: control-radius",
+        "list-item-content-spacing: overlay-padding",
     ] {
-        let copied_alias_line = format!("out property <brush> {copied_alias};");
         assert!(
-            !styling.lines().any(|line| line.trim() == copied_alias_line),
+            !styling.lines().any(|line| line.trim().contains(copied_alias)),
             "fluent2 styling should bind list/table row semantic tokens directly, not through copied generic alias {copied_alias}"
         );
     }
@@ -3094,6 +4523,18 @@ fn test_fluent2_list_item_motion_uses_list_duration_token() {
         styling.contains("list-item-motion-duration"),
         "fluent2 styling should expose a semantic list item motion duration token"
     );
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <duration> list-item-motion-duration: 150ms;"),
+        "fluent2 list item motion token should own its literal value"
+    );
+    assert!(
+        !styling
+            .lines()
+            .any(|line| line.trim().contains("list-item-motion-duration: control-motion-duration")),
+        "fluent2 list item motion token should not alias the generic control motion token"
+    );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/components.slint"))
         .expect("fluent2 should embed components.slint");
@@ -3141,6 +4582,36 @@ fn test_fluent2_table_header_colors_use_semantic_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "out property <length> table-header-horizontal-padding: 12px;",
+        "out property <length> table-cell-horizontal-padding: 12px;",
+        "out property <length> table-header-sort-icon-size: 12px;",
+        "out property <length> table-header-separator-thickness: 1px;",
+        "out property <length> table-header-resize-separator-thickness: 1px;",
+        "out property <length> table-row-height: 36px;",
+        "out property <length> table-row-radius: 4px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 table geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> table-header-horizontal-padding: control-horizontal-padding;",
+        "out property <length> table-cell-horizontal-padding: control-horizontal-padding;",
+        "out property <length> table-header-sort-icon-size: icon-size;",
+        "out property <length> table-header-separator-thickness: separator-thickness;",
+        "out property <length> table-header-resize-separator-thickness: separator-thickness;",
+        "out property <length> table-row-height: item-height;",
+        "out property <length> table-row-radius: control-radius;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 table geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
+    }
+
     for token in [
         "table-header-background",
         "table-header-hover-background",
@@ -3153,14 +4624,59 @@ fn test_fluent2_table_header_colors_use_semantic_tokens() {
     }
 
     for copied_alias in [
+        "table-header-hover-background: sub-title-tertiary",
+        "table-header-hover-background: control-fill-subtle-pressed",
         "table-header-pressed-background: control-secondary",
+        "table-header-pressed-background: control-fill-hover",
         "table-header-foreground: text-secondary",
         "table-header-sort-icon-foreground: table-sort-icon-foreground",
         "table-header-resize-hover-background: control-secondary",
+        "table-header-resize-hover-background: control-fill-hover",
     ] {
         assert!(
             !styling.contains(copied_alias),
             "fluent2 styling should bind table header semantic tokens directly, not through copied generic alias {copied_alias}"
+        );
+    }
+
+    for expected in [
+        "property <brush> table-header-fill: neutral-background-1;",
+        "property <brush> table-header-hover-fill: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "property <brush> table-header-pressed-fill: dark-color-scheme ? #FFFFFF14 : #F5F5F5;",
+        "property <brush> table-header-foreground-fill: neutral-foreground-2;",
+        "property <brush> table-header-sort-icon-foreground-fill: neutral-foreground-2;",
+        "property <brush> table-header-resize-hover-fill: dark-color-scheme ? #FFFFFF14 : #F5F5F5;",
+        "out property <brush> table-header-background: table-header-fill;",
+        "out property <brush> table-header-hover-background: table-header-hover-fill;",
+        "out property <brush> table-header-pressed-background: table-header-pressed-fill;",
+        "out property <brush> table-header-foreground: table-header-foreground-fill;",
+        "out property <brush> table-header-sort-icon-foreground: table-header-sort-icon-foreground-fill;",
+        "out property <brush> table-header-resize-hover-background: table-header-resize-hover-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 table header colors should route through table-header-owned primitives: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> table-header-background: neutral-background-1;",
+        "out property <brush> table-header-hover-background: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "out property <brush> table-header-pressed-background: dark-color-scheme ? #FFFFFF14 : #F5F5F5;",
+        "out property <brush> table-header-foreground: neutral-foreground-2;",
+        "out property <brush> table-header-sort-icon-foreground: neutral-foreground-2;",
+        "out property <brush> table-header-resize-hover-background: dark-color-scheme ? #FFFFFF14 : #F5F5F5;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 table header public exports should not bind directly to generic primitives: {copied_direct_export}"
+        );
+    }
+
+    for stale_bridge in ["sub-title-secondary", "sub-title-tertiary"] {
+        assert!(
+            !styling.contains(stale_bridge),
+            "fluent2 styling should remove stale copied Fluent table subtitle bridge {stale_bridge}"
         );
     }
 
@@ -3191,6 +4707,22 @@ fn test_fluent2_table_header_colors_use_semantic_tokens() {
     ] {
         assert!(column.contains(expected), "fluent2 TableViewColumn should use {expected}");
     }
+
+    let resize_separator = column
+        .split("x: parent.width - Fluent2SizeSettings.table-header-resize-separator-thickness")
+        .nth(1)
+        .and_then(|after| after.split("movable-touch-area := TouchArea").next())
+        .expect("fluent2 TableViewColumn should define a resize separator before the drag grip");
+
+    assert!(
+        resize_separator.contains("height: Fluent2SizeSettings.table-header-height"),
+        "fluent2 table header resize separator should use the table header height token"
+    );
+
+    assert!(
+        !resize_separator.contains("height: 100%"),
+        "fluent2 table header resize separator should not use implicit full-height geometry"
+    );
 
     let cell = source
         .split("component TableViewCell")
@@ -3247,6 +4779,19 @@ fn test_fluent2_table_motion_uses_table_token() {
         "fluent2 styling should expose table-motion-duration"
     );
 
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <duration> table-motion-duration: 150ms;"),
+        "fluent2 table motion token should own its literal duration"
+    );
+
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <duration> table-motion-duration: control-motion-duration;"),
+        "fluent2 table motion token should not alias the generic control motion token"
+    );
+
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/tableview.slint"))
         .expect("fluent2 should embed tableview.slint");
     let source_contents = source.read();
@@ -3301,6 +4846,28 @@ fn test_fluent2_menu_separator_insets_use_tokens() {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
+    for expected in [
+        "out property <length> menu-separator-horizontal-inset: 0px;",
+        "out property <length> menu-separator-vertical-padding: 4px;",
+        "out property <length> menu-separator-thickness: 1px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 menu separator geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> menu-separator-horizontal-inset: interaction-receiver-size;",
+        "out property <length> menu-separator-vertical-padding: overlay-padding;",
+        "out property <length> menu-separator-thickness: separator-thickness;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 menu separator geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
+    }
+
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/menu.slint"))
         .expect("fluent2 should embed menu.slint");
     let source_contents = source.read();
@@ -3351,11 +4918,57 @@ fn test_fluent2_menu_border_colors_use_semantic_tokens() {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
+    for expected in [
+        "property <brush> menu-frame-stroke: neutral-stroke-1;",
+        "property <brush> menu-separator-stroke: neutral-stroke-1;",
+        "out property <brush> menu-frame-border: menu-frame-stroke;",
+        "out property <brush> menu-separator-color: menu-separator-stroke;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 menu border colors should route through menu-owned stroke primitives: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> menu-frame-border: neutral-stroke-1;",
+        "out property <brush> menu-separator-color: neutral-stroke-1;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 menu border colors should not export direct generic stroke primitives: {copied_direct_export}"
+        );
+    }
+
+    for expected in [
+        "out property <length> menu-frame-radius: 8px;",
+        "out property <length> menu-frame-border-width: 1px;",
+        "out property <length> menu-flyout-radius: 8px;",
+        "out property <length> menu-flyout-border-width: 1px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 menu surface geometry tokens should own direct values: {expected}"
+        );
+    }
+
     for copied_alias in ["menu-flyout-border: control-background-stroke-flyout"] {
         let copied_alias_line = format!("out property <brush> {copied_alias};");
         assert!(
             !styling.lines().any(|line| line.trim() == copied_alias_line),
             "fluent2 styling should bind menu border semantic tokens directly, not through copied generic alias {copied_alias}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> menu-frame-radius: overlay-radius;",
+        "out property <length> menu-frame-border-width: stroke-width;",
+        "out property <length> menu-flyout-radius: overlay-radius;",
+        "out property <length> menu-flyout-border-width: stroke-width;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 menu surface geometry tokens should not alias through copied generic geometry: {copied_alias}"
         );
     }
 
@@ -3472,14 +5085,50 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "out property <length> menu-bar-spacing: 8px;",
+        "out property <length> menu-bar-item-horizontal-padding: 12px;",
+        "out property <length> menu-bar-item-top-padding: 4px;",
+        "out property <length> menu-bar-item-radius: 4px;",
+        "out property <length> menu-item-radius: 4px;",
+        "out property <length> menu-item-icon-size: 12px;",
+        "out property <length> menu-item-horizontal-padding: 12px;",
+        "out property <length> menu-item-spacing: 8px;",
+        "out property <length> menu-item-height: 32px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 menu item geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> menu-bar-spacing: control-spacing;",
+        "out property <length> menu-bar-item-horizontal-padding: control-horizontal-padding;",
+        "out property <length> menu-bar-item-top-padding: control-vertical-padding;",
+        "out property <length> menu-bar-item-radius: control-radius;",
+        "out property <length> menu-item-radius: control-radius;",
+        "out property <length> menu-item-icon-size: icon-size;",
+        "out property <length> menu-item-horizontal-padding: control-horizontal-padding;",
+        "out property <length> menu-item-spacing: control-spacing;",
+        "out property <length> menu-item-height: compact-item-height;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 menu item geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
+    }
+
     for copied_bridge in [
         "menu-bar-item-foreground: foreground",
         "menu-bar-item-pressed-foreground: text-secondary",
         "menu-bar-item-hover-background: subtle-secondary",
+        "menu-bar-item-hover-background: control-fill-subtle-hover",
         "menu-bar-item-pressed-background: control-alt-tertiary",
         "menu-item-foreground: foreground",
         "menu-item-current-foreground: foreground",
         "menu-item-current-background: subtle-secondary",
+        "menu-item-current-background: control-fill-subtle-hover",
     ] {
         let copied_bridge_line = format!("out property <brush> {copied_bridge};");
         assert!(
@@ -3488,9 +5137,46 @@ fn test_fluent2_menu_item_colors_use_semantic_tokens() {
         );
     }
 
+    for expected in [
+        "property <brush> menu-bar-item-foreground-fill: neutral-foreground-1;",
+        "property <brush> menu-bar-item-pressed-foreground-fill: neutral-foreground-2;",
+        "property <brush> menu-bar-item-hover-fill: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "property <brush> menu-bar-item-pressed-fill: state-layer-brush.with_alpha(Fluent2SizeSettings.state-layer-active-opacity);",
+        "property <brush> menu-item-foreground-fill: neutral-foreground-1;",
+        "property <brush> menu-item-current-foreground-fill: neutral-foreground-1;",
+        "property <brush> menu-item-current-fill: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "out property <brush> menu-bar-item-foreground: menu-bar-item-foreground-fill;",
+        "out property <brush> menu-bar-item-pressed-foreground: menu-bar-item-pressed-foreground-fill;",
+        "out property <brush> menu-bar-item-hover-background: menu-bar-item-hover-fill;",
+        "out property <brush> menu-bar-item-pressed-background: menu-bar-item-pressed-fill;",
+        "out property <brush> menu-item-foreground: menu-item-foreground-fill;",
+        "out property <brush> menu-item-current-foreground: menu-item-current-foreground-fill;",
+        "out property <brush> menu-item-current-background: menu-item-current-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 menu color tokens should route through menu-owned primitives: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> menu-bar-item-foreground: neutral-foreground-1;",
+        "out property <brush> menu-bar-item-pressed-foreground: neutral-foreground-2;",
+        "out property <brush> menu-bar-item-hover-background: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "out property <brush> menu-bar-item-pressed-background: state-layer-brush.with_alpha(Fluent2SizeSettings.state-layer-active-opacity);",
+        "out property <brush> menu-item-foreground: neutral-foreground-1;",
+        "out property <brush> menu-item-current-foreground: neutral-foreground-1;",
+        "out property <brush> menu-item-current-background: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 exported menu tokens should bind through menu-owned primitives, not direct primitives: {copied_direct_export}"
+        );
+    }
+
     assert!(
         styling.contains(
-            "menu-bar-item-pressed-background: state-layer-brush.with_alpha(Fluent2SizeSettings.state-layer-active-opacity)"
+            "menu-bar-item-pressed-fill: state-layer-brush.with_alpha(Fluent2SizeSettings.state-layer-active-opacity)"
         ),
         "fluent2 menu bar pressed background should use the shared state-layer active opacity token"
     );
@@ -3603,6 +5289,52 @@ fn test_fluent2_picker_borders_use_semantic_tokens() {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
+    for expected in [
+        "property <brush> date-picker-stroke: neutral-stroke-1;",
+        "property <brush> time-picker-period-stroke: neutral-stroke-1;",
+        "out property <brush> date-picker-border: date-picker-stroke;",
+        "out property <brush> time-picker-period-border: time-picker-period-stroke;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 picker border colors should route through picker-owned stroke primitives: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> date-picker-border: neutral-stroke-1;",
+        "out property <brush> time-picker-period-border: neutral-stroke-1;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 picker border colors should not export direct generic stroke primitives: {copied_direct_export}"
+        );
+    }
+
+    for expected in [
+        "out property <length> date-picker-day-today-border-width: 1px;",
+        "out property <length> date-picker-separator-thickness: 1px;",
+        "out property <length> time-picker-period-border-width: 1px;",
+        "out property <length> time-picker-period-separator-thickness: 1px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 picker border/separator tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> date-picker-day-today-border-width: stroke-width;",
+        "out property <length> date-picker-separator-thickness: separator-thickness;",
+        "out property <length> time-picker-period-border-width: stroke-width;",
+        "out property <length> time-picker-period-separator-thickness: separator-thickness;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 picker border/separator tokens should not keep copied alias: {copied_alias}"
+        );
+    }
+
     for (file, expected) in [
         ("datepicker.slint", "border-brush: Fluent2Palette.date-picker-border"),
         ("time-picker.slint", "border-brush: Fluent2Palette.time-picker-period-border"),
@@ -3682,11 +5414,16 @@ fn test_fluent2_date_picker_day_colors_use_semantic_tokens() {
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
     for token in [
+        "picker-text-foreground-fill",
+        "date-picker-day-foreground-fill",
         "date-picker-day-foreground",
         "date-picker-day-state-brush",
+        "date-picker-day-selected-fill",
+        "date-picker-day-selected-foreground-fill",
         "date-picker-day-selected-background",
         "date-picker-day-selected-foreground",
         "date-picker-day-selected-state-brush",
+        "date-picker-day-today-fill",
         "date-picker-day-today-border",
         "date-picker-day-today-foreground",
         "date-picker-day-today-state-brush",
@@ -3694,14 +5431,37 @@ fn test_fluent2_date_picker_day_colors_use_semantic_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "property <brush> date-picker-day-foreground-fill: picker-text-foreground-fill;",
+        "out property <brush> date-picker-day-foreground: date-picker-day-foreground-fill;",
+        "property <brush> date-picker-day-selected-fill: accent-fill;",
+        "property <brush> date-picker-day-selected-foreground-fill: accent-foreground-1;",
+        "property <brush> date-picker-day-today-fill: accent-fill;",
+        "out property <brush> date-picker-day-selected-background: date-picker-day-selected-fill;",
+        "out property <brush> date-picker-day-selected-foreground: date-picker-day-selected-foreground-fill;",
+        "out property <brush> date-picker-day-today-border: date-picker-day-today-fill;",
+        "out property <brush> date-picker-day-today-foreground: date-picker-day-today-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 styling should keep date picker accent treatment behind picker-owned primitive {expected}"
+        );
+    }
+
     for copied_bridge in [
         "date-picker-day-foreground: foreground",
+        "date-picker-day-foreground: neutral-foreground-1",
+        "date-picker-day-foreground: picker-text-foreground-fill",
         "date-picker-day-state-brush: state",
         "date-picker-day-selected-background: accent-background",
+        "date-picker-day-selected-background: accent-fill",
         "date-picker-day-selected-foreground: accent-foreground",
+        "date-picker-day-selected-foreground: accent-foreground-1",
         "date-picker-day-selected-state-brush: state-secondary",
         "date-picker-day-today-border: accent-background",
+        "date-picker-day-today-border: accent-fill",
         "date-picker-day-today-foreground: accent-background",
+        "date-picker-day-today-foreground: accent-fill",
         "date-picker-day-today-state-brush: state",
     ] {
         let copied_bridge_line = format!("out property <brush> {copied_bridge};");
@@ -3759,10 +5519,15 @@ fn test_fluent2_date_picker_popup_controls_use_semantic_tokens() {
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
     for token in [
+        "picker-text-foreground-fill",
+        "date-picker-icon-foreground-fill",
         "date-picker-icon-foreground",
         "date-picker-icon-state-brush",
+        "date-picker-current-day-foreground-fill",
         "date-picker-current-day-foreground",
+        "date-picker-title-foreground-fill",
         "date-picker-title-foreground",
+        "date-picker-selection-button-foreground-fill",
         "date-picker-selection-button-foreground",
         "date-picker-selection-button-state-brush",
     ] {
@@ -3771,10 +5536,18 @@ fn test_fluent2_date_picker_popup_controls_use_semantic_tokens() {
 
     for copied_alias in [
         "date-picker-icon-foreground: foreground",
+        "date-picker-icon-foreground: neutral-foreground-1",
+        "date-picker-icon-foreground: picker-text-foreground-fill",
         "date-picker-icon-state-brush: state",
         "date-picker-current-day-foreground: foreground",
+        "date-picker-current-day-foreground: neutral-foreground-1",
+        "date-picker-current-day-foreground: picker-text-foreground-fill",
         "date-picker-title-foreground: foreground",
+        "date-picker-title-foreground: neutral-foreground-1",
+        "date-picker-title-foreground: picker-text-foreground-fill",
         "date-picker-selection-button-foreground: foreground",
+        "date-picker-selection-button-foreground: neutral-foreground-1",
+        "date-picker-selection-button-foreground: picker-text-foreground-fill",
         "date-picker-selection-button-state-brush: state",
     ] {
         let copied_alias_line = format!("out property <brush> {copied_alias};");
@@ -3851,16 +5624,36 @@ fn test_fluent2_surface_backgrounds_use_semantic_tokens() {
     for expected in [
         "menu-frame-background",
         "menu-flyout-background",
+        "menu-frame-fill",
+        "menu-flyout-fill",
         "scrollbar-track-hover-background",
         "table-header-background",
         "time-clock-background",
+        "time-clock-fill",
     ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
+    for expected in [
+        "property <brush> menu-frame-fill: neutral-background-1;",
+        "property <brush> menu-flyout-fill: neutral-background-3;",
+        "property <brush> time-clock-fill: neutral-background-1;",
+        "out property <brush> menu-frame-background: menu-frame-fill;",
+        "out property <brush> menu-flyout-background: menu-flyout-fill;",
+        "out property <brush> time-clock-background: time-clock-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 surface background exports should route through surface-owned primitives: {expected}"
+        );
+    }
+
     for copied_alias in [
+        "menu-frame-background: neutral-background-1",
+        "menu-flyout-background: neutral-background-3",
         "menu-flyout-background: alternate-background",
         "scrollbar-track-hover-background: alternate-background",
+        "time-clock-background: neutral-background-1",
     ] {
         let copied_alias_line = format!("out property <brush> {copied_alias};");
         assert!(
@@ -3929,6 +5722,24 @@ fn test_fluent2_separator_colors_use_semantic_tokens() {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
+    for expected in [
+        "property <brush> table-header-separator-fill: neutral-stroke-subtle;",
+        "out property <brush> table-header-separator: table-header-separator-fill;",
+        "property <brush> tab-separator-fill: neutral-stroke-subtle;",
+        "out property <brush> tab-separator: tab-separator-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 separator tokens should route through control-owned primitives: {expected}"
+        );
+    }
+
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <brush> table-header-separator: neutral-stroke-subtle;"),
+        "fluent2 table header separator should not export a direct generic neutral stroke primitive"
+    );
+
     for (file, component_marker, expected, copied_literal) in [
         (
             "tableview.slint",
@@ -3969,6 +5780,9 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
 
     for token in [
         "tab-background",
+        "tab-transparent-fill",
+        "tab-hover-fill",
+        "tab-active-fill",
         "tab-hover-background",
         "tab-pressed-background",
         "tab-selected-background",
@@ -3985,7 +5799,80 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "out property <length> tab-horizontal-padding: 12px;",
+        "out property <length> tab-min-width: 32px;",
+        "out property <length> tab-height: 32px;",
+        "out property <length> tab-radius: 8px;",
+        "out property <length> tab-separator-thickness: 1px;",
+        "out property <length> tab-border-width: 1px;",
+        "out property <length> tab-hidden-border-width: 0px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 tab geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> tab-horizontal-padding: control-horizontal-padding;",
+        "out property <length> tab-min-width: compact-item-height;",
+        "out property <length> tab-height: compact-item-height;",
+        "out property <length> tab-radius: overlay-radius;",
+        "out property <length> tab-separator-thickness: separator-thickness;",
+        "out property <length> tab-border-width: stroke-width;",
+        "out property <length> tab-hidden-border-width: control-hidden-stroke-width;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 tab geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
+    }
+
+    for expected in [
+        "property <brush> tab-transparent-fill: control-fill-transparent;",
+        "property <brush> tab-hover-fill: dark-color-scheme ? #FFFFFF0F : #0000000A;",
+        "property <brush> tab-active-fill: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "property <brush> tab-separator-fill: neutral-stroke-subtle;",
+        "property <brush> tab-border-fill: neutral-stroke-subtle;",
+        "property <brush> tab-foreground-fill: neutral-foreground-2;",
+        "property <brush> tab-selected-foreground-fill: neutral-foreground-1;",
+        "out property <brush> tab-separator: tab-separator-fill;",
+        "out property <brush> tab-background: tab-transparent-fill;",
+        "out property <brush> tab-hover-background: tab-hover-fill;",
+        "out property <brush> tab-pressed-background: tab-active-fill;",
+        "out property <brush> tab-selected-background: tab-active-fill;",
+        "out property <brush> tab-border: tab-border-fill;",
+        "out property <brush> tab-foreground: tab-foreground-fill;",
+        "out property <brush> tab-selected-foreground: tab-selected-foreground-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 tab tokens should route through tab-owned primitives and export semantic tab tokens: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> tab-separator: neutral-stroke-subtle;",
+        "out property <brush> tab-background: transparent;",
+        "out property <brush> tab-hover-background: dark-color-scheme ? #FFFFFF0F : #0000000A;",
+        "out property <brush> tab-pressed-background: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "out property <brush> tab-selected-background: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "out property <brush> tab-border: neutral-stroke-subtle;",
+        "out property <brush> tab-foreground: neutral-foreground-2;",
+        "out property <brush> tab-selected-foreground: neutral-foreground-1;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 exported tab tokens should bind through tab-specific primitives, not direct copied branches: {copied_direct_export}"
+        );
+    }
+
     for copied_bridge in [
+        "tab-background: neutral-stroke-transparent",
+        "tab-hover-background: control-fill-subtle",
+        "tab-pressed-background: control-fill",
+        "tab-selected-background: control-fill",
         "tab-background: control-fill-transparent",
         "tab-hover-background: layer-on-mica-base-alt-secondary",
         "tab-pressed-background: layer-on-mica-base-alt",
@@ -4007,8 +5894,8 @@ fn test_fluent2_tab_colors_use_semantic_tokens() {
     let tab_impl = source
         .split("export component TabImpl")
         .nth(1)
-        .and_then(|after| after.split("component FluentTabBarBase").next())
-        .expect("fluent2 tabwidget should define TabImpl before FluentTabBarBase");
+        .and_then(|after| after.split("component Fluent2TabBarBase").next())
+        .expect("fluent2 tabwidget should define TabImpl before Fluent2TabBarBase");
 
     assert!(
         tab_impl.contains(
@@ -4105,6 +5992,27 @@ fn test_fluent2_hidden_strokes_use_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in
+        ["switch-hidden-thumb-border-width: 0px", "switch-hidden-rail-border-width: 0px"]
+    {
+        let expected_line = format!("out property <length> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 switch hidden stroke tokens should own their literal value: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "switch-hidden-thumb-border-width: control-hidden-stroke-width",
+        "switch-hidden-rail-border-width: control-hidden-stroke-width",
+    ] {
+        let copied_alias_line = format!("out property <length> {copied_alias};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias_line),
+            "fluent2 switch hidden stroke tokens should not alias copied generic token {copied_alias}"
+        );
+    }
+
     for (control, expected_tokens) in [
         ("checkbox.slint", &["Fluent2SizeSettings.checkbox-hidden-border-width"][..]),
         (
@@ -4149,6 +6057,7 @@ fn test_fluent2_spinbox_buttons_use_state_tokens() {
         "spinbox-button-hover-background",
         "spinbox-button-pressed-background",
         "spinbox-button-disabled-icon-foreground",
+        "spinbox-button-column-padding",
         "spinbox-button-radius",
         "spinbox-button-icon-size",
         "spinbox-button-width",
@@ -4158,14 +6067,65 @@ fn test_fluent2_spinbox_buttons_use_state_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "property <brush> spinbox-button-hover-fill: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "property <brush> spinbox-button-pressed-fill: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "property <brush> spinbox-button-disabled-icon-foreground-fill: neutral-foreground-disabled;",
+        "out property <brush> spinbox-button-hover-background: spinbox-button-hover-fill;",
+        "out property <brush> spinbox-button-pressed-background: spinbox-button-pressed-fill;",
+        "out property <brush> spinbox-button-disabled-icon-foreground: spinbox-button-disabled-icon-foreground-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 spinbox button state fills should route through spinbox-owned primitives: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> spinbox-button-hover-background: dark-color-scheme ? #FFFFFF14 : #0000000F;",
+        "out property <brush> spinbox-button-pressed-background: dark-color-scheme ? #FFFFFF0A : #00000014;",
+        "out property <brush> spinbox-button-disabled-icon-foreground: neutral-foreground-disabled;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 spinbox button public exports should not bind directly to generic/raw primitives: {copied_direct_export}"
+        );
+    }
+
+    for expected in [
+        "spinbox-button-column-padding: 2px",
+        "spinbox-button-radius: 4px",
+        "spinbox-button-width: 28px",
+        "spinbox-button-icon-size: 12px",
+        "spinbox-button-spacing: 4px",
+        "spinbox-button-motion-duration: 150ms",
+    ] {
+        let expected_line = if expected.ends_with("ms") {
+            format!("out property <duration> {expected};")
+        } else {
+            format!("out property <length> {expected};")
+        };
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 spinbox button tokens should own their literal value: {expected}"
+        );
+    }
+
     for copied_alias in [
         "spinbox-button-hover-background: subtle-secondary",
+        "spinbox-button-hover-background: control-fill-subtle-hover",
         "spinbox-button-pressed-background: subtle-tertiary",
+        "spinbox-button-pressed-background: control-fill-subtle-pressed",
         "spinbox-button-disabled-icon-foreground: text-disabled",
+        "spinbox-button-column-padding: control-tight-horizontal-padding",
+        "spinbox-button-radius: control-radius",
+        "spinbox-button-width: compact-control-height",
+        "spinbox-button-icon-size: icon-size",
+        "spinbox-button-spacing: overlay-padding",
+        "spinbox-button-motion-duration: control-motion-duration",
     ] {
-        let copied_alias_line = format!("out property <brush> {copied_alias};");
         assert!(
-            !styling.lines().any(|line| line.trim() == copied_alias_line),
+            !styling.lines().any(|line| line.trim().contains(copied_alias)),
             "fluent2 styling should bind spinbox button semantic tokens directly, not through copied generic alias {copied_alias}"
         );
     }
@@ -4290,9 +6250,23 @@ fn test_fluent2_switch_disabled_thumb_uses_single_token_path() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "property <brush> switch-thumb-disabled-fill: neutral-foreground-2;",
+        "property <brush> switch-thumb-checked-disabled-fill: accent-foreground-disabled;",
+        "out property <brush> switch-thumb-disabled: switch-thumb-disabled-fill;",
+        "out property <brush> switch-thumb-checked-disabled: switch-thumb-checked-disabled-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 switch disabled thumb tokens should route through switch-owned primitives: {expected}"
+        );
+    }
+
     for copied_alias in [
         "switch-thumb-disabled: text-secondary",
+        "switch-thumb-disabled: neutral-foreground-2",
         "switch-thumb-checked-disabled: text-accent-foreground-disabled",
+        "switch-thumb-checked-disabled: accent-foreground-disabled",
     ] {
         let copied_alias_line = format!("out property <brush> {copied_alias};");
         assert!(
@@ -4343,6 +6317,12 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
         "switch-rail-background",
         "switch-rail-hover-background",
         "switch-rail-pressed-background",
+        "switch-rail-checked-fill",
+        "switch-rail-checked-hover-fill",
+        "switch-rail-checked-pressed-fill",
+        "switch-rail-checked-disabled-fill",
+        "switch-thumb-rest-fill",
+        "switch-thumb-stroke-fill",
         "switch-rail-checked-background",
         "switch-rail-checked-hover-background",
         "switch-rail-checked-pressed-background",
@@ -4361,6 +6341,89 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
         "switch-thumb-border-width",
     ] {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    for expected in ["switch-rail-border-width: 1px", "switch-thumb-border-width: 1px"] {
+        let expected_line = format!("out property <length> {expected};");
+        assert!(
+            styling.lines().any(|line| line.trim() == expected_line),
+            "fluent2 switch stroke tokens should own their literal value: {expected}"
+        );
+    }
+
+    for copied_alias in
+        ["switch-rail-border-width: stroke-width", "switch-thumb-border-width: stroke-width"]
+    {
+        let copied_alias_line = format!("out property <length> {copied_alias};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias_line),
+            "fluent2 switch stroke tokens should not alias copied generic token {copied_alias}"
+        );
+    }
+
+    for expected in [
+        "property <brush> switch-rail-checked-fill: accent-fill;",
+        "property <brush> switch-rail-checked-hover-fill: accent-fill-hover;",
+        "property <brush> switch-rail-checked-pressed-fill: accent-fill-pressed;",
+        "property <brush> switch-rail-checked-disabled-fill: accent-fill-disabled;",
+        "property <brush> switch-foreground-fill: neutral-foreground-1;",
+        "property <brush> switch-disabled-foreground-fill: neutral-foreground-disabled;",
+        "property <brush> switch-rail-disabled-fill: control-fill-transparent;",
+        "property <brush> switch-rail-border-fill: neutral-stroke-strong;",
+        "property <brush> switch-rail-disabled-border-fill: neutral-stroke-disabled;",
+        "property <brush> switch-thumb-rest-fill: neutral-foreground-2;",
+        "property <brush> switch-thumb-stroke-fill: neutral-stroke-circle;",
+        "property <brush> switch-thumb-checked-fill: accent-foreground-1;",
+        "property <brush> switch-thumb-checked-hover-fill: accent-foreground-1;",
+        "property <brush> switch-thumb-checked-pressed-fill: accent-foreground-1;",
+        "property <brush> switch-thumb-checked-disabled-fill: accent-foreground-disabled;",
+        "out property <brush> switch-foreground: switch-foreground-fill;",
+        "out property <brush> switch-disabled-foreground: switch-disabled-foreground-fill;",
+        "out property <brush> switch-rail-checked-background: switch-rail-checked-fill;",
+        "out property <brush> switch-rail-checked-hover-background: switch-rail-checked-hover-fill;",
+        "out property <brush> switch-rail-checked-pressed-background: switch-rail-checked-pressed-fill;",
+        "out property <brush> switch-rail-checked-disabled-background: switch-rail-checked-disabled-fill;",
+        "out property <brush> switch-rail-disabled-background: switch-rail-disabled-fill;",
+        "out property <brush> switch-rail-border: switch-rail-border-fill;",
+        "out property <brush> switch-rail-disabled-border: switch-rail-disabled-border-fill;",
+        "out property <brush> switch-thumb-checked-background: switch-thumb-checked-fill;",
+        "out property <brush> switch-thumb-checked-hover-background: switch-thumb-checked-hover-fill;",
+        "out property <brush> switch-thumb-checked-pressed-background: switch-thumb-checked-pressed-fill;",
+        "out property <brush> switch-thumb-checked-disabled: switch-thumb-checked-disabled-fill;",
+        "out property <brush> switch-thumb-background: switch-thumb-rest-fill;",
+        "out property <brush> switch-thumb-hover-background: switch-thumb-rest-fill;",
+        "out property <brush> switch-thumb-pressed-background: switch-thumb-rest-fill;",
+        "out property <brush> switch-thumb-border: switch-thumb-stroke-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 checked switch tokens should route through switch-owned accent primitives: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> switch-rail-checked-background: accent-fill;",
+        "out property <brush> switch-rail-checked-hover-background: accent-fill-hover;",
+        "out property <brush> switch-rail-checked-pressed-background: accent-fill-pressed;",
+        "out property <brush> switch-rail-checked-disabled-background: accent-fill-disabled;",
+        "out property <brush> switch-foreground: neutral-foreground-1;",
+        "out property <brush> switch-disabled-foreground: neutral-foreground-disabled;",
+        "out property <brush> switch-rail-disabled-background: control-fill-transparent;",
+        "out property <brush> switch-rail-border: neutral-stroke-strong;",
+        "out property <brush> switch-rail-disabled-border: neutral-stroke-disabled;",
+        "out property <brush> switch-thumb-checked-background: accent-foreground-1;",
+        "out property <brush> switch-thumb-checked-hover-background: accent-foreground-1;",
+        "out property <brush> switch-thumb-checked-pressed-background: accent-foreground-1;",
+        "out property <brush> switch-thumb-checked-disabled: accent-foreground-disabled;",
+        "out property <brush> switch-thumb-background: neutral-foreground-2;",
+        "out property <brush> switch-thumb-hover-background: neutral-foreground-2;",
+        "out property <brush> switch-thumb-pressed-background: neutral-foreground-2;",
+        "out property <brush> switch-thumb-border: neutral-stroke-circle;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 exported checked switch tokens should bind through switch-owned accent primitives, not direct generic accent primitives: {copied_direct_export}"
+        );
     }
 
     for copied_bridge in [
@@ -4388,9 +6451,9 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
     }
 
     for expected in [
-        "property <brush> switch-rail-rest-fill: control-alt-fill-secondary;",
-        "property <brush> switch-rail-hover-fill: control-alt-fill-tertiary;",
-        "property <brush> switch-rail-pressed-fill: control-alt-fill-quaternary;",
+        "property <brush> switch-rail-rest-fill: dark-color-scheme ? #0000001A : #00000005;",
+        "property <brush> switch-rail-hover-fill: dark-color-scheme ? #FFFFFF0A : #0000000F;",
+        "property <brush> switch-rail-pressed-fill: dark-color-scheme ? #FFFFFF12 : #00000017;",
         "switch-rail-background: switch-rail-rest-fill",
         "switch-rail-hover-background: switch-rail-hover-fill",
         "switch-rail-pressed-background: switch-rail-pressed-fill",
@@ -4406,6 +6469,9 @@ fn test_fluent2_switch_colors_use_semantic_tokens() {
         "switch-rail-rest-fill: control-alt-secondary",
         "switch-rail-hover-fill: control-alt-tertiary",
         "switch-rail-pressed-fill: control-alt-quaternary",
+        "switch-rail-rest-fill: control-alt-fill-secondary",
+        "switch-rail-hover-fill: control-alt-fill-tertiary",
+        "switch-rail-pressed-fill: control-alt-fill-quaternary",
         "switch-rail-background: control-alt-secondary",
         "switch-rail-hover-background: control-alt-tertiary",
         "switch-rail-pressed-background: control-alt-quaternary",
@@ -4480,6 +6546,26 @@ fn test_fluent2_switch_radius_geometry_uses_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "out property <length> switch-rail-radius: 10px;",
+        "out property <length> switch-thumb-radius: 6px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 Switch radius tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> switch-rail-radius: switch-height / 2;",
+        "out property <length> switch-thumb-radius: switch-thumb-size / 2;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 Switch radius tokens should not keep copied alias: {copied_alias}"
+        );
+    }
+
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/switch.slint"))
         .expect("fluent2 should embed switch.slint");
     let source_contents = source.read();
@@ -4508,6 +6594,17 @@ fn test_fluent2_switch_motion_uses_switch_duration_token() {
     assert!(
         styling.contains("switch-motion-duration"),
         "fluent2 styling should expose a semantic switch motion duration token"
+    );
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <duration> switch-motion-duration: 150ms;"),
+        "fluent2 switch motion should own a direct duration"
+    );
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <duration> switch-motion-duration: control-motion-duration;"),
+        "fluent2 switch motion should not alias the generic control motion token"
     );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/switch.slint"))
@@ -4758,6 +6855,26 @@ fn test_fluent2_lineedit_icon_state_layer_radius_uses_tokens() {
         "fluent2 styling should expose a line edit icon state layer radius token"
     );
 
+    for expected in [
+        "out property <length> lineedit-icon-touch-target: 28px;",
+        "out property <length> lineedit-icon-state-layer-radius: 14px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 line edit icon state-layer geometry should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> lineedit-icon-touch-target: compact-control-height;",
+        "out property <length> lineedit-icon-state-layer-radius: lineedit-icon-touch-target / 2;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 line edit icon state-layer geometry should not keep copied alias: {copied_alias}"
+        );
+    }
+
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/lineedit-base.slint"))
         .expect("fluent2 should embed lineedit-base.slint");
     let source_contents = source.read();
@@ -4792,11 +6909,25 @@ fn test_fluent2_lineedit_icon_state_brush_uses_semantic_token() {
         styling.contains("lineedit-icon-state-brush"),
         "fluent2 styling should expose a semantic line edit icon state brush token"
     );
+    for expected in [
+        "property <brush> lineedit-icon-state-brush-fill: state-layer-brush;",
+        "out property <brush> lineedit-icon-state-brush: lineedit-icon-state-brush-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 line edit icon state brush should route through a lineedit-owned primitive: {expected}"
+        );
+    }
     assert!(
         !styling
             .lines()
             .any(|line| line.trim() == "out property <brush> lineedit-icon-state-brush: state;"),
         "fluent2 line edit icon state brush should not alias through the copied generic state token"
+    );
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <brush> lineedit-icon-state-brush: state-layer-brush;"),
+        "fluent2 line edit icon state brush should not export directly from the generic state-layer primitive"
     );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/lineedit-base.slint"))
@@ -4908,18 +7039,25 @@ fn test_fluent2_time_picker_selector_colors_use_semantic_tokens() {
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
     for token in [
+        "picker-text-foreground-fill",
+        "time-picker-selector-foreground-fill",
         "time-picker-selector-foreground",
+        "time-picker-selected-foreground-fill",
         "time-picker-selector-selected-foreground",
         "time-picker-selector-state-brush",
         "time-picker-selector-selected-state-brush",
         "time-picker-input-background",
+        "time-picker-input-selected-fill",
         "time-picker-input-selected-background",
+        "time-picker-input-foreground-fill",
         "time-picker-input-foreground",
         "time-picker-input-selected-foreground",
         "time-picker-input-state-brush",
         "time-picker-input-selected-state-brush",
         "time-picker-period-item-foreground",
+        "time-picker-period-item-selected-fill",
         "time-picker-period-item-selected-background",
+        "time-picker-period-item-foreground-fill",
         "time-picker-period-item-selected-foreground",
         "time-picker-period-item-state-brush",
         "time-picker-period-item-selected-state-brush",
@@ -4927,20 +7065,53 @@ fn test_fluent2_time_picker_selector_colors_use_semantic_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "property <brush> time-picker-selector-foreground-fill: picker-text-foreground-fill;",
+        "property <brush> time-picker-selected-foreground-fill: accent-foreground-1;",
+        "property <brush> time-picker-input-selected-fill: accent-fill;",
+        "property <brush> time-picker-input-foreground-fill: picker-text-foreground-fill;",
+        "property <brush> time-picker-period-item-selected-fill: accent-fill;",
+        "property <brush> time-picker-period-item-foreground-fill: picker-text-foreground-fill;",
+        "out property <brush> time-picker-selector-foreground: time-picker-selector-foreground-fill;",
+        "out property <brush> time-picker-selector-selected-foreground: time-picker-selected-foreground-fill;",
+        "out property <brush> time-picker-input-selected-background: time-picker-input-selected-fill;",
+        "out property <brush> time-picker-input-foreground: time-picker-input-foreground-fill;",
+        "out property <brush> time-picker-input-selected-foreground: time-picker-selected-foreground-fill;",
+        "out property <brush> time-picker-period-item-foreground: time-picker-period-item-foreground-fill;",
+        "out property <brush> time-picker-period-item-selected-background: time-picker-period-item-selected-fill;",
+        "out property <brush> time-picker-period-item-selected-foreground: time-picker-selected-foreground-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 styling should keep time picker accent treatment behind picker-owned primitive {expected}"
+        );
+    }
+
     for copied_alias in [
         "time-picker-selector-foreground: foreground",
+        "time-picker-selector-foreground: neutral-foreground-1",
+        "time-picker-selector-foreground: picker-text-foreground-fill",
         "time-picker-selector-selected-foreground: accent-foreground",
+        "time-picker-selector-selected-foreground: accent-foreground-1",
         "time-picker-selector-state-brush: state",
         "time-picker-selector-selected-state-brush: state-secondary",
         "time-picker-input-background: control-background",
         "time-picker-input-selected-background: accent-background",
+        "time-picker-input-selected-background: accent-fill",
         "time-picker-input-foreground: foreground",
+        "time-picker-input-foreground: neutral-foreground-1",
+        "time-picker-input-foreground: picker-text-foreground-fill",
         "time-picker-input-selected-foreground: accent-foreground",
+        "time-picker-input-selected-foreground: accent-foreground-1",
         "time-picker-input-state-brush: state",
         "time-picker-input-selected-state-brush: state-secondary",
         "time-picker-period-item-foreground: foreground",
+        "time-picker-period-item-foreground: neutral-foreground-1",
+        "time-picker-period-item-foreground: picker-text-foreground-fill",
         "time-picker-period-item-selected-background: accent-background",
+        "time-picker-period-item-selected-background: accent-fill",
         "time-picker-period-item-selected-foreground: accent-foreground",
+        "time-picker-period-item-selected-foreground: accent-foreground-1",
         "time-picker-period-item-state-brush: state",
         "time-picker-period-item-selected-state-brush: state-secondary",
     ] {
@@ -5070,8 +7241,13 @@ fn test_fluent2_time_picker_popup_colors_use_semantic_tokens() {
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
     for token in [
+        "picker-text-foreground-fill",
+        "time-picker-popup-foreground-fill",
         "time-picker-popup-foreground",
+        "time-picker-clock-foreground-fill",
         "time-picker-clock-foreground",
+        "time-picker-input-fill",
+        "time-picker-title-foreground-fill",
         "time-picker-title-foreground",
         "time-input-radius",
         "time-period-selector-radius",
@@ -5079,10 +7255,45 @@ fn test_fluent2_time_picker_popup_colors_use_semantic_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "property <brush> time-picker-popup-foreground-fill: picker-text-foreground-fill;",
+        "property <brush> time-picker-clock-foreground-fill: accent-fill;",
+        "property <brush> time-picker-input-fill: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "property <brush> time-picker-title-foreground-fill: picker-text-foreground-fill;",
+        "out property <brush> time-picker-input-background: time-picker-input-fill;",
+        "out property <brush> time-picker-popup-foreground: time-picker-popup-foreground-fill;",
+        "out property <brush> time-picker-clock-foreground: time-picker-clock-foreground-fill;",
+        "out property <brush> time-picker-title-foreground: time-picker-title-foreground-fill;",
+        "out property <length> time-input-radius: 8px;",
+        "out property <length> time-period-selector-radius: 8px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 time picker popup tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <brush> time-picker-input-background: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "out property <brush> time-picker-input-background: control-fill;",
+        "out property <length> time-input-radius: overlay-radius;",
+        "out property <length> time-period-selector-radius: overlay-radius;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 time picker popup tokens should not keep copied alias: {copied_alias}"
+        );
+    }
+
     for copied_alias in [
         "time-picker-popup-foreground: foreground",
+        "time-picker-popup-foreground: neutral-foreground-1",
+        "time-picker-popup-foreground: picker-text-foreground-fill",
         "time-picker-clock-foreground: accent-background",
+        "time-picker-clock-foreground: accent-fill",
         "time-picker-title-foreground: foreground",
+        "time-picker-title-foreground: neutral-foreground-1",
+        "time-picker-title-foreground: picker-text-foreground-fill",
     ] {
         let copied_alias_line = format!("out property <brush> {copied_alias};");
         assert!(
@@ -5337,6 +7548,35 @@ fn test_fluent2_picker_radius_geometry_uses_tokens() {
     ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
+
+    for expected in [
+        "out property <length> date-delegate-radius: 20px;",
+        "out property <length> time-clock-radius: 128px;",
+        "out property <length> time-clock-coordinate-radius: 128px;",
+        "out property <length> time-clock-center-dot-radius: 4px;",
+        "out property <length> time-selector-radius: 24px;",
+        "out property <length> time-clock-current-selector-radius: 24px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 picker radius tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> date-delegate-radius: date-delegate-size / 2;",
+        "out property <length> time-clock-radius: time-clock-size / 2;",
+        "out property <length> time-clock-coordinate-radius: time-clock-radius;",
+        "out property <length> time-clock-center-dot-radius: time-clock-center-dot-size / 2;",
+        "out property <length> time-selector-radius: picker-large-touch-target / 2;",
+        "out property <length> time-clock-current-selector-radius: picker-large-touch-target / 2;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 picker radius tokens should not keep copied alias: {copied_alias}"
+        );
+    }
+
     for stale_token in ["time-clock-inner-dot-size", "time-clock-inner-dot-radius"] {
         assert!(
             !styling.contains(stale_token),
@@ -5439,6 +7679,28 @@ fn test_fluent2_picker_icon_state_layer_radius_uses_tokens() {
         styling.contains("picker-selection-motion-duration"),
         "fluent2 styling should expose a picker selection motion duration token"
     );
+
+    for expected in [
+        "out property <length> picker-icon-state-layer-radius: 24px;",
+        "out property <length> picker-selection-state-layer-radius: 4px;",
+        "out property <duration> picker-selection-motion-duration: 150ms;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 picker selection state tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> picker-icon-state-layer-radius: picker-large-touch-target / 2;",
+        "out property <length> picker-selection-state-layer-radius: control-radius;",
+        "out property <duration> picker-selection-motion-duration: control-motion-duration;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 picker selection state tokens should not keep copied alias: {copied_alias}"
+        );
+    }
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/internal-components.slint"))
         .expect("fluent2 should embed internal-components.slint");
@@ -5644,6 +7906,7 @@ fn test_fluent2_table_headers_use_focus_touch_area() {
         "pressed when touch-area.pressed",
         "hover when touch-area.has-hover",
         "width: parent.width - Fluent2SizeSettings.table-header-horizontal-padding",
+        "height: Fluent2SizeSettings.table-header-height",
     ] {
         assert!(block.contains(expected), "fluent2 TableViewColumn should use {expected}");
     }
@@ -5651,6 +7914,11 @@ fn test_fluent2_table_headers_use_focus_touch_area() {
     assert!(
         !block.contains("width: parent.width - Fluent2SizeSettings.control-horizontal-padding"),
         "fluent2 TableViewColumn focus receiver should not use the generic control padding token"
+    );
+
+    assert!(
+        !block.contains("height: 100%"),
+        "fluent2 TableViewColumn focus receiver should use a table-header height token"
     );
 
     assert!(
@@ -5761,6 +8029,17 @@ fn test_fluent2_button_motion_uses_button_token() {
         styling.contains("button-motion-duration"),
         "fluent2 styling should expose button-motion-duration"
     );
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <duration> button-motion-duration: 150ms;"),
+        "fluent2 button motion should own a direct duration"
+    );
+    assert!(
+        !styling.lines().any(|line| line.trim()
+            == "out property <duration> button-motion-duration: control-motion-duration;"),
+        "fluent2 button motion should not alias the generic control motion token"
+    );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/button.slint"))
         .expect("fluent2 should embed button.slint");
@@ -5821,10 +8100,10 @@ fn test_fluent2_state_border_motion_is_on_stroke_elements() {
         );
     }
 
-    for (control, component_marker) in [
-        ("button.slint", "export component Button"),
-        ("checkbox.slint", "export component CheckBox"),
-        ("spinbox.slint", "component SpinBoxButton"),
+    for (control, component_marker, end_marker) in [
+        ("button.slint", "export component Button", "// Copyright"),
+        ("checkbox.slint", "export component CheckBox", "// Copyright"),
+        ("spinbox.slint", "component SpinBoxButton", "export component SpinBox"),
     ] {
         let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{control}")))
             .unwrap_or_else(|| panic!("fluent2 should embed {control}"));
@@ -5833,6 +8112,7 @@ fn test_fluent2_state_border_motion_is_on_stroke_elements() {
         let component = source
             .split(component_marker)
             .nth(1)
+            .and_then(|after| after.split(end_marker).next())
             .unwrap_or_else(|| panic!("fluent2 {control} should define {component_marker}"));
 
         assert!(
@@ -5858,6 +8138,10 @@ fn test_fluent2_button_colors_use_semantic_tokens() {
         "button-hover-foreground",
         "button-pressed-foreground",
         "button-disabled-foreground",
+        "button-primary-fill",
+        "button-primary-hover-fill",
+        "button-primary-pressed-fill",
+        "button-primary-disabled-fill",
         "button-primary-background",
         "button-primary-hover-background",
         "button-primary-pressed-background",
@@ -5879,7 +8163,107 @@ fn test_fluent2_button_colors_use_semantic_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for expected in [
+        "out property <length> button-min-width: 32px;",
+        "out property <length> button-height: 32px;",
+        "out property <length> button-radius: 4px;",
+        "out property <length> button-container-radius: 4px;",
+        "out property <length> button-border-width: 1px;",
+        "out property <length> button-horizontal-padding: 12px;",
+        "out property <length> button-vertical-padding: 4px;",
+        "out property <length> button-content-spacing: 4px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 button geometry tokens should own direct values: {expected}"
+        );
+    }
+
+    for copied_alias in [
+        "out property <length> button-min-width: control-min-width;",
+        "out property <length> button-height: control-height;",
+        "out property <length> button-radius: control-radius;",
+        "out property <length> button-container-radius: button-radius;",
+        "out property <length> button-border-width: stroke-width;",
+        "out property <length> button-horizontal-padding: control-horizontal-padding;",
+        "out property <length> button-vertical-padding: control-vertical-padding;",
+        "out property <length> button-content-spacing: overlay-padding;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 button geometry tokens should not alias through copied generic geometry: {copied_alias}"
+        );
+    }
+
+    for expected in [
+        "property <brush> button-fill: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "property <brush> button-hover-fill: dark-color-scheme ? #FFFFFF14 : #F5F5F5;",
+        "property <brush> button-pressed-fill: dark-color-scheme ? #FFFFFF0A : #EDEDED;",
+        "property <brush> button-disabled-fill: dark-color-scheme ? #FFFFFF0A : #F5F5F5;",
+        "property <brush> button-foreground-fill: neutral-foreground-1;",
+        "property <brush> button-hover-foreground-fill: neutral-foreground-1;",
+        "property <brush> button-pressed-foreground-fill: neutral-foreground-2;",
+        "property <brush> button-disabled-foreground-fill: neutral-foreground-disabled;",
+        "property <brush> button-primary-fill: accent-fill;",
+        "property <brush> button-primary-hover-fill: accent-fill-hover;",
+        "property <brush> button-primary-pressed-fill: accent-fill-pressed;",
+        "property <brush> button-primary-disabled-fill: accent-fill-disabled;",
+        "property <brush> button-primary-foreground-fill: accent-foreground-1;",
+        "property <brush> button-primary-hover-foreground-fill: accent-foreground-1;",
+        "property <brush> button-primary-pressed-foreground-fill: accent-foreground-pressed;",
+        "property <brush> button-primary-disabled-foreground-fill: accent-foreground-disabled;",
+        "property <brush> button-border-stroke: neutral-stroke-1;",
+        "property <brush> button-primary-border-stroke: accent-stroke-control;",
+        "property <brush> button-primary-disabled-border-stroke: neutral-stroke-transparent;",
+        "property <brush> button-icon-transparent-foreground-fill: control-fill-transparent;",
+        "out property <brush> button-primary-background: button-primary-fill;",
+        "out property <brush> button-primary-hover-background: button-primary-hover-fill;",
+        "out property <brush> button-primary-pressed-background: button-primary-pressed-fill;",
+        "out property <brush> button-primary-disabled-background: button-primary-disabled-fill;",
+        "out property <brush> button-primary-foreground: button-primary-foreground-fill;",
+        "out property <brush> button-primary-hover-foreground: button-primary-hover-foreground-fill;",
+        "out property <brush> button-primary-pressed-foreground: button-primary-pressed-foreground-fill;",
+        "out property <brush> button-primary-disabled-foreground: button-primary-disabled-foreground-fill;",
+        "out property <brush> button-border: button-border-stroke;",
+        "out property <brush> button-primary-border: button-primary-border-stroke;",
+        "out property <brush> button-primary-disabled-border: button-primary-disabled-border-stroke;",
+        "out property <brush> button-icon-transparent-foreground: button-icon-transparent-foreground-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 button tokens should route through button-owned primitives: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "property <brush> button-fill: control-fill;",
+        "property <brush> button-hover-fill: control-fill-hover;",
+        "property <brush> button-pressed-fill: control-fill-pressed;",
+        "property <brush> button-disabled-fill: control-fill-disabled;",
+        "out property <brush> button-primary-background: accent-fill;",
+        "out property <brush> button-primary-hover-background: accent-fill-hover;",
+        "out property <brush> button-primary-pressed-background: accent-fill-pressed;",
+        "out property <brush> button-primary-disabled-background: accent-fill-disabled;",
+        "out property <brush> button-primary-foreground: accent-foreground-1;",
+        "out property <brush> button-primary-hover-foreground: accent-foreground-1;",
+        "out property <brush> button-primary-pressed-foreground: accent-foreground-pressed;",
+        "out property <brush> button-primary-disabled-foreground: accent-foreground-disabled;",
+        "out property <brush> button-border: neutral-stroke-1;",
+        "out property <brush> button-primary-border: accent-stroke-control;",
+        "out property <brush> button-primary-disabled-border: neutral-stroke-transparent;",
+        "out property <brush> button-icon-transparent-foreground: control-fill-transparent;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 exported primary button tokens should bind through button-owned accent primitives, not direct generic accent primitives: {copied_direct_export}"
+        );
+    }
+
     for copied_bridge in [
+        "button-background: control-fill",
+        "button-hover-background: control-fill-hover",
+        "button-pressed-background: control-fill-pressed",
+        "button-disabled-background: control-fill-disabled",
         "button-background: control-background",
         "button-hover-background: control-secondary",
         "button-pressed-background: control-tertiary",
@@ -5903,6 +8287,38 @@ fn test_fluent2_button_colors_use_semantic_tokens() {
         assert!(
             !styling.lines().any(|line| line.trim() == copied_bridge_line),
             "fluent2 button semantic tokens should not alias through copied bridge {copied_bridge}"
+        );
+    }
+
+    for expected in [
+        "out property <brush> button-background: button-fill;",
+        "out property <brush> button-hover-background: button-hover-fill;",
+        "out property <brush> button-pressed-background: button-pressed-fill;",
+        "out property <brush> button-disabled-background: button-disabled-fill;",
+        "out property <brush> button-foreground: button-foreground-fill;",
+        "out property <brush> button-hover-foreground: button-hover-foreground-fill;",
+        "out property <brush> button-pressed-foreground: button-pressed-foreground-fill;",
+        "out property <brush> button-disabled-foreground: button-disabled-foreground-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 neutral button exports should route through button-owned primitives: {expected}"
+        );
+    }
+
+    for copied_direct_export in [
+        "out property <brush> button-background: dark-color-scheme ? #FFFFFF0F : #FFFFFFB3;",
+        "out property <brush> button-hover-background: dark-color-scheme ? #FFFFFF14 : #F5F5F5;",
+        "out property <brush> button-pressed-background: dark-color-scheme ? #FFFFFF0A : #EDEDED;",
+        "out property <brush> button-disabled-background: dark-color-scheme ? #FFFFFF0A : #F5F5F5;",
+        "out property <brush> button-foreground: neutral-foreground-1;",
+        "out property <brush> button-hover-foreground: neutral-foreground-1;",
+        "out property <brush> button-pressed-foreground: neutral-foreground-2;",
+        "out property <brush> button-disabled-foreground: neutral-foreground-disabled;",
+    ] {
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_direct_export),
+            "fluent2 exported neutral button tokens should bind through button-owned primitives, not direct generic primitives: {copied_direct_export}"
         );
     }
 
@@ -6062,7 +8478,7 @@ fn test_fluent2_tabs_use_focus_touch_area() {
     let block = source
         .split("export component TabImpl")
         .nth(1)
-        .and_then(|after| after.split("component FluentTabBarBase").next())
+        .and_then(|after| after.split("component Fluent2TabBarBase").next())
         .expect("fluent2 should define TabImpl");
 
     for expected in [
@@ -6083,7 +8499,31 @@ fn test_fluent2_tabs_use_focus_touch_area() {
 }
 
 #[test]
-fn test_fluent2_tabbar_base_uses_focus_touch_area() {
+fn test_fluent2_tabbar_base_uses_fluent2_namespace() {
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/tabwidget.slint"))
+        .expect("fluent2 should embed tabwidget.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+
+    assert!(
+        source.contains("component Fluent2TabBarBase inherits TabBarBase"),
+        "fluent2 tab bar base should use a Fluent2-local component name"
+    );
+    assert!(
+        !source.contains("component FluentTabBarBase inherits TabBarBase"),
+        "fluent2 tab bar base should not keep the copied Fluent namespace name"
+    );
+
+    for expected in [
+        "export component TabBarHorizontalImpl inherits Fluent2TabBarBase",
+        "export component TabBarVerticalImpl inherits Fluent2TabBarBase",
+    ] {
+        assert!(source.contains(expected), "fluent2 tab bars should use {expected}");
+    }
+}
+
+#[test]
+fn test_fluent2_tabbar_base_preserves_touch_area_api_and_uses_tokens() {
     let helper = load_file(&std::path::PathBuf::from("builtin:/fluent2/internal-components.slint"))
         .expect("fluent2 should embed internal-components.slint");
     let helper_contents = helper.read();
@@ -6106,20 +8546,19 @@ fn test_fluent2_tabbar_base_uses_focus_touch_area() {
     let source = std::str::from_utf8(&source_contents).unwrap();
 
     for expected in [
-        "import { FocusTouchArea } from \"internal-components.slint\";",
-        "export component TabBarBase",
-        "touch-area := FocusTouchArea",
-        "enabled: true",
+        "export component TabBarBase inherits TouchArea",
         "scroll-event(event) =>",
-        "@children",
         "Fluent2SizeSettings.tab-scroll-delta",
     ] {
-        assert!(source.contains(expected), "fluent2 TabBarBase should use {expected}");
+        assert!(
+            source.contains(expected),
+            "fluent2 TabBarBase should preserve API and use {expected}"
+        );
     }
 
     assert!(
-        !source.contains("export component TabBarBase inherits TouchArea"),
-        "fluent2 TabBarBase should not inherit directly from TouchArea"
+        !source.contains("touch-area := FocusTouchArea"),
+        "fluent2 TabBarBase should inherit TouchArea so exported tab bars keep the cross-style public API"
     );
 }
 
@@ -6131,13 +8570,24 @@ fn test_fluent2_combo_and_spin_scroll_delta_use_component_tokens() {
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
     for expected in [
+        "out property <length> combobox-scroll-delta: 2px;",
+        "out property <length> spinbox-scroll-delta: 2px;",
+        "out property <length> tab-scroll-delta: 2px;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 scroll thresholds should expose direct component-specific values: {expected}"
+        );
+    }
+
+    for copied_alias in [
         "out property <length> combobox-scroll-delta: control-scroll-delta;",
         "out property <length> spinbox-scroll-delta: control-scroll-delta;",
         "out property <length> tab-scroll-delta: control-scroll-delta;",
     ] {
         assert!(
-            styling.lines().any(|line| line.trim() == expected),
-            "fluent2 scroll thresholds should expose component-specific aliases: {expected}"
+            !styling.lines().any(|line| line.trim() == copied_alias),
+            "fluent2 scroll thresholds should not alias through copied generic control scroll geometry: {copied_alias}"
         );
     }
 
@@ -6174,9 +8624,15 @@ fn test_fluent2_owns_lineedit_base_geometry() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
     assert!(
-        styling.lines().any(|line| line.trim()
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <length> lineedit-min-focusable-width: 1px;"),
+        "fluent2 styling should expose a direct line edit semantic focusable-width token"
+    );
+    assert!(
+        !styling.lines().any(|line| line.trim()
             == "out property <length> lineedit-min-focusable-width: input-min-focusable-width;"),
-        "fluent2 styling should expose a line edit semantic focusable-width token"
+        "fluent2 line edit focusable-width token should not alias through copied generic input geometry"
     );
 
     assert!(
@@ -6296,6 +8752,26 @@ fn test_fluent2_slider_track_geometry_uses_tokens() {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
+    for copied_alias in [
+        "slider-track-active-radius: slider-track-radius",
+        "slider-thumb-inner-size: icon-size",
+        "slider-thumb-inner-radius: slider-thumb-inner-size / 2",
+        "slider-cross-axis-min-size: interaction-receiver-size",
+    ] {
+        let copied_alias_line = format!("out property <length> {copied_alias};");
+        assert!(
+            !styling.lines().any(|line| line.trim() == copied_alias_line),
+            "fluent2 slider geometry tokens should own direct values instead of copied alias {copied_alias}"
+        );
+    }
+
+    assert!(
+        styling
+            .lines()
+            .any(|line| line.trim() == "out property <length> slider-cross-axis-min-size: 0px;"),
+        "fluent2 slider cross-axis minimum should own a direct zero value"
+    );
+
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/slider.slint"))
         .expect("fluent2 should embed slider.slint");
     let source_contents = source.read();
@@ -6341,11 +8817,42 @@ fn test_fluent2_slider_rail_and_thumb_stroke_use_semantic_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for expected in ["slider-rail-background", "slider-thumb-stroke", "slider-thumb-border-width"] {
+    for expected in [
+        "slider-rail-fill",
+        "slider-thumb-stroke-fill",
+        "slider-rail-background",
+        "slider-thumb-stroke",
+        "slider-thumb-border-width",
+    ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
-    for copied_bridge in ["slider-rail-background: border", "slider-thumb-stroke: border"] {
+    let copied_width_alias = "out property <length> slider-thumb-border-width: stroke-width;";
+    assert!(
+        !styling.lines().any(|line| line.trim() == copied_width_alias),
+        "fluent2 slider thumb stroke width should own a direct value instead of aliasing stroke-width"
+    );
+
+    for expected in [
+        "property <brush> slider-rail-fill: control-stroke-subtle-fill;",
+        "property <brush> slider-thumb-stroke-fill: control-stroke-subtle-fill;",
+        "out property <brush> slider-rail-background: slider-rail-fill;",
+        "out property <brush> slider-thumb-stroke: slider-thumb-stroke-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 slider inactive rail and thumb stroke should route through slider-owned primitive {expected}"
+        );
+    }
+
+    for copied_bridge in [
+        "slider-rail-background: border",
+        "slider-thumb-stroke: border",
+        "slider-rail-background: neutral-stroke-1",
+        "slider-thumb-stroke: neutral-stroke-1",
+        "slider-rail-background: control-stroke-subtle-fill",
+        "slider-thumb-stroke: control-stroke-subtle-fill",
+    ] {
         let copied_bridge_line = format!("out property <brush> {copied_bridge};");
         assert!(
             !styling.lines().any(|line| line.trim() == copied_bridge_line),
@@ -6384,6 +8891,9 @@ fn test_fluent2_slider_active_colors_use_semantic_tokens() {
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
     for expected in [
+        "slider-active-fill",
+        "slider-active-hover-fill",
+        "slider-active-pressed-fill",
         "slider-track-active-background",
         "slider-thumb-active-background",
         "slider-thumb-hover-background",
@@ -6393,11 +8903,30 @@ fn test_fluent2_slider_active_colors_use_semantic_tokens() {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
+    for expected in [
+        "property <brush> slider-active-fill: accent-fill;",
+        "property <brush> slider-active-hover-fill: accent-fill-hover;",
+        "property <brush> slider-active-pressed-fill: accent-fill-pressed;",
+        "out property <brush> slider-track-active-background: slider-active-fill;",
+        "out property <brush> slider-thumb-active-background: slider-active-fill;",
+        "out property <brush> slider-thumb-hover-background: slider-active-hover-fill;",
+        "out property <brush> slider-thumb-pressed-background: slider-active-pressed-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 styling should keep slider accent treatment behind slider-owned primitive {expected}"
+        );
+    }
+
     for copied_bridge in [
         "slider-track-active-background: accent-background",
+        "slider-track-active-background: accent-fill",
         "slider-thumb-active-background: accent-background",
+        "slider-thumb-active-background: accent-fill",
         "slider-thumb-hover-background: secondary-accent-background",
+        "slider-thumb-hover-background: accent-fill-hover",
         "slider-thumb-pressed-background: tertiary-accent-background",
+        "slider-thumb-pressed-background: accent-fill-pressed",
     ] {
         let copied_bridge_line = format!("out property <brush> {copied_bridge};");
         assert!(
@@ -6405,6 +8934,13 @@ fn test_fluent2_slider_active_colors_use_semantic_tokens() {
             "fluent2 slider semantic tokens should not alias through copied bridge {copied_bridge}"
         );
     }
+
+    let copied_motion_alias =
+        "out property <duration> slider-motion-duration: control-motion-duration;";
+    assert!(
+        !styling.lines().any(|line| line.trim() == copied_motion_alias),
+        "fluent2 slider motion should own a direct duration instead of aliasing control-motion-duration"
+    );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/slider.slint"))
         .expect("fluent2 should embed slider.slint");
@@ -6442,15 +8978,38 @@ fn test_fluent2_slider_disabled_and_thumb_rest_colors_use_semantic_tokens() {
     let styling_contents = styling.read();
     let styling = std::str::from_utf8(&styling_contents).unwrap();
 
-    for expected in ["slider-disabled-background", "slider-thumb-background", "slider-thumb-border"]
-    {
+    for expected in [
+        "slider-disabled-fill",
+        "slider-thumb-rest-fill",
+        "slider-thumb-border-fill",
+        "slider-disabled-background",
+        "slider-thumb-background",
+        "slider-thumb-border",
+    ] {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
+    }
+
+    for expected in [
+        "property <brush> slider-disabled-fill: accent-fill-disabled;",
+        "property <brush> slider-thumb-rest-fill: control-fill-solid;",
+        "property <brush> slider-thumb-border-fill: neutral-stroke-circle;",
+        "out property <brush> slider-disabled-background: slider-disabled-fill;",
+        "out property <brush> slider-thumb-background: slider-thumb-rest-fill;",
+        "out property <brush> slider-thumb-border: slider-thumb-border-fill;",
+    ] {
+        assert!(
+            styling.lines().any(|line| line.trim() == expected),
+            "fluent2 styling should keep disabled slider accent treatment behind slider-owned primitive {expected}"
+        );
     }
 
     for copied_bridge in [
         "slider-disabled-background: accent-disabled",
+        "slider-disabled-background: accent-fill-disabled",
         "slider-thumb-background: control-solid",
+        "slider-thumb-background: control-fill-solid",
         "slider-thumb-border: circle-border",
+        "slider-thumb-border: neutral-stroke-circle",
     ] {
         let copied_bridge_line = format!("out property <brush> {copied_bridge};");
         assert!(

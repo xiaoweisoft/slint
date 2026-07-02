@@ -102,6 +102,8 @@ export component SpinBox {
         border-width: Fluent2SizeSettings.spinbox-border-width;
         border-color: Fluent2Palette.text-control-border;
 
+        animate background, border-color { duration: Fluent2SizeSettings.spinbox-motion-duration; }
+
         layout := HorizontalLayout {
             padding-left: Fluent2SizeSettings.spinbox-horizontal-padding;
             padding-right: Fluent2SizeSettings.spinbox-button-column-padding;
@@ -150,6 +152,8 @@ export component SpinBox {
             y: parent.height - self.height;
             width: parent.width - 2 * Fluent2SizeSettings.text-input-focus-indicator-horizontal-inset;
             height: Fluent2SizeSettings.spinbox-focus-indicator-height;
+
+            animate background { duration: Fluent2SizeSettings.spinbox-motion-duration; }
         }
     }
 }

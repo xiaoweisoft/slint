@@ -26,7 +26,7 @@ export component ProgressIndicator {
 
         i-track := Rectangle {
             width: !root.indeterminate ?  parent.width * min(1, max(0, root.progress)) : parent.width;
-            height: 100%;
+            height: Fluent2SizeSettings.progress-track-height;
             x: !root.indeterminate ? Fluent2SizeSettings.progress-determinate-track-offset : -parent.width + (parent.width * mod(animation-tick(), Fluent2SizeSettings.progress-indeterminate-cycle-duration) / Fluent2SizeSettings.progress-indeterminate-sweep-duration);
             border-radius: Fluent2SizeSettings.progress-track-radius;
             background: Fluent2Palette.progress-indicator-active-background;

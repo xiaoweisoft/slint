@@ -25,6 +25,7 @@ component TableViewColumn inherits Rectangle {
 
     touch-area := FocusTouchArea {
         width: parent.width - Fluent2SizeSettings.table-header-horizontal-padding;
+        height: Fluent2SizeSettings.table-header-height;
         enabled: true;
     }
 
@@ -61,6 +62,7 @@ component TableViewColumn inherits Rectangle {
     Rectangle {
         x: parent.width - Fluent2SizeSettings.table-header-resize-separator-thickness;
         width: Fluent2SizeSettings.table-header-resize-separator-thickness;
+        height: Fluent2SizeSettings.table-header-height;
 
         states [
             hover when movable-touch-area.has-hover : {

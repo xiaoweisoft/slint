@@ -111,7 +111,7 @@ export component TabImpl inherits Rectangle {
     }
 }
 
-component FluentTabBarBase inherits TabBarBase {
+component Fluent2TabBarBase inherits TabBarBase {
     // injected properties:
     // The currently focused tab
     in-out property <int> current-focused: i-focus-scope.has-focus ? i-focus-scope.focused-tab : -1;
@@ -148,7 +148,7 @@ component FluentTabBarBase inherits TabBarBase {
     }
 }
 
-export component TabBarHorizontalImpl inherits FluentTabBarBase {
+export component TabBarHorizontalImpl inherits Fluent2TabBarBase {
     Flickable {
         HorizontalLayout {
             @children
@@ -156,7 +156,7 @@ export component TabBarHorizontalImpl inherits FluentTabBarBase {
     }
 }
 
-export component TabBarVerticalImpl inherits FluentTabBarBase {
+export component TabBarVerticalImpl inherits Fluent2TabBarBase {
     Flickable {
         VerticalLayout {
             @children

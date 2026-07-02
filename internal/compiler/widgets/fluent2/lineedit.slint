@@ -79,6 +79,8 @@ export component LineEdit {
         border-width: Fluent2SizeSettings.text-input-border-width;
         border-color: Fluent2Palette.text-control-border;
 
+        animate background, border-color { duration: Fluent2SizeSettings.text-input-motion-duration; }
+
         layout := HorizontalLayout {
             padding-left: Fluent2SizeSettings.text-input-horizontal-padding;
             padding-right: Fluent2SizeSettings.text-input-horizontal-padding;
@@ -128,6 +130,8 @@ export component LineEdit {
             y: parent.height - self.height;
             width: parent.width - 2 * Fluent2SizeSettings.text-input-focus-indicator-horizontal-inset;
             height: Fluent2SizeSettings.text-input-focus-indicator-height;
+
+            animate background { duration: Fluent2SizeSettings.text-input-motion-duration; }
         }
     }
 }

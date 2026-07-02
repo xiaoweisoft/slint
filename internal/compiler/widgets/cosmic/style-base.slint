@@ -32,4 +32,8 @@ export global Palette {
     out property <brush> selection-foreground: CosmicPalette.selection-foreground;
     out property <brush> border: CosmicPalette.border;
     in-out property <ColorScheme> color-scheme <=> CosmicPalette.color-scheme;
+    in-out property <string> theme-engine: "cosmic";
+    in-out property <string> font-family: "";
+    in-out property <color> accent-color-override: #00000000;
+    in-out property <color> retro-accent-color-override: #00000000;
 }

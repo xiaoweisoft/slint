@@ -48,6 +48,9 @@ export component ComboBox {
         hover when base.has-hover : {
             background.background: Fluent2Palette.combobox-hover-background;
         }
+        focused when root.has-focus : {
+            focus-border.background: Fluent2Palette.combobox-focus-indicator-background;
+        }
     ]
 
     base := ComboBoxBase {
@@ -68,7 +71,7 @@ export component ComboBox {
         border-width: Fluent2SizeSettings.combobox-border-width;
         border-color: Fluent2Palette.combobox-border;
 
-        animate border-color { duration: Fluent2SizeSettings.combobox-motion-duration; }
+        animate background, border-color { duration: Fluent2SizeSettings.combobox-motion-duration; }
 
         layout := HorizontalLayout {
             padding-left: Fluent2SizeSettings.combobox-horizontal-padding;
@@ -95,6 +98,15 @@ export component ComboBox {
 
                 animate colorize { duration: Fluent2SizeSettings.combobox-motion-duration; }
             }
+        }
+
+        focus-border := Rectangle {
+            x: Fluent2SizeSettings.text-input-focus-indicator-horizontal-inset;
+            y: parent.height - self.height;
+            width: parent.width - 2 * Fluent2SizeSettings.text-input-focus-indicator-horizontal-inset;
+            height: Fluent2SizeSettings.combobox-focus-indicator-height;
+
+            animate background { duration: Fluent2SizeSettings.combobox-motion-duration; }
         }
     }
 

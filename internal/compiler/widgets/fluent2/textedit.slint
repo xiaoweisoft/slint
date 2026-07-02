@@ -93,11 +93,15 @@ export component TextEdit {
         selection-background-color: Fluent2Palette.text-input-selection-background;
         selection-foreground-color: Fluent2Palette.text-input-selection-foreground;
 
+        animate background, border-color { duration: Fluent2SizeSettings.text-input-motion-duration; }
+
         i-focus-border := Rectangle {
             x: Fluent2SizeSettings.text-input-focus-indicator-horizontal-inset;
             y: parent.height - self.height;
             width: parent.width - 2 * Fluent2SizeSettings.text-input-focus-indicator-horizontal-inset;
             height: Fluent2SizeSettings.text-input-focus-indicator-height;
+
+            animate background { duration: Fluent2SizeSettings.text-input-motion-duration; }
         }
     }
 }
