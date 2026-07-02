@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 
 import { Fluent2Palette, Fluent2FontSettings, Fluent2SizeSettings, Icons } from "styling.slint";
+import { FocusBorder } from "components.slint";
 import { SpinBoxBase } from "spinbox-base.slint";
 import { FocusTouchArea } from "internal-components.slint";
 
@@ -41,6 +42,10 @@ component SpinBoxButton {
 
             animate colorize { duration: Fluent2SizeSettings.control-motion-duration; }
         }
+    }
+
+    if root.has-focus && root.enabled : FocusBorder {
+        border-radius: Fluent2SizeSettings.control-radius;
     }
 
     touch-area := FocusTouchArea {
