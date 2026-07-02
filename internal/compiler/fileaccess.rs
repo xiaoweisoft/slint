@@ -984,6 +984,43 @@ fn test_fluent2_list_items_use_focus_touch_area() {
 }
 
 #[test]
+fn test_fluent2_table_rows_use_focus_touch_area() {
+    let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/tableview.slint"))
+        .expect("fluent2 should embed tableview.slint");
+    let source_contents = source.read();
+    let source = std::str::from_utf8(&source_contents).unwrap();
+
+    assert!(
+        source.contains("FocusTouchArea"),
+        "fluent2 TableView rows should import the Fluent2 interaction helper"
+    );
+
+    let block = source
+        .split("component TableViewRow")
+        .nth(1)
+        .and_then(|after| after.split("export component StandardTableView").next())
+        .expect("fluent2 should define TableViewRow");
+
+    for expected in [
+        "callback clicked <=> touch-area.clicked",
+        "touch-area := FocusTouchArea",
+        "enabled: true",
+        "pressed when touch-area.pressed",
+        "hover when touch-area.has-hover",
+        "pointer-event(pe) =>",
+        "self.absolute-position.x + self.mouse-x",
+        "self.absolute-position.y + self.mouse-y",
+    ] {
+        assert!(block.contains(expected), "fluent2 TableViewRow should use {expected}");
+    }
+
+    assert!(
+        !block.lines().any(|line| line.trim_start().starts_with("touch-area := TouchArea")),
+        "fluent2 TableViewRow should use FocusTouchArea instead of a bare TouchArea"
+    );
+}
+
+#[test]
 fn test_fluent2_button_uses_focus_touch_area() {
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/button.slint"))
         .expect("fluent2 should embed button.slint");

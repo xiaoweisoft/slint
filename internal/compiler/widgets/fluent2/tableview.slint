@@ -3,6 +3,7 @@
 
 import { Fluent2Palette, Fluent2FontSettings, Fluent2SizeSettings, Icons } from "styling.slint";
 import { ListView } from "listview.slint";
+import { FocusTouchArea } from "internal-components.slint";
 
 component TableViewColumn inherits Rectangle {
     in property <SortOrder> sort-order: SortOrder.unsorted;
@@ -119,7 +120,9 @@ component TableViewRow inherits Rectangle {
         }
     ]
 
-    touch-area := TouchArea {
+    touch-area := FocusTouchArea {
+        enabled: true;
+
         pointer-event(pe) => {
             root.pointer-event(pe, {
                 x: self.absolute-position.x + self.mouse-x,
