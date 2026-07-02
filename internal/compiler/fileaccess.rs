@@ -354,10 +354,16 @@ fn test_fluent2_render_fixture_covers_picker_surfaces() {
 
     for expected in [
         "imagePath=\"../assets/generated/fluent2-render-fixtures/fluent2-pickers.png\"",
+        "init => {",
+        "date-picker.show();",
+        "time-picker.show();",
         "DatePickerPopup {",
+        "x: 24px;",
+        "y: 24px;",
         "title: \"Pick a date\";",
         "date: { year: 2026, month: 7, day: 2 };",
         "TimePickerPopup {",
+        "x: 384px;",
         "title: \"Pick a time\";",
         "time: { hour: 10, minute: 30, second: 0 };",
         "use-24-hour-format: true;",
