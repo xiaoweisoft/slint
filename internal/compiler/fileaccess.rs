@@ -969,6 +969,35 @@ fn test_fluent2_text_inputs_use_semantic_color_tokens() {
 }
 
 #[test]
+fn test_fluent2_text_input_focus_indicator_geometry_uses_tokens() {
+    let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
+        .expect("fluent2 should embed styling.slint");
+    let styling_contents = styling.read();
+    let styling = std::str::from_utf8(&styling_contents).unwrap();
+
+    for token in ["input-focus-indicator-height", "text-input-focus-indicator-horizontal-inset"] {
+        assert!(styling.contains(token), "fluent2 styling should expose {token}");
+    }
+
+    for control in ["lineedit.slint", "textedit.slint", "spinbox.slint"] {
+        let source = load_file(&std::path::PathBuf::from(format!("builtin:/fluent2/{control}")))
+            .unwrap_or_else(|| panic!("fluent2 should embed {control}"));
+        let source_contents = source.read();
+        let source = std::str::from_utf8(&source_contents).unwrap();
+
+        assert!(
+            source.contains("Fluent2SizeSettings.text-input-focus-indicator-horizontal-inset"),
+            "fluent2 {control} focus indicator should use the horizontal inset token"
+        );
+        assert!(
+            !source.contains("x: parent.border-radius")
+                && !source.contains("width: parent.width - 2 * parent.border-radius"),
+            "fluent2 {control} focus indicator should not derive visual inset from live border radius"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_spinbox_input_colors_use_semantic_tokens() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");
