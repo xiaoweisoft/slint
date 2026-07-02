@@ -211,6 +211,54 @@ fn test_fluent2_style_compiles_representative_controls() {
 }
 
 #[test]
+fn test_fluent2_render_fixture_covers_representative_controls() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let fixture_root = manifest_dir
+        .parent()
+        .and_then(|path| path.parent())
+        .expect("compiler crate should live under internal/compiler")
+        .join("docs/astro/src/fluent2-render-fixtures");
+
+    let controls_path = fixture_root.join("fluent2-controls.md");
+    let states_path = fixture_root.join("fluent2-states.md");
+    let controls = std::fs::read_to_string(&controls_path)
+        .unwrap_or_else(|err| panic!("failed to read {controls_path:?}: {err}"));
+    let states = std::fs::read_to_string(&states_path)
+        .unwrap_or_else(|err| panic!("failed to read {states_path:?}: {err}"));
+
+    for expected in [
+        "imagePath=\"../assets/generated/fluent2-render-fixtures/fluent2-controls.png\"",
+        "import { Palette,",
+        "Button { text: \"Primary\"; primary: true; }",
+        "StandardButton { kind: ok; }",
+        "DatePickerPopup { title: \"Date\"; }",
+        "TimePickerPopup { title: \"Time\"; }",
+        "StandardListView {",
+        "StandardTableView {",
+        "AboutSlint { width: 280px; height: 80px; }",
+    ] {
+        assert!(
+            controls.contains(expected),
+            "fluent2 controls render fixture should include {expected}"
+        );
+    }
+
+    for expected in [
+        "imagePath=\"../assets/generated/fluent2-render-fixtures/fluent2-states.png\"",
+        "Button { text: \"Disabled\"; enabled: false; }",
+        "LineEdit { text: \"Read only\"; read-only: true; }",
+        "TextEdit { text: \"Disabled multiline text\\nkeeps Fluent2 surface and foreground tokens\"; enabled: false; height: 80px; }",
+        "ScrollView {",
+        "Spinner { indeterminate: true; }",
+    ] {
+        assert!(
+            states.contains(expected),
+            "fluent2 states render fixture should include {expected}"
+        );
+    }
+}
+
+#[test]
 fn test_fluent2_light_dark_aliases_select_color_scheme() {
     let source = r#"
         import { ColorSchemeSelector } from "color-scheme.slint";
