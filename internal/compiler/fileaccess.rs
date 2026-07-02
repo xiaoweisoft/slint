@@ -5123,6 +5123,16 @@ fn test_fluent2_time_picker_clock_selection_uses_bounded_index() {
             .contains("if root.current-item >= 0 || root.current-item < root.model.length: Path"),
         "fluent2 time picker clock hand should not use an always-true lower/upper bound union"
     );
+    assert!(
+        source.contains(
+            "if root.current-item >= 0 && root.current-item < root.model.length: Rectangle"
+        ),
+        "fluent2 time picker current selector should render only for a bounded selected index"
+    );
+    assert!(
+        !source.contains("if root.current-item < root.model.length: Rectangle"),
+        "fluent2 time picker current selector should not render for negative current indexes"
+    );
 }
 
 #[test]

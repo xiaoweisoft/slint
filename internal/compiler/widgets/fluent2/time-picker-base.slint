@@ -123,7 +123,7 @@ export component Clock {
         border-radius: Fluent2SizeSettings.time-clock-center-dot-radius;
     }
 
-    if root.current-item < root.model.length: Rectangle {
+    if root.current-item >= 0 && root.current-item < root.model.length: Rectangle {
         x: root.current-x;
         y: root.current-y;
         width: root.picker-ditameter;
