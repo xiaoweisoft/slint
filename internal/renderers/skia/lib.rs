@@ -67,6 +67,27 @@ use i_slint_core::items::{ItemRc, TextWrap};
 use itemrenderer::to_skia_rect;
 pub use skia_safe;
 
+pub const SKIA_RESOURCE_CACHE_LIMIT_ENV: &str = "SLINT_SKIA_CACHE_LIMIT_MB";
+
+pub fn configured_resource_cache_limit_bytes() -> Option<usize> {
+    std::env::var(SKIA_RESOURCE_CACHE_LIMIT_ENV)
+        .ok()
+        .and_then(|value| value.trim().parse::<usize>().ok())
+        .filter(|value| *value > 0)
+        .and_then(|mb| mb.checked_mul(1024 * 1024))
+}
+
+pub fn apply_configured_resource_cache_limit(gr_context: &mut skia_safe::gpu::DirectContext) {
+    if let Some(limit_bytes) = configured_resource_cache_limit_bytes() {
+        gr_context.set_resource_cache_limit(limit_bytes);
+        i_slint_core::debug_log!(
+            "Skia resource cache limit set from {}={} bytes",
+            SKIA_RESOURCE_CACHE_LIMIT_ENV,
+            limit_bytes
+        );
+    }
+}
+
 cfg_if::cfg_if! {
     if #[cfg(skia_backend_vulkan)] {
         type DefaultSurface = vulkan_surface::VulkanSurface;
@@ -1094,6 +1115,25 @@ pub trait Surface {
     /// Implementations should return self to allow upcasting.
     fn as_any(&self) -> &dyn core::any::Any {
         &()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn configured_resource_cache_limit_parses_megabytes() {
+        std::env::set_var(SKIA_RESOURCE_CACHE_LIMIT_ENV, "32");
+        assert_eq!(configured_resource_cache_limit_bytes(), Some(32 * 1024 * 1024));
+
+        std::env::set_var(SKIA_RESOURCE_CACHE_LIMIT_ENV, "0");
+        assert_eq!(configured_resource_cache_limit_bytes(), None);
+
+        std::env::set_var(SKIA_RESOURCE_CACHE_LIMIT_ENV, "not-a-number");
+        assert_eq!(configured_resource_cache_limit_bytes(), None);
+
+        std::env::remove_var(SKIA_RESOURCE_CACHE_LIMIT_ENV);
     }
 }
 

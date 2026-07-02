@@ -248,6 +248,7 @@ impl OpenGLSurface {
             skia_safe::gpu::direct_contexts::make_gl(gl_interface, None).ok_or_else(|| {
                 "Skia Renderer: Internal Error: Could not create Skia Direct Context from GL interface".to_string()
             })?;
+        crate::apply_configured_resource_cache_limit(&mut gr_context);
 
         let width: i32 = size.width.try_into().map_err(|e| {
                 format!("Attempting to create window surface with width that doesn't fit into non-zero i32: {e}")

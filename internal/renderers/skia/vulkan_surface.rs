@@ -184,8 +184,9 @@ impl VulkanSurface {
             )
         };
 
-        let gr_context = skia_safe::gpu::direct_contexts::make_vulkan(&backend_context, None)
+        let mut gr_context = skia_safe::gpu::direct_contexts::make_vulkan(&backend_context, None)
             .ok_or_else(|| format!("Error creating Skia Vulkan context"))?;
+        crate::apply_configured_resource_cache_limit(&mut gr_context);
 
         let previous_frame_end = RefCell::new(Some(sync::now(device.clone()).boxed()));
 
