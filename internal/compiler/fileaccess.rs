@@ -613,6 +613,16 @@ fn test_fluent2_groupbox_title_colors_use_semantic_tokens() {
         assert!(styling.contains(token), "fluent2 styling should expose {token}");
     }
 
+    for copied_bridge in [
+        "groupbox-title-foreground: control-foreground",
+        "groupbox-title-disabled-foreground: text-disabled",
+    ] {
+        assert!(
+            !styling.contains(copied_bridge),
+            "fluent2 GroupBox title semantic tokens should not alias through copied bridge {copied_bridge}"
+        );
+    }
+
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/groupbox.slint"))
         .expect("fluent2 should embed groupbox.slint");
     let source_contents = source.read();
@@ -2342,7 +2352,10 @@ fn test_fluent2_surface_backgrounds_use_semantic_tokens() {
         assert!(styling.contains(expected), "fluent2 styling should expose {expected}");
     }
 
-    for copied_alias in ["menu-flyout-background: alternate-background"] {
+    for copied_alias in [
+        "menu-flyout-background: alternate-background",
+        "scrollbar-track-hover-background: alternate-background",
+    ] {
         let copied_alias_line = format!("out property <brush> {copied_alias};");
         assert!(
             !styling.lines().any(|line| line.trim() == copied_alias_line),
@@ -3044,6 +3057,10 @@ fn test_fluent2_lineedit_icon_state_brush_uses_semantic_token() {
     assert!(
         styling.contains("lineedit-icon-state-brush"),
         "fluent2 styling should expose a semantic line edit icon state brush token"
+    );
+    assert!(
+        !styling.contains("lineedit-icon-state-brush: state"),
+        "fluent2 line edit icon state brush should not alias through the copied generic state token"
     );
 
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/lineedit-base.slint"))
