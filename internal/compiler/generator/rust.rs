@@ -389,7 +389,12 @@ fn generate_public_component(
             }
 
             fn show(&self) -> ::core::result::Result<(), slint::PlatformError> {
-                self.0.globals.get().unwrap().window_adapter_ref()?.window().show()
+                let globals = self.0.globals.get().unwrap();
+                #[cfg(target_os = "android")]
+                let window_adapter = globals.rebind_window_adapter_component()?;
+                #[cfg(not(target_os = "android"))]
+                let window_adapter = globals.window_adapter_ref()?;
+                window_adapter.window().show()
             }
 
             fn hide(&self) -> ::core::result::Result<(), slint::PlatformError> {
@@ -505,6 +510,14 @@ fn generate_shared_globals(
                     #apply_constant_scale_factor
                     ::core::result::Result::Ok(adapter)
                 })
+            }
+
+            fn rebind_window_adapter_component(&self) -> sp::Result<&sp::Rc<dyn sp::WindowAdapter>, slint::PlatformError>
+            {
+                let adapter = self.window_adapter_ref()?;
+                let root_rc = self.root_item_tree_weak.upgrade().unwrap();
+                sp::WindowInner::from_pub(adapter.window()).set_component(&root_rc);
+                ::core::result::Result::Ok(adapter)
             }
 
             fn maybe_window_adapter_impl(&self) -> sp::Option<sp::Rc<dyn sp::WindowAdapter>> {
