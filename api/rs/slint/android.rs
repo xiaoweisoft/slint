@@ -103,6 +103,30 @@ pub use android_activity::AndroidApp;
 
 use crate::platform::SetPlatformError;
 
+#[cfg(all(
+    target_os = "android",
+    any(feature = "backend-android-activity-05", feature = "backend-android-activity-06")
+))]
+pub use i_slint_backend_android_activity::{
+    AndroidAxisInput, AndroidInputInterceptor, AndroidInputInterceptorResult, AndroidKeyInput,
+};
+
+/// Registers an application-owned interceptor for Android key and controller-axis
+/// samples before normal Slint window dispatch.
+///
+/// The Interface is product-neutral: applications decide which samples are
+/// eligible and return [`AndroidInputInterceptorResult::Handled`] only when the
+/// sample has been consumed. Registration must happen before [`init()`].
+#[cfg(all(
+    target_os = "android",
+    any(feature = "backend-android-activity-05", feature = "backend-android-activity-06")
+))]
+pub fn set_input_interceptor(
+    interceptor: std::sync::Arc<dyn AndroidInputInterceptor>,
+) -> Result<(), std::sync::Arc<dyn AndroidInputInterceptor>> {
+    i_slint_backend_android_activity::set_input_interceptor(interceptor)
+}
+
 /// Initializes the Android backend.
 ///
 /// **Note:** This function is only available on Android with the "backend-android-activity-06" feature

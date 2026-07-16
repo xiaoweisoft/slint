@@ -516,7 +516,7 @@ fn generate_shared_globals(
             {
                 let adapter = self.window_adapter_ref()?;
                 let root_rc = self.root_item_tree_weak.upgrade().unwrap();
-                sp::WindowInner::from_pub(adapter.window()).set_component(&root_rc);
+                sp::WindowInner::from_pub(adapter.window()).set_component_if_changed(&root_rc);
                 ::core::result::Result::Ok(adapter)
             }
 

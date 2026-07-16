@@ -26,7 +26,73 @@ use i_slint_core::platform::{Clipboard, WindowAdapter};
 use i_slint_renderer_skia::SkiaRendererExt;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
+
+/// Result returned by an Android input interceptor.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AndroidInputInterceptorResult {
+    /// The interceptor did not consume the sample. Slint or Android may continue
+    /// normal delivery.
+    Ignored,
+    /// The interceptor consumed the sample. The Android backend returns
+    /// `InputStatus::Handled` and does not dispatch a second Slint event.
+    Handled,
+}
+
+/// Product-neutral Android key sample offered before normal Slint dispatch.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AndroidKeyInput {
+    /// Android `KeyEvent.getKeyCode()` value.
+    pub key_code: i32,
+    /// Whether this sample represents a press/multiple action (`true`) or a
+    /// release (`false`).
+    pub pressed: bool,
+    /// Android repeat count.
+    pub repeat_count: u32,
+    /// Android input source bit field.
+    pub source: u32,
+}
+
+/// Product-neutral Android controller-axis sample offered before normal Slint
+/// joystick/HAT dispatch.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AndroidAxisInput {
+    /// Android `MotionEvent` axis id.
+    pub axis: i32,
+    /// Current normalized axis value reported by Android.
+    pub value: f32,
+    /// Android input source bit field.
+    pub source: u32,
+}
+
+/// Optional application Adapter for intercepting Android input before Slint's
+/// normal window dispatch.
+///
+/// Implementations own product policy and must return [`AndroidInputInterceptorResult::Ignored`]
+/// for samples that should continue through Slint or Android.
+pub trait AndroidInputInterceptor: Send + Sync {
+    /// Intercept one Android key sample.
+    fn intercept_key(&self, input: AndroidKeyInput) -> AndroidInputInterceptorResult;
+
+    /// Intercept one Android controller-axis sample.
+    fn intercept_axis(&self, input: AndroidAxisInput) -> AndroidInputInterceptorResult;
+}
+
+static INPUT_INTERCEPTOR: OnceLock<Arc<dyn AndroidInputInterceptor>> = OnceLock::new();
+
+/// Registers the Android input interceptor for this process.
+///
+/// Registration must happen before [`AndroidPlatform`] initialization. A second
+/// registration returns the supplied Adapter unchanged.
+pub fn set_input_interceptor(
+    interceptor: Arc<dyn AndroidInputInterceptor>,
+) -> Result<(), Arc<dyn AndroidInputInterceptor>> {
+    INPUT_INTERCEPTOR.set(interceptor)
+}
+
+fn input_interceptor() -> Option<&'static Arc<dyn AndroidInputInterceptor>> {
+    INPUT_INTERCEPTOR.get()
+}
 
 thread_local! {
     static CURRENT_WINDOW: RefCell<Weak<AndroidWindowAdapter>> = RefCell::new(Default::default());

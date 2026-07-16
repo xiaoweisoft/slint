@@ -42,74 +42,30 @@ fn android_backend_log(message: &str) {
     }
 }
 
-#[cfg(target_os = "android")]
-fn dispatch_xiaoweios_controller_axis(axis: Axis, value: f32, source: Source) -> bool {
-    type AxisHook = unsafe extern "C" fn(i32, f32, i32) -> bool;
-    let Some(hook) = lookup_xiaoweios_controller_hook::<AxisHook>(
-        b"xiaoweios_slint_android_controller_axis_event\0",
-    ) else {
-        return false;
-    };
-    unsafe { hook(u32::from(axis) as i32, value, u32::from(source) as i32) }
+fn intercept_controller_axis(axis: Axis, value: f32, source: Source) -> bool {
+    input_interceptor().is_some_and(|interceptor| {
+        interceptor.intercept_axis(AndroidAxisInput {
+            axis: u32::from(axis) as i32,
+            value,
+            source: u32::from(source),
+        }) == AndroidInputInterceptorResult::Handled
+    })
 }
 
-#[cfg(target_os = "android")]
-fn lookup_xiaoweios_controller_hook<T>(symbol: &'static [u8]) -> Option<T>
-where
-    T: Copy,
-{
-    use core::ffi::{c_char, c_void};
-
-    unsafe extern "C" {
-        fn dlsym(handle: *mut c_void, symbol: *const c_char) -> *mut c_void;
-    }
-
-    let ptr = unsafe { dlsym(core::ptr::null_mut(), symbol.as_ptr().cast()) };
-    if ptr.is_null() { None } else { Some(unsafe { core::mem::transmute_copy(&ptr) }) }
-}
-
-#[cfg(not(target_os = "android"))]
-fn dispatch_xiaoweios_controller_axis(_axis: Axis, _value: f32, _source: Source) -> bool {
-    false
-}
-
-#[cfg(target_os = "android")]
-fn dispatch_xiaoweios_controller_key(key_event: &android_activity::input::KeyEvent) -> bool {
-    if !matches!(
-        key_event.key_code(),
-        Keycode::Back
-            | Keycode::DpadUp
-            | Keycode::DpadDown
-            | Keycode::DpadLeft
-            | Keycode::DpadRight
-            | Keycode::DpadCenter
-    ) {
-        return false;
-    }
-    let action = match key_event.action() {
-        KeyAction::Down | KeyAction::Multiple => 0,
-        KeyAction::Up => 1,
+fn intercept_key_event(key_event: &android_activity::input::KeyEvent) -> bool {
+    let pressed = match key_event.action() {
+        KeyAction::Down | KeyAction::Multiple => true,
+        KeyAction::Up => false,
         _ => return false,
     };
-    type KeyHook = unsafe extern "C" fn(i32, i32, i32, i32) -> bool;
-    let Some(hook) = lookup_xiaoweios_controller_hook::<KeyHook>(
-        b"xiaoweios_slint_android_controller_key_event\0",
-    ) else {
-        return false;
-    };
-    unsafe {
-        hook(
-            u32::from(key_event.key_code()) as i32,
-            action,
-            key_event.repeat_count() as i32,
-            u32::from(key_event.source()) as i32,
-        )
-    }
-}
-
-#[cfg(not(target_os = "android"))]
-fn dispatch_xiaoweios_controller_key(_key_event: &android_activity::input::KeyEvent) -> bool {
-    false
+    input_interceptor().is_some_and(|interceptor| {
+        interceptor.intercept_key(AndroidKeyInput {
+            key_code: u32::from(key_event.key_code()) as i32,
+            pressed,
+            repeat_count: u32::try_from(key_event.repeat_count()).unwrap_or(0),
+            source: u32::from(key_event.source()),
+        }) == AndroidInputInterceptorResult::Handled
+    })
 }
 
 struct LongPressDetection {
@@ -123,6 +79,14 @@ enum ControllerAxisKey {
     Right,
     Up,
     Down,
+    PageUp,
+    PageDown,
+}
+
+enum AndroidKeyMapping {
+    InterceptorHandled,
+    WindowEvent(WindowEvent),
+    Unmapped,
 }
 
 impl ControllerAxisKey {
@@ -132,6 +96,8 @@ impl ControllerAxisKey {
             Self::Right => "right",
             Self::Up => "up",
             Self::Down => "down",
+            Self::PageUp => "page-up",
+            Self::PageDown => "page-down",
         }
     }
 
@@ -141,6 +107,8 @@ impl ControllerAxisKey {
             Self::Right => Key::RightArrow.into(),
             Self::Up => Key::UpArrow.into(),
             Self::Down => Key::DownArrow.into(),
+            Self::PageUp => Key::PageUp.into(),
+            Self::PageDown => Key::PageDown.into(),
         }
     }
 }
@@ -168,6 +136,10 @@ pub struct AndroidWindowAdapter {
     controller_axis_y: Cell<Option<ControllerAxisKey>>,
     controller_axis_hat_x: Cell<Option<ControllerAxisKey>>,
     controller_axis_hat_y: Cell<Option<ControllerAxisKey>>,
+    controller_axis_l_trigger: Cell<Option<ControllerAxisKey>>,
+    controller_axis_r_trigger: Cell<Option<ControllerAxisKey>>,
+    controller_axis_gas: Cell<Option<ControllerAxisKey>>,
+    controller_axis_brake: Cell<Option<ControllerAxisKey>>,
 }
 
 impl WindowAdapter for AndroidWindowAdapter {
@@ -330,16 +302,16 @@ impl AndroidWindowAdapter {
             controller_axis_y: Cell::new(None),
             controller_axis_hat_x: Cell::new(None),
             controller_axis_hat_y: Cell::new(None),
+            controller_axis_l_trigger: Cell::new(None),
+            controller_axis_r_trigger: Cell::new(None),
+            controller_axis_gas: Cell::new(None),
+            controller_axis_brake: Cell::new(None),
         })
     }
 
     pub fn process_event(&self, event: &PollEvent<'_>) -> Result<ControlFlow<()>, PlatformError> {
-        let queue = std::mem::take(&mut *self.event_queue.lock().unwrap());
-        for e in queue {
-            match e {
-                Event::Quit => return Ok(ControlFlow::Break(())),
-                Event::Other(o) => o(),
-            }
+        if self.process_queued_events()?.is_break() {
+            return Ok(ControlFlow::Break(()));
         }
         #[cfg_attr(slint_nightly_test, allow(non_exhaustive_omitted_patterns))]
         match event {
@@ -388,7 +360,7 @@ impl AndroidWindowAdapter {
                 self.window.try_dispatch_event(WindowEvent::WindowActiveChanged(true))?;
             }
             PollEvent::Main(MainEvent::LostFocus) => {
-                self.window.try_dispatch_event(WindowEvent::WindowActiveChanged(true))?;
+                self.window.try_dispatch_event(WindowEvent::WindowActiveChanged(false))?;
             }
             PollEvent::Main(MainEvent::ConfigChanged { .. }) => {
                 let scale_factor =
@@ -412,7 +384,22 @@ impl AndroidWindowAdapter {
             }
             _ => (),
         }
-        Ok(ControlFlow::Continue(()))
+        self.process_queued_events()
+    }
+
+    fn process_queued_events(&self) -> Result<ControlFlow<()>, PlatformError> {
+        loop {
+            let queue = std::mem::take(&mut *self.event_queue.lock().unwrap());
+            if queue.is_empty() {
+                return Ok(ControlFlow::Continue(()));
+            }
+            for event in queue {
+                match event {
+                    Event::Quit => return Ok(ControlFlow::Break(())),
+                    Event::Other(callback) => callback(),
+                }
+            }
+        }
     }
 
     fn try_dispatch_key_event(&self, ev: WindowEvent) -> i_slint_core::input::KeyEventResult {
@@ -456,7 +443,11 @@ impl AndroidWindowAdapter {
                         key_event.repeat_count()
                     ));
                     match map_key_event(key_event) {
-                        Some(ev) => {
+                        AndroidKeyMapping::InterceptorHandled => {
+                            android_backend_log("input key interceptor handled");
+                            InputStatus::Handled
+                        }
+                        AndroidKeyMapping::WindowEvent(ev) => {
                             android_backend_log(&format!("input key mapped event={ev:?}"));
                             if self.try_dispatch_key_event(ev)
                                 == i_slint_core::input::KeyEventResult::EventAccepted
@@ -468,7 +459,7 @@ impl AndroidWindowAdapter {
                                 InputStatus::Unhandled
                             }
                         }
-                        None => {
+                        AndroidKeyMapping::Unmapped => {
                             android_backend_log("input key unmapped");
                             InputStatus::Unhandled
                         }
@@ -633,19 +624,27 @@ impl AndroidWindowAdapter {
         let y = pointer.axis_value(Axis::Y);
         let hat_x = pointer.axis_value(Axis::HatX);
         let hat_y = pointer.axis_value(Axis::HatY);
+        let l_trigger = pointer.axis_value(Axis::Ltrigger);
+        let r_trigger = pointer.axis_value(Axis::Rtrigger);
+        let gas = pointer.axis_value(Axis::Gas);
+        let brake = pointer.axis_value(Axis::Brake);
         android_backend_log(&format!(
-            "input controller motion source=0x{source_bits:x} x={x:.3} y={y:.3} hat_x={hat_x:.3} hat_y={hat_y:.3}"
+            "input controller motion source=0x{source_bits:x} x={x:.3} y={y:.3} hat_x={hat_x:.3} hat_y={hat_y:.3} l_trigger={l_trigger:.3} r_trigger={r_trigger:.3} gas={gas:.3} brake={brake:.3}"
         ));
 
         let mut handled_by_shell = false;
-        handled_by_shell |= dispatch_xiaoweios_controller_axis(Axis::X, x, motion_event.source());
-        handled_by_shell |= dispatch_xiaoweios_controller_axis(Axis::Y, y, motion_event.source());
+        handled_by_shell |= intercept_controller_axis(Axis::X, x, motion_event.source());
+        handled_by_shell |= intercept_controller_axis(Axis::Y, y, motion_event.source());
+        handled_by_shell |= intercept_controller_axis(Axis::HatX, hat_x, motion_event.source());
+        handled_by_shell |= intercept_controller_axis(Axis::HatY, hat_y, motion_event.source());
         handled_by_shell |=
-            dispatch_xiaoweios_controller_axis(Axis::HatX, hat_x, motion_event.source());
+            intercept_controller_axis(Axis::Ltrigger, l_trigger, motion_event.source());
         handled_by_shell |=
-            dispatch_xiaoweios_controller_axis(Axis::HatY, hat_y, motion_event.source());
+            intercept_controller_axis(Axis::Rtrigger, r_trigger, motion_event.source());
+        handled_by_shell |= intercept_controller_axis(Axis::Gas, gas, motion_event.source());
+        handled_by_shell |= intercept_controller_axis(Axis::Brake, brake, motion_event.source());
         if handled_by_shell {
-            android_backend_log("input controller motion routed=xiaoweios-shell");
+            android_backend_log("input controller motion routed=input-interceptor");
             return true;
         }
 
@@ -653,6 +652,22 @@ impl AndroidWindowAdapter {
         self.update_controller_axis(&self.controller_axis_y, axis_key_vertical(y));
         self.update_controller_axis(&self.controller_axis_hat_x, axis_key_horizontal(hat_x));
         self.update_controller_axis(&self.controller_axis_hat_y, axis_key_vertical(hat_y));
+        self.update_controller_axis(
+            &self.controller_axis_l_trigger,
+            axis_key_trigger(l_trigger, ControllerAxisKey::PageUp),
+        );
+        self.update_controller_axis(
+            &self.controller_axis_r_trigger,
+            axis_key_trigger(r_trigger, ControllerAxisKey::PageDown),
+        );
+        self.update_controller_axis(
+            &self.controller_axis_gas,
+            axis_key_trigger(gas, ControllerAxisKey::PageDown),
+        );
+        self.update_controller_axis(
+            &self.controller_axis_brake,
+            axis_key_trigger(brake, ControllerAxisKey::PageUp),
+        );
         true
     }
 
@@ -888,20 +903,26 @@ fn button_for_event(
     return PointerEventButton::Other;
 }
 
-fn map_key_event(key_event: &android_activity::input::KeyEvent) -> Option<WindowEvent> {
-    if dispatch_xiaoweios_controller_key(key_event) {
-        android_backend_log("input key routed=xiaoweios-shell");
-        return None;
+fn map_key_event(key_event: &android_activity::input::KeyEvent) -> AndroidKeyMapping {
+    if intercept_key_event(key_event) {
+        android_backend_log("input key routed=input-interceptor");
+        return AndroidKeyMapping::InterceptorHandled;
     }
-    let text = map_key_code(key_event.key_code())?;
+    let Some(text) = map_key_code(key_event.key_code()) else {
+        return AndroidKeyMapping::Unmapped;
+    };
     let repeat = key_event.repeat_count() > 0;
     match key_event.action() {
-        KeyAction::Down if repeat => Some(WindowEvent::KeyPressRepeated { text }),
-        KeyAction::Down => Some(WindowEvent::KeyPressed { text }),
-        KeyAction::Up => Some(WindowEvent::KeyReleased { text }),
-        KeyAction::Multiple if repeat => Some(WindowEvent::KeyPressRepeated { text }),
-        KeyAction::Multiple => Some(WindowEvent::KeyPressed { text }),
-        _ => None,
+        KeyAction::Down if repeat => {
+            AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressRepeated { text })
+        }
+        KeyAction::Down => AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressed { text }),
+        KeyAction::Up => AndroidKeyMapping::WindowEvent(WindowEvent::KeyReleased { text }),
+        KeyAction::Multiple if repeat => {
+            AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressRepeated { text })
+        }
+        KeyAction::Multiple => AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressed { text }),
+        _ => AndroidKeyMapping::Unmapped,
     }
 }
 
@@ -923,18 +944,21 @@ fn axis_key_vertical(value: f32) -> Option<ControllerAxisKey> {
     if value < 0.0 { Some(ControllerAxisKey::Up) } else { Some(ControllerAxisKey::Down) }
 }
 
+fn axis_key_trigger(value: f32, key: ControllerAxisKey) -> Option<ControllerAxisKey> {
+    value.is_finite().then_some(value).filter(|value| *value >= 0.5)?;
+    Some(key)
+}
+
 fn map_key_code(code: android_activity::input::Keycode) -> Option<SharedString> {
     match code {
         Keycode::Unknown => None,
         Keycode::SoftLeft => None,
         Keycode::SoftRight => None,
         Keycode::Home => None,
-        // XiaoweiOS handles controller/DPAD semantics at the Activity/JNI
-        // boundary so shared UI receives ControllerKey identity instead of
-        // backend-local Slint key text. Leave these Android keys unhandled here
-        // so the Activity bridge can route them consistently with gamepad
-        // button and trigger keys.
-        Keycode::Back => None,
+        // The optional application interceptor may handle controller/D-pad
+        // semantics before normal Slint key mapping. When it declines, map
+        // these keys into the standard focused-window path below.
+        Keycode::Back => Some(Key::Escape.into()),
         Keycode::Call => None,
         Keycode::Endcall => None,
         Keycode::Keycode0 => Some("0".into()),
@@ -949,11 +973,11 @@ fn map_key_code(code: android_activity::input::Keycode) -> Option<SharedString> 
         Keycode::Keycode9 => Some("9".into()),
         Keycode::Star => Some("*".into()),
         Keycode::Pound => Some("#".into()),
-        Keycode::DpadUp => None,
-        Keycode::DpadDown => None,
-        Keycode::DpadLeft => None,
-        Keycode::DpadRight => None,
-        Keycode::DpadCenter => None,
+        Keycode::DpadUp => Some(Key::UpArrow.into()),
+        Keycode::DpadDown => Some(Key::DownArrow.into()),
+        Keycode::DpadLeft => Some(Key::LeftArrow.into()),
+        Keycode::DpadRight => Some(Key::RightArrow.into()),
+        Keycode::DpadCenter => Some(Key::Return.into()),
         Keycode::VolumeUp => None,
         Keycode::VolumeDown => None,
         Keycode::Power => None,
@@ -1026,20 +1050,20 @@ fn map_key_code(code: android_activity::input::Keycode) -> Option<SharedString> 
         Keycode::PageDown => Some(Key::PageDown.into()),
         Keycode::Pictsymbols => None,
         Keycode::SwitchCharset => None,
-        Keycode::ButtonA => None,
-        Keycode::ButtonB => None,
+        Keycode::ButtonA => Some(Key::Return.into()),
+        Keycode::ButtonB => Some(Key::Escape.into()),
         Keycode::ButtonC => None,
-        Keycode::ButtonX => None,
-        Keycode::ButtonY => None,
+        Keycode::ButtonX => Some(" ".into()),
+        Keycode::ButtonY => Some(Key::Backspace.into()),
         Keycode::ButtonZ => None,
-        Keycode::ButtonL1 => None,
-        Keycode::ButtonR1 => None,
-        Keycode::ButtonL2 => None,
-        Keycode::ButtonR2 => None,
-        Keycode::ButtonThumbl => None,
-        Keycode::ButtonThumbr => None,
-        Keycode::ButtonStart => None,
-        Keycode::ButtonSelect => None,
+        Keycode::ButtonL1 => Some("[".into()),
+        Keycode::ButtonR1 => Some("]".into()),
+        Keycode::ButtonL2 => Some(Key::PageUp.into()),
+        Keycode::ButtonR2 => Some(Key::PageDown.into()),
+        Keycode::ButtonThumbl => Some(Key::F7.into()),
+        Keycode::ButtonThumbr => Some(Key::F8.into()),
+        Keycode::ButtonStart => Some(Key::F10.into()),
+        Keycode::ButtonSelect => Some(Key::F9.into()),
         Keycode::ButtonMode => None,
         Keycode::Escape => Some(Key::Escape.into()),
         Keycode::ForwardDel => Some(Key::Delete.into()),

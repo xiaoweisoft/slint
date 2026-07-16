@@ -567,6 +567,23 @@ impl WindowInner {
         })
     }
 
+    /// Associates this window with `component` only when it is a different item tree.
+    ///
+    /// Android uses one window adapter per native Activity and generated component
+    /// construction binds the root before `ComponentHandle::show()`. Avoid running
+    /// the component-switch reset twice for that same root because it would clear
+    /// focus claimed during component initialization.
+    pub fn set_component_if_changed(&self, component: &ItemTreeRc) {
+        if self
+            .try_component()
+            .as_ref()
+            .is_some_and(|current| ItemTreeRc::ptr_eq(current, component))
+        {
+            return;
+        }
+        self.set_component(component);
+    }
+
     /// return the component.
     /// Panics if it wasn't set.
     pub fn component(&self) -> ItemTreeRc {
