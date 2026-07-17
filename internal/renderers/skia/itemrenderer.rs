@@ -22,21 +22,28 @@ use i_slint_core::lengths::{
 use i_slint_core::textlayout::sharedparley::{self, GlyphRenderer};
 use i_slint_core::window::WindowInner;
 use i_slint_core::{Brush, Color, SharedString};
-use skia_safe::{Matrix, TileMode};
+use skia_safe::{M44, Matrix, TileMode};
 
-fn projective_matrix(transform: ItemTransform, scale: f32) -> Matrix {
+fn projective_m44(transform: ItemTransform, scale: f32) -> M44 {
     let m = transform.matrix();
-    Matrix::new_all(
+    M44::row_major(&[
         m.m11,
         m.m21,
+        m.m31,
         m.m41 * scale,
         m.m12,
         m.m22,
+        m.m32,
         m.m42 * scale,
+        m.m13,
+        m.m23,
+        m.m33,
+        m.m43 * scale,
         m.m14 / scale,
         m.m24 / scale,
+        m.m34 / scale,
         m.m44,
-    )
+    ])
 }
 
 pub type SkiaBoxShadowCache = BoxShadowCache<skia_safe::Image>;
@@ -832,7 +839,7 @@ impl ItemRenderer for SkiaItemRenderer<'_> {
     }
 
     fn projective_transform(&mut self, transform: ItemTransform) {
-        self.canvas.concat(&projective_matrix(transform, self.scale_factor.get()));
+        self.canvas.concat_44(&projective_m44(transform, self.scale_factor.get()));
     }
 
     fn supports_projective_transformations(&self) -> bool {
@@ -1104,14 +1111,28 @@ mod projective_tests {
     use super::*;
 
     #[test]
-    fn projective_matrix_conjugates_logical_coordinates_by_scale_factor() {
+    fn projective_m44_conjugates_logical_coordinates_by_scale_factor() {
         let transform =
             ItemTransform::translation(10., 20.).then(&ItemTransform::perspective(800.));
-        let matrix = projective_matrix(transform, 2.);
-        assert_eq!(matrix.translate_x(), 20.);
-        assert_eq!(matrix.translate_y(), 40.);
-        assert_eq!(matrix.persp_x(), transform.matrix().m14 / 2.);
-        assert_eq!(matrix.persp_y(), transform.matrix().m24 / 2.);
+        let matrix = projective_m44(transform, 2.);
+        let mut values = [0.; 16];
+        matrix.get_row_major(&mut values);
+        assert_eq!(values[3], 20.);
+        assert_eq!(values[7], 40.);
+        assert_eq!(values[12], transform.matrix().m14 / 2.);
+        assert_eq!(values[13], transform.matrix().m24 / 2.);
+    }
+
+    #[test]
+    fn projective_m44_preserves_child_depth_for_parent_perspective() {
+        let transform = ItemTransform::identity()
+            .then_translate_z(240.)
+            .then(&ItemTransform::perspective(900.));
+        let matrix = projective_m44(transform, 2.);
+        let mut values = [0.; 16];
+        matrix.get_row_major(&mut values);
+        assert_ne!(values[11], 0.);
+        assert_ne!(values[14], 0.);
     }
 }
 

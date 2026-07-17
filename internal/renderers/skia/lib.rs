@@ -1128,16 +1128,24 @@ mod tests {
 
     #[test]
     fn configured_resource_cache_limit_parses_megabytes() {
-        std::env::set_var(SKIA_RESOURCE_CACHE_LIMIT_ENV, "32");
+        unsafe {
+            std::env::set_var(SKIA_RESOURCE_CACHE_LIMIT_ENV, "32");
+        }
         assert_eq!(configured_resource_cache_limit_bytes(), Some(32 * 1024 * 1024));
 
-        std::env::set_var(SKIA_RESOURCE_CACHE_LIMIT_ENV, "0");
+        unsafe {
+            std::env::set_var(SKIA_RESOURCE_CACHE_LIMIT_ENV, "0");
+        }
         assert_eq!(configured_resource_cache_limit_bytes(), None);
 
-        std::env::set_var(SKIA_RESOURCE_CACHE_LIMIT_ENV, "not-a-number");
+        unsafe {
+            std::env::set_var(SKIA_RESOURCE_CACHE_LIMIT_ENV, "not-a-number");
+        }
         assert_eq!(configured_resource_cache_limit_bytes(), None);
 
-        std::env::remove_var(SKIA_RESOURCE_CACHE_LIMIT_ENV);
+        unsafe {
+            std::env::remove_var(SKIA_RESOURCE_CACHE_LIMIT_ENV);
+        }
     }
 }
 
