@@ -42,7 +42,7 @@ The width and height of the element. When set, this overrides the default size.
 
 ### Transforms
 
-Transforms allow for rotating and scaling items around a specified origin point. The default origin point is the center of the element.
+Transforms allow for rotating and scaling items around a specified origin point. The default origin point is the center of the element. Skia renderers also support projecting a flat item subtree with pitch, yaw, and perspective; rendering and pointer input use the same mapping.
 
 Transforms are not available for the software renderer.
 
@@ -58,6 +58,21 @@ Image {
 
 #### transform-rotation
 <SlintProperty propName="transform-rotation" typeName="angle" defaultValue='0deg'/>
+
+#### transform-pitch
+<SlintProperty propName="transform-pitch" typeName="angle" defaultValue='0deg'>
+Rotates the element and its children around the horizontal axis. Set `transform-perspective` to a positive length to apply perspective projection.
+</SlintProperty>
+
+#### transform-yaw
+<SlintProperty propName="transform-yaw" typeName="angle" defaultValue='0deg'>
+Rotates the element and its children around the vertical axis. Set `transform-perspective` to a positive length to apply perspective projection.
+</SlintProperty>
+
+#### transform-perspective
+<SlintProperty propName="transform-perspective" typeName="length" defaultValue='0px'>
+Sets the camera distance for pitch and yaw projection. Zero disables perspective. This property is currently supported by the Skia renderer.
+</SlintProperty>
 
 #### transform-origin
 <SlintProperty propName="transform-origin" typeName="struct" structName="Point" defaultValue='{x: self.width / 2, y: self.height / 2}'>

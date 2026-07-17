@@ -165,7 +165,12 @@ pub fn lower_transform_properties(
                     }
                 }
                 "transform-scale" => None,
-                "transform-rotation" => Some(Expression::NumberLiteral(0., Default::default())),
+                "transform-rotation"
+                | "transform-pitch"
+                | "transform-yaw"
+                | "transform-perspective" => {
+                    Some(Expression::NumberLiteral(0., Default::default()))
+                }
                 _ => unreachable!(),
             }
         }),

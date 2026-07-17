@@ -16,9 +16,147 @@ pub type LogicalPoint = euclid::Point2D<Coord, LogicalPx>;
 pub type LogicalSize = euclid::Size2D<Coord, LogicalPx>;
 pub type LogicalVector = euclid::Vector2D<Coord, LogicalPx>;
 pub type LogicalBorderRadius = BorderRadius<Coord, LogicalPx>;
-pub type ItemTransform = euclid::Transform2D<f32, LogicalPx, LogicalPx>;
+/// A transform applied to an item subtree. This is projective so rendering,
+/// bounds calculation, and pointer routing can share one mapping.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ItemTransform(euclid::Transform3D<f32, LogicalPx, LogicalPx>);
+
+impl Default for ItemTransform {
+    fn default() -> Self {
+        Self::identity()
+    }
+}
+
+impl ItemTransform {
+    pub fn identity() -> Self {
+        Self(euclid::Transform3D::identity())
+    }
+
+    pub fn translation(x: f32, y: f32) -> Self {
+        Self(euclid::Transform3D::translation(x, y, 0.))
+    }
+
+    pub fn perspective(distance: f32) -> Self {
+        if distance > 0. {
+            Self(euclid::Transform3D::perspective(distance))
+        } else {
+            Self::identity()
+        }
+    }
+
+    pub fn then(&self, other: &Self) -> Self {
+        Self(self.0.then(&other.0))
+    }
+
+    pub fn then_translate(&self, offset: LogicalVector) -> Self {
+        Self(self.0.then_translate(offset.extend(0.)))
+    }
+
+    pub fn then_scale(&self, x: f32, y: f32) -> Self {
+        Self(self.0.then_scale(x, y, 1.))
+    }
+
+    pub fn then_rotate(&self, angle: euclid::Angle<f32>) -> Self {
+        Self(self.0.then_rotate(0., 0., 1., angle))
+    }
+
+    pub fn then_rotate_x(&self, angle: euclid::Angle<f32>) -> Self {
+        Self(self.0.then_rotate(1., 0., 0., angle))
+    }
+
+    pub fn then_rotate_y(&self, angle: euclid::Angle<f32>) -> Self {
+        Self(self.0.then_rotate(0., 1., 0., angle))
+    }
+
+    pub fn inverse(&self) -> Option<Self> {
+        // Pointer input lives on the z=0 item plane. Invert that plane's
+        // homography directly; a 4x4 inverse cannot recover the projected z.
+        let m = &self.0;
+        let (a, b, c) = (m.m11, m.m12, m.m14);
+        let (d, e, f) = (m.m21, m.m22, m.m24);
+        let (g, h, i) = (m.m41, m.m42, m.m44);
+        let determinant = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+        if determinant.abs() <= f32::EPSILON {
+            return None;
+        }
+        let inv = 1. / determinant;
+        Some(Self(euclid::Transform3D::new(
+            (e * i - f * h) * inv,
+            (c * h - b * i) * inv,
+            0.,
+            (b * f - c * e) * inv,
+            (f * g - d * i) * inv,
+            (a * i - c * g) * inv,
+            0.,
+            (c * d - a * f) * inv,
+            0.,
+            0.,
+            1.,
+            0.,
+            (d * h - e * g) * inv,
+            (b * g - a * h) * inv,
+            0.,
+            (a * e - b * d) * inv,
+        )))
+    }
+
+    pub fn transform_point(&self, point: LogicalPoint) -> Option<LogicalPoint> {
+        self.0.transform_point2d(point)
+    }
+
+    pub fn outer_transformed_rect(&self, rect: &LogicalRect) -> Option<LogicalRect> {
+        self.0.outer_transformed_rect(rect)
+    }
+
+    pub fn matrix(&self) -> &euclid::Transform3D<f32, LogicalPx, LogicalPx> {
+        &self.0
+    }
+}
 
 pub type ScaleFactor = euclid::Scale<f32, LogicalPx, PhysicalPx>;
+
+#[cfg(test)]
+mod item_transform_tests {
+    use super::*;
+
+    fn close(left: f32, right: f32) {
+        assert!((left - right).abs() < 0.001, "{left} != {right}");
+    }
+
+    #[test]
+    fn projective_transform_round_trips_points_and_bounds() {
+        let transform = ItemTransform::translation(-160., -90.)
+            .then_rotate_x(euclid::Angle::degrees(4.))
+            .then_rotate_y(euclid::Angle::degrees(-6.))
+            .then(&ItemTransform::perspective(900.))
+            .then_translate(LogicalVector::new(160., 90.));
+        let point = LogicalPoint::new(245., 117.);
+        let projected = transform.transform_point(point).unwrap();
+        let restored = transform.inverse().unwrap().transform_point(projected).unwrap();
+        close(restored.x, point.x);
+        close(restored.y, point.y);
+
+        let bounds = transform
+            .outer_transformed_rect(&LogicalRect::new(
+                LogicalPoint::new(0., 0.),
+                LogicalSize::new(320., 180.),
+            ))
+            .unwrap();
+        assert!(bounds.width() > 0.);
+        assert!(bounds.height() > 0.);
+    }
+
+    #[test]
+    fn affine_defaults_preserve_translation_scale_and_rotation() {
+        let transform = ItemTransform::translation(10., 20.)
+            .then_scale(2., 3.)
+            .then_rotate(euclid::Angle::degrees(0.));
+        assert_eq!(
+            transform.transform_point(LogicalPoint::new(4., 5.)),
+            Some(LogicalPoint::new(28., 75.))
+        );
+    }
+}
 
 pub trait SizeLengths {
     type LengthType;

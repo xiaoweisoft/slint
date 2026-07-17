@@ -526,7 +526,9 @@ impl ItemRc {
             let geometry = parent.geometry();
             if supports_transformations {
                 if let Some(transform) = parent.children_transform() {
-                    result = transform.transform_point(result.cast()).cast();
+                    if let Some(mapped) = transform.transform_point(result) {
+                        result = mapped;
+                    }
                 }
             }
             result += geometry.origin.to_vector();
@@ -570,7 +572,9 @@ impl ItemRc {
         }
         full_transform = full_transform.and_then(|ft| ft.inverse());
         if let Some(transform) = full_transform {
-            result = transform.transform_point(result.cast()).cast();
+            if let Some(mapped) = transform.transform_point(result) {
+                result = mapped;
+            }
         } else {
             result -= offset;
         }
@@ -894,12 +898,14 @@ impl ItemRc {
     pub fn children_transform(&self) -> Option<ItemTransform> {
         self.downcast::<crate::items::Transform>().map(|transform_item| {
             let item = transform_item.as_pin_ref();
-            let origin = item.transform_origin().to_euclid().to_vector().cast::<f32>();
-            ItemTransform::translation(-origin.x, -origin.y)
-                .cast()
-                .then_scale(item.transform_scale_x(), item.transform_scale_y())
-                .then_rotate(euclid::Angle { radians: item.transform_rotation().to_radians() })
-                .then_translate(origin)
+            let supports_projective = self
+                .window_adapter()
+                .is_none_or(|adapter| adapter.renderer().supports_projective_transformations());
+            if item.has_projective_transform() && supports_projective {
+                item.item_transform()
+            } else {
+                item.affine_item_transform()
+            }
         })
     }
 

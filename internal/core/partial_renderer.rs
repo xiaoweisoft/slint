@@ -147,7 +147,7 @@ impl CachedItemBoundingBoxAndTransform {
             Self::ItemWithTransform {
                 bounding_rect,
                 transform: complex_child_transform
-                    .then_translate(geometry.origin.to_vector().cast())
+                    .then_translate(geometry.origin.to_vector())
                     .into(),
             }
         } else {
@@ -495,13 +495,13 @@ impl<'a, T: ItemRenderer + ItemRendererFeatures> PartialRenderer<'a, T> {
                                     .intersection(
                                         &state
                                             .transform_to_screen
-                                            .outer_transformed_rect(&geometry.cast())
-                                            .cast()
+                                            .outer_transformed_rect(&geometry)
+                                            .unwrap_or_default()
                                             .union(
                                                 &state
                                                     .old_transform_to_screen
-                                                    .outer_transformed_rect(&geometry.cast())
-                                                    .cast(),
+                                                    .outer_transformed_rect(&geometry)
+                                                    .unwrap_or_default(),
                                             ),
                                     )
                                     .unwrap_or_default();
@@ -528,8 +528,8 @@ impl<'a, T: ItemRenderer + ItemRendererFeatures> PartialRenderer<'a, T> {
                                 .intersection(
                                     &state
                                         .transform_to_screen
-                                        .outer_transformed_rect(&geometry.cast())
-                                        .cast(),
+                                        .outer_transformed_rect(&geometry)
+                                        .unwrap_or_default(),
                                 )
                                 .unwrap_or_default();
                         }
@@ -548,8 +548,7 @@ impl<'a, T: ItemRenderer + ItemRendererFeatures> PartialRenderer<'a, T> {
                 }
             },
             {
-                let initial_transform =
-                    euclid::Transform2D::translation(origin.x as f32, origin.y as f32);
+                let initial_transform = ItemTransform::translation(origin.x, origin.y);
                 ComputeDirtyRegionState {
                     transform_to_screen: initial_transform,
                     old_transform_to_screen: initial_transform,
@@ -574,7 +573,7 @@ impl<'a, T: ItemRenderer + ItemRendererFeatures> PartialRenderer<'a, T> {
 
         if !rect.is_empty() {
             if let Some(rect) =
-                transform.outer_transformed_rect(&rect.cast()).cast().intersection(clip_rect)
+                transform.outer_transformed_rect(rect).and_then(|rect| rect.intersection(clip_rect))
             {
                 self.dirty_region.add_rect(rect);
             }

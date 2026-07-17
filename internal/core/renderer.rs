@@ -142,4 +142,9 @@ pub trait RendererSealed {
 
     /// Whether the renderer supports transformations such as rotations and scaling or not.
     fn supports_transformations(&self) -> bool;
+
+    /// Whether the renderer supports projective item transforms with matching input mapping.
+    fn supports_projective_transformations(&self) -> bool {
+        false
+    }
 }

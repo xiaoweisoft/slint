@@ -1036,6 +1036,10 @@ impl i_slint_core::renderer::RendererSealed for SkiaRenderer {
     fn supports_transformations(&self) -> bool {
         true
     }
+
+    fn supports_projective_transformations(&self) -> bool {
+        true
+    }
 }
 
 impl Drop for SkiaRenderer {

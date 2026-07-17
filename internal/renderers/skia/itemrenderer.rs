@@ -15,13 +15,29 @@ use i_slint_core::item_rendering::{
 };
 use i_slint_core::items::{ImageFit, ImageRendering, ItemRc, Layer, Opacity, RenderingResult};
 use i_slint_core::lengths::{
-    LogicalBorderRadius, LogicalLength, LogicalPoint, LogicalPx, LogicalRect, LogicalSize,
-    LogicalVector, PhysicalPx, RectLengths, ScaleFactor, SizeLengths, logical_size_from_api,
+    ItemTransform, LogicalBorderRadius, LogicalLength, LogicalPoint, LogicalPx, LogicalRect,
+    LogicalSize, LogicalVector, PhysicalPx, RectLengths, ScaleFactor, SizeLengths,
+    logical_size_from_api,
 };
 use i_slint_core::textlayout::sharedparley::{self, GlyphRenderer};
 use i_slint_core::window::WindowInner;
 use i_slint_core::{Brush, Color, SharedString};
 use skia_safe::{Matrix, TileMode};
+
+fn projective_matrix(transform: ItemTransform, scale: f32) -> Matrix {
+    let m = transform.matrix();
+    Matrix::new_all(
+        m.m11,
+        m.m21,
+        m.m41 * scale,
+        m.m12,
+        m.m22,
+        m.m42 * scale,
+        m.m14 / scale,
+        m.m24 / scale,
+        m.m44,
+    )
+}
 
 pub type SkiaBoxShadowCache = BoxShadowCache<skia_safe::Image>;
 
@@ -815,6 +831,14 @@ impl ItemRenderer for SkiaItemRenderer<'_> {
         self.canvas.scale((x_factor, y_factor));
     }
 
+    fn projective_transform(&mut self, transform: ItemTransform) {
+        self.canvas.concat(&projective_matrix(transform, self.scale_factor.get()));
+    }
+
+    fn supports_projective_transformations(&self) -> bool {
+        true
+    }
+
     fn apply_opacity(&mut self, opacity: f32) {
         self.current_state.alpha *= opacity;
     }
@@ -1073,6 +1097,22 @@ pub fn to_skia_rrect(rect: &PhysicalRect, radius: &PhysicalBorderRadius) -> skia
 
 impl ItemRendererFeatures for SkiaItemRenderer<'_> {
     const SUPPORTS_TRANSFORMATIONS: bool = true;
+}
+
+#[cfg(test)]
+mod projective_tests {
+    use super::*;
+
+    #[test]
+    fn projective_matrix_conjugates_logical_coordinates_by_scale_factor() {
+        let transform =
+            ItemTransform::translation(10., 20.).then(&ItemTransform::perspective(800.));
+        let matrix = projective_matrix(transform, 2.);
+        assert_eq!(matrix.translate_x(), 20.);
+        assert_eq!(matrix.translate_y(), 40.);
+        assert_eq!(matrix.persp_x(), transform.matrix().m14 / 2.);
+        assert_eq!(matrix.persp_y(), transform.matrix().m24 / 2.);
+    }
 }
 
 pub fn to_skia_point(point: PhysicalPoint) -> skia_safe::Point {

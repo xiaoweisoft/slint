@@ -85,6 +85,9 @@ export component ComponentContainer inherits Empty {
 
 export component Transform inherits Empty {
     in property <angle> transform-rotation;
+    in property <angle> transform-pitch;
+    in property <angle> transform-yaw;
+    in property <length> transform-perspective;
     in property <percent> transform-scale-x;
     in property <percent> transform-scale-y;
     in property <Point> transform-origin;

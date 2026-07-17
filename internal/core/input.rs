@@ -111,17 +111,19 @@ impl MouseEvent {
             MouseEvent::Moved { position, .. } => Some(position),
             MouseEvent::Wheel { position, .. } => Some(position),
             MouseEvent::DragMove(e) | MouseEvent::Drop(e) => {
-                e.position = crate::api::LogicalPosition::from_euclid(
-                    transform
-                        .transform_point(crate::lengths::logical_point_from_api(e.position).cast())
-                        .cast(),
-                );
+                if let Some(mapped) =
+                    transform.transform_point(crate::lengths::logical_point_from_api(e.position))
+                {
+                    e.position = crate::api::LogicalPosition::from_euclid(mapped);
+                }
                 None
             }
             MouseEvent::Exit => None,
         };
         if let Some(pos) = pos {
-            *pos = transform.transform_point(pos.cast()).cast();
+            if let Some(mapped) = transform.transform_point(*pos) {
+                *pos = mapped;
+            }
         }
     }
 
@@ -721,7 +723,9 @@ pub(crate) fn send_exit_events(
             *p -= g.origin.to_vector();
             if window_adapter.renderer().supports_transformations() {
                 if let Some(inverse_transform) = item.inverse_children_transform() {
-                    *p = inverse_transform.transform_point(p.cast()).cast();
+                    if let Some(mapped) = inverse_transform.transform_point(*p) {
+                        *p = mapped;
+                    }
                 }
             }
         }

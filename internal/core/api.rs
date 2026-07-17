@@ -539,6 +539,11 @@ impl Window {
         self.0.scale_factor()
     }
 
+    /// Returns whether the active renderer supports projective item transforms.
+    pub fn supports_projective_transformations(&self) -> bool {
+        self.0.window_adapter().renderer().supports_projective_transformations()
+    }
+
     /// Returns the position of the window on the screen, in physical screen coordinates and including
     /// a window frame (if present).
     pub fn position(&self) -> PhysicalPosition {
