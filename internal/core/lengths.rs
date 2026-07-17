@@ -52,6 +52,10 @@ impl ItemTransform {
         Self(self.0.then_translate(offset.extend(0.)))
     }
 
+    pub fn then_translate_z(&self, z: f32) -> Self {
+        Self(self.0.then_translate(euclid::Vector3D::new(0., 0., z)))
+    }
+
     pub fn then_scale(&self, x: f32, y: f32) -> Self {
         Self(self.0.then_scale(x, y, 1.))
     }
@@ -128,6 +132,7 @@ mod item_transform_tests {
         let transform = ItemTransform::translation(-160., -90.)
             .then_rotate_x(euclid::Angle::degrees(4.))
             .then_rotate_y(euclid::Angle::degrees(-6.))
+            .then_translate_z(240.)
             .then(&ItemTransform::perspective(900.))
             .then_translate(LogicalVector::new(160., 90.));
         let point = LogicalPoint::new(245., 117.);
@@ -144,6 +149,20 @@ mod item_transform_tests {
             .unwrap();
         assert!(bounds.width() > 0.);
         assert!(bounds.height() > 0.);
+    }
+
+    #[test]
+    fn positive_z_translation_projects_a_larger_plane_and_keeps_inverse_mapping() {
+        let transform = ItemTransform::translation(-160., -90.)
+            .then_translate_z(240.)
+            .then(&ItemTransform::perspective(900.))
+            .then_translate(LogicalVector::new(160., 90.));
+        let point = LogicalPoint::new(240., 90.);
+        let projected = transform.transform_point(point).unwrap();
+        assert!(projected.x > point.x);
+        let restored = transform.inverse().unwrap().transform_point(projected).unwrap();
+        close(restored.x, point.x);
+        close(restored.y, point.y);
     }
 
     #[test]

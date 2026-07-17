@@ -1033,6 +1033,7 @@ pub struct Transform {
     pub transform_rotation: Property<f32>,
     pub transform_pitch: Property<f32>,
     pub transform_yaw: Property<f32>,
+    pub transform_translate_z: Property<LogicalLength>,
     pub transform_perspective: Property<LogicalLength>,
     pub transform_scale_x: Property<f32>,
     pub transform_scale_y: Property<f32>,
@@ -1055,7 +1056,8 @@ impl Transform {
             .affine_item_transform()
             .then_translate(-origin)
             .then_rotate_x(euclid::Angle::degrees(self.transform_pitch()))
-            .then_rotate_y(euclid::Angle::degrees(self.transform_yaw()));
+            .then_rotate_y(euclid::Angle::degrees(self.transform_yaw()))
+            .then_translate_z(self.transform_translate_z().get());
         if self.transform_perspective().get() > 0. {
             transform = transform.then(&crate::lengths::ItemTransform::perspective(
                 self.transform_perspective().get(),
@@ -1067,6 +1069,7 @@ impl Transform {
     pub fn has_projective_transform(self: Pin<&Self>) -> bool {
         self.transform_pitch() != 0.
             || self.transform_yaw() != 0.
+            || self.transform_translate_z().get() != 0.
             || self.transform_perspective().get() > 0.
     }
 }

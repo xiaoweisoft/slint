@@ -12,6 +12,7 @@ export component TestCase {
         transform-origin: { x: 160px, y: 90px };
         transform-pitch: 4deg;
         transform-yaw: -6deg;
+        transform-translate-z: 240px;
         transform-perspective: 900px;
 
         TouchArea {
@@ -22,6 +23,7 @@ export component TestCase {
     out property <bool> properties-valid:
         plane.transform-pitch == 4deg
         && plane.transform-yaw == -6deg
+        && plane.transform-translate-z == 240px
         && plane.transform-perspective == 900px;
 }
 

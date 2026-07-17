@@ -168,6 +168,7 @@ pub fn lower_transform_properties(
                 "transform-rotation"
                 | "transform-pitch"
                 | "transform-yaw"
+                | "transform-translate-z"
                 | "transform-perspective" => {
                     Some(Expression::NumberLiteral(0., Default::default()))
                 }

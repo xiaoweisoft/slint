@@ -69,6 +69,11 @@ Rotates the element and its children around the horizontal axis. Set `transform-
 Rotates the element and its children around the vertical axis. Set `transform-perspective` to a positive length to apply perspective projection.
 </SlintProperty>
 
+#### transform-translate-z
+<SlintProperty propName="transform-translate-z" typeName="length" defaultValue='0px'>
+Moves the element and its children along their local depth axis. Positive values move toward the camera when `transform-perspective` is positive. This property is currently supported by the Skia renderer.
+</SlintProperty>
+
 #### transform-perspective
 <SlintProperty propName="transform-perspective" typeName="length" defaultValue='0px'>
 Sets the camera distance for pitch and yaw projection. Zero disables perspective. This property is currently supported by the Skia renderer.
