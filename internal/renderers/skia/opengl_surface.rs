@@ -11,7 +11,9 @@ use glutin::{
     prelude::*,
     surface::{SurfaceAttributesBuilder, WindowSurface},
 };
-use i_slint_core::api::{GraphicsAPI, PhysicalSize as PhysicalWindowSize, Window};
+use i_slint_core::api::{
+    GraphicsAPI, PhysicalSize as PhysicalWindowSize, ProjectiveTransformCost, Window,
+};
 use i_slint_core::graphics::{BorrowedOpenGLTexture, RequestedGraphicsAPI, RequestedOpenGLVersion};
 use i_slint_core::partial_renderer::DirtyRegion;
 use i_slint_core::platform::PlatformError;
@@ -25,6 +27,19 @@ pub struct OpenGLSurface {
     gr_context: RefCell<skia_safe::gpu::DirectContext>,
     glutin_context: glutin::context::PossiblyCurrentContext,
     glutin_surface: glutin::surface::Surface<glutin::surface::WindowSurface>,
+    projective_transform_cost: ProjectiveTransformCost,
+}
+
+fn projective_transform_cost_for_gpu(
+    is_android: bool,
+    vendor: &str,
+    renderer: &str,
+) -> ProjectiveTransformCost {
+    if is_android && vendor == "ARM" && renderer.starts_with("Mali-G52") {
+        ProjectiveTransformCost::EfficientAffine
+    } else {
+        ProjectiveTransformCost::ExactProjective
+    }
 }
 
 impl super::Surface for OpenGLSurface {
@@ -47,6 +62,10 @@ impl super::Surface for OpenGLSurface {
 
     fn name(&self) -> &'static str {
         "opengl"
+    }
+
+    fn projective_transform_cost(&self) -> ProjectiveTransformCost {
+        self.projective_transform_cost
     }
 
     fn with_graphics_api(&self, callback: &mut dyn FnMut(GraphicsAPI<'_>)) {
@@ -217,7 +236,7 @@ impl OpenGLSurface {
 
         glutin_surface.resize(&current_glutin_context, width, height);
 
-        let fb_info = {
+        let (fb_info, projective_transform_cost) = {
             use glow::HasContext;
 
             let gl = unsafe {
@@ -226,15 +245,21 @@ impl OpenGLSurface {
                 })
             };
             let fboid = unsafe { gl.get_parameter_i32(glow::FRAMEBUFFER_BINDING) };
+            let vendor = unsafe { gl.get_parameter_string(glow::VENDOR) };
+            let renderer = unsafe { gl.get_parameter_string(glow::RENDERER) };
 
-            skia_safe::gpu::gl::FramebufferInfo {
+            let fb_info = skia_safe::gpu::gl::FramebufferInfo {
                 fboid: fboid.try_into().map_err(|_| {
                     "Skia Renderer: Internal error, framebuffer binding returned signed id"
                         .to_string()
                 })?,
                 format: skia_safe::gpu::gl::Format::RGBA8.into(),
                 ..Default::default()
-            }
+            };
+            (
+                fb_info,
+                projective_transform_cost_for_gpu(cfg!(target_os = "android"), &vendor, &renderer),
+            )
         };
 
         let gl_interface = skia_safe::gpu::gl::Interface::new_load_with_cstr(|name| {
@@ -274,6 +299,7 @@ impl OpenGLSurface {
             gr_context: RefCell::new(gr_context),
             glutin_context: current_glutin_context,
             glutin_surface,
+            projective_transform_cost,
         })
     }
 
@@ -495,5 +521,22 @@ impl Drop for OpenGLSurface {
             );
             self.gr_context.borrow_mut().abandon();
         }
+    }
+}
+
+#[cfg(test)]
+mod projective_cost_tests {
+    use super::*;
+
+    #[test]
+    fn affected_android_gpu_uses_affine_without_full_frame_raster() {
+        assert_eq!(
+            projective_transform_cost_for_gpu(true, "ARM", "Mali-G52"),
+            i_slint_core::api::ProjectiveTransformCost::EfficientAffine
+        );
+        assert_eq!(
+            projective_transform_cost_for_gpu(true, "Qualcomm", "Adreno (TM) 640"),
+            i_slint_core::api::ProjectiveTransformCost::ExactProjective
+        );
     }
 }

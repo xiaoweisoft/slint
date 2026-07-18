@@ -21,6 +21,18 @@ pub use crate::graphics::{
 pub use crate::sharedvector::SharedVector;
 pub use crate::{format, string::SharedString, string::ToSharedString};
 
+/// Cost class for rendering projective item transforms.
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
+pub enum ProjectiveTransformCost {
+    /// Neither exact projective transforms nor an efficient product fallback are available.
+    #[default]
+    Unsupported,
+    /// Exact perspective is too expensive; callers should use affine depth cues.
+    EfficientAffine,
+    /// Exact projective transforms are available without full-frame software fallback.
+    ExactProjective,
+}
+
 /// A position represented in the coordinate space of logical pixels. That is the space before applying
 /// a display device specific scale factor.
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
@@ -542,6 +554,11 @@ impl Window {
     /// Returns whether the active renderer supports projective item transforms.
     pub fn supports_projective_transformations(&self) -> bool {
         self.0.window_adapter().renderer().supports_projective_transformations()
+    }
+
+    /// Returns the active renderer's projective transform cost class.
+    pub fn projective_transform_cost(&self) -> ProjectiveTransformCost {
+        self.0.window_adapter().renderer().projective_transform_cost()
     }
 
     /// Returns the position of the window on the screen, in physical screen coordinates and including

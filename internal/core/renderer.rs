@@ -147,4 +147,13 @@ pub trait RendererSealed {
     fn supports_projective_transformations(&self) -> bool {
         false
     }
+
+    /// Cost class for projective transforms on the active rendering provider.
+    fn projective_transform_cost(&self) -> crate::api::ProjectiveTransformCost {
+        if self.supports_projective_transformations() {
+            crate::api::ProjectiveTransformCost::ExactProjective
+        } else {
+            crate::api::ProjectiveTransformCost::Unsupported
+        }
+    }
 }

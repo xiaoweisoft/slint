@@ -113,6 +113,10 @@ pub struct SoftwareSurface {
 }
 
 impl super::Surface for SoftwareSurface {
+    fn projective_transform_cost(&self) -> i_slint_core::api::ProjectiveTransformCost {
+        i_slint_core::api::ProjectiveTransformCost::Unsupported
+    }
+
     #[cfg(feature = "softbuffer")]
     fn new(
         _shared_context: &SkiaSharedContext,

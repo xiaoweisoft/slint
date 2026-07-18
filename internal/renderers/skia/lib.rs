@@ -1038,7 +1038,17 @@ impl i_slint_core::renderer::RendererSealed for SkiaRenderer {
     }
 
     fn supports_projective_transformations(&self) -> bool {
-        true
+        self.projective_transform_cost()
+            == i_slint_core::api::ProjectiveTransformCost::ExactProjective
+    }
+
+    fn projective_transform_cost(&self) -> i_slint_core::api::ProjectiveTransformCost {
+        self.surface
+            .borrow()
+            .as_ref()
+            .map_or(i_slint_core::api::ProjectiveTransformCost::EfficientAffine, |surface| {
+                surface.projective_transform_cost()
+            })
     }
 }
 
@@ -1063,6 +1073,10 @@ pub trait Surface {
         Self: Sized;
     /// Returns the name of the surface, for diagnostic purposes.
     fn name(&self) -> &'static str;
+
+    fn projective_transform_cost(&self) -> i_slint_core::api::ProjectiveTransformCost {
+        i_slint_core::api::ProjectiveTransformCost::ExactProjective
+    }
 
     /// If supported, this invokes the specified callback with access to the platform graphics API.
     fn with_graphics_api(&self, _callback: &mut dyn FnMut(GraphicsAPI<'_>)) {}
@@ -1125,6 +1139,73 @@ pub trait Surface {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    struct EfficientAffineSurface;
+
+    impl Surface for EfficientAffineSurface {
+        fn new(
+            _shared_context: &SkiaSharedContext,
+            _window_handle: Arc<dyn raw_window_handle::HasWindowHandle + Sync + Send>,
+            _display_handle: Arc<dyn raw_window_handle::HasDisplayHandle + Sync + Send>,
+            _size: PhysicalWindowSize,
+            _requested_graphics_api: Option<RequestedGraphicsAPI>,
+        ) -> Result<Self, PlatformError> {
+            unreachable!("test surface is constructed directly")
+        }
+
+        fn name(&self) -> &'static str {
+            "efficient-affine-test"
+        }
+
+        fn projective_transform_cost(&self) -> i_slint_core::api::ProjectiveTransformCost {
+            i_slint_core::api::ProjectiveTransformCost::EfficientAffine
+        }
+
+        fn render(
+            &self,
+            _window: &Window,
+            _size: PhysicalWindowSize,
+            _render_callback: &dyn Fn(
+                &skia_safe::Canvas,
+                Option<&mut skia_safe::gpu::DirectContext>,
+                u8,
+            ) -> Option<DirtyRegion>,
+            _pre_present_callback: &RefCell<Option<Box<dyn FnMut()>>>,
+        ) -> Result<(), PlatformError> {
+            unreachable!("capability test does not render")
+        }
+
+        fn resize_event(&self, _size: PhysicalWindowSize) -> Result<(), PlatformError> {
+            Ok(())
+        }
+
+        fn bits_per_pixel(&self) -> Result<u8, PlatformError> {
+            Ok(32)
+        }
+    }
+
+    #[test]
+    fn exact_projective_support_follows_the_active_surface_cost() {
+        let context = SkiaSharedContext::default();
+        let pending_renderer = SkiaRenderer::default(&context);
+        assert_eq!(
+            i_slint_core::renderer::RendererSealed::projective_transform_cost(&pending_renderer),
+            i_slint_core::api::ProjectiveTransformCost::EfficientAffine
+        );
+        assert!(!i_slint_core::renderer::RendererSealed::supports_projective_transformations(
+            &pending_renderer
+        ));
+
+        let affine_renderer =
+            SkiaRenderer::new_with_surface(&context, Box::new(EfficientAffineSurface));
+        assert_eq!(
+            i_slint_core::renderer::RendererSealed::projective_transform_cost(&affine_renderer),
+            i_slint_core::api::ProjectiveTransformCost::EfficientAffine
+        );
+        assert!(!i_slint_core::renderer::RendererSealed::supports_projective_transformations(
+            &affine_renderer
+        ));
+    }
 
     #[test]
     fn configured_resource_cache_limit_parses_megabytes() {

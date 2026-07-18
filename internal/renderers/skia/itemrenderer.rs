@@ -843,7 +843,10 @@ impl ItemRenderer for SkiaItemRenderer<'_> {
     }
 
     fn supports_projective_transformations(&self) -> bool {
-        true
+        self.surface.is_some_and(|surface| {
+            surface.projective_transform_cost()
+                == i_slint_core::api::ProjectiveTransformCost::ExactProjective
+        })
     }
 
     fn apply_opacity(&mut self, opacity: f32) {
