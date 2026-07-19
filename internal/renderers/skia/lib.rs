@@ -1046,7 +1046,7 @@ impl i_slint_core::renderer::RendererSealed for SkiaRenderer {
         self.surface
             .borrow()
             .as_ref()
-            .map_or(i_slint_core::api::ProjectiveTransformCost::EfficientAffine, |surface| {
+            .map_or(i_slint_core::api::ProjectiveTransformCost::Unsupported, |surface| {
                 surface.projective_transform_cost()
             })
     }
@@ -1140,9 +1140,9 @@ pub trait Surface {
 mod tests {
     use super::*;
 
-    struct EfficientAffineSurface;
+    struct UnsupportedSurface;
 
-    impl Surface for EfficientAffineSurface {
+    impl Surface for UnsupportedSurface {
         fn new(
             _shared_context: &SkiaSharedContext,
             _window_handle: Arc<dyn raw_window_handle::HasWindowHandle + Sync + Send>,
@@ -1154,11 +1154,11 @@ mod tests {
         }
 
         fn name(&self) -> &'static str {
-            "efficient-affine-test"
+            "unsupported-test"
         }
 
         fn projective_transform_cost(&self) -> i_slint_core::api::ProjectiveTransformCost {
-            i_slint_core::api::ProjectiveTransformCost::EfficientAffine
+            i_slint_core::api::ProjectiveTransformCost::Unsupported
         }
 
         fn render(
@@ -1190,20 +1190,22 @@ mod tests {
         let pending_renderer = SkiaRenderer::default(&context);
         assert_eq!(
             i_slint_core::renderer::RendererSealed::projective_transform_cost(&pending_renderer),
-            i_slint_core::api::ProjectiveTransformCost::EfficientAffine
+            i_slint_core::api::ProjectiveTransformCost::Unsupported
         );
         assert!(!i_slint_core::renderer::RendererSealed::supports_projective_transformations(
             &pending_renderer
         ));
 
-        let affine_renderer =
-            SkiaRenderer::new_with_surface(&context, Box::new(EfficientAffineSurface));
+        let unsupported_renderer =
+            SkiaRenderer::new_with_surface(&context, Box::new(UnsupportedSurface));
         assert_eq!(
-            i_slint_core::renderer::RendererSealed::projective_transform_cost(&affine_renderer),
-            i_slint_core::api::ProjectiveTransformCost::EfficientAffine
+            i_slint_core::renderer::RendererSealed::projective_transform_cost(
+                &unsupported_renderer
+            ),
+            i_slint_core::api::ProjectiveTransformCost::Unsupported
         );
         assert!(!i_slint_core::renderer::RendererSealed::supports_projective_transformations(
-            &affine_renderer
+            &unsupported_renderer
         ));
     }
 

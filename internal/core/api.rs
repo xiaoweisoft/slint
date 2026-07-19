@@ -24,11 +24,9 @@ pub use crate::{format, string::SharedString, string::ToSharedString};
 /// Cost class for rendering projective item transforms.
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub enum ProjectiveTransformCost {
-    /// Neither exact projective transforms nor an efficient product fallback are available.
+    /// Exact projective transforms are unavailable or too expensive for the active provider.
     #[default]
     Unsupported,
-    /// Exact perspective is too expensive; callers should use affine depth cues.
-    EfficientAffine,
     /// Exact projective transforms are available without full-frame software fallback.
     ExactProjective,
 }

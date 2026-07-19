@@ -36,7 +36,7 @@ fn projective_transform_cost_for_gpu(
     renderer: &str,
 ) -> ProjectiveTransformCost {
     if is_android && vendor == "ARM" && renderer.starts_with("Mali-G52") {
-        ProjectiveTransformCost::EfficientAffine
+        ProjectiveTransformCost::Unsupported
     } else {
         ProjectiveTransformCost::ExactProjective
     }
@@ -529,10 +529,10 @@ mod projective_cost_tests {
     use super::*;
 
     #[test]
-    fn affected_android_gpu_uses_affine_without_full_frame_raster() {
+    fn affected_android_gpu_disables_projective_rendering() {
         assert_eq!(
             projective_transform_cost_for_gpu(true, "ARM", "Mali-G52"),
-            i_slint_core::api::ProjectiveTransformCost::EfficientAffine
+            i_slint_core::api::ProjectiveTransformCost::Unsupported
         );
         assert_eq!(
             projective_transform_cost_for_gpu(true, "Qualcomm", "Adreno (TM) 640"),
