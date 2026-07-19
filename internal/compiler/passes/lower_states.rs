@@ -251,9 +251,17 @@ fn expression_for_property(element: &ElementRc, name: &str) -> ExpressionForProp
             None
         };
     }
-    let expr = super::materialize_fake_properties::initialize(element, name).unwrap_or_else(|| {
-        Expression::default_value_for_type(&element.borrow().lookup_property(name).property_type)
-    });
+    // Transform lowering runs after state lowering, so preserve scale's identity default here
+    // instead of using the synthetic Float32 property's zero default.
+    let expr = if matches!(name, "transform-scale" | "transform-scale-x" | "transform-scale-y") {
+        Expression::NumberLiteral(1., Unit::None)
+    } else {
+        super::materialize_fake_properties::initialize(element, name).unwrap_or_else(|| {
+            Expression::default_value_for_type(
+                &element.borrow().lookup_property(name).property_type,
+            )
+        })
+    };
 
     ExpressionForProperty::Expression(expr)
 }
