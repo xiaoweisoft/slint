@@ -7532,6 +7532,31 @@ fn test_fluent2_menu_items_use_focus_touch_area() {
 }
 
 #[test]
+fn test_menu_items_honor_title_horizontal_alignment() {
+    for style in ["common", "fluent2"] {
+        let source =
+            load_file(&std::path::PathBuf::from(format!("builtin:/{style}/menu-base.slint")))
+                .unwrap_or_else(|| panic!("{style} should embed menu-base.slint"));
+        let source_contents = source.read();
+        let source = std::str::from_utf8(&source_contents).unwrap();
+        let menu_item = source
+            .split("export component MenuItemBase")
+            .nth(1)
+            .expect("menu-base.slint should define MenuItemBase");
+
+        for expected in [
+            "horizontal-alignment: entry.horizontal-alignment",
+            "horizontal-stretch: 1",
+            "visible: entry.has-sub-menu",
+            "entry.horizontal-alignment == TextHorizontalAlignment.center",
+            "entry.horizontal-alignment == TextHorizontalAlignment.right",
+        ] {
+            assert!(menu_item.contains(expected), "{style} MenuItemBase should use {expected}");
+        }
+    }
+}
+
+#[test]
 fn test_fluent2_picker_radius_geometry_uses_tokens() {
     let styling = load_file(&std::path::PathBuf::from("builtin:/fluent2/styling.slint"))
         .expect("fluent2 should embed styling.slint");

@@ -119,12 +119,14 @@ impl MenuFromItemTree {
                     let checkable = menu_item.checkable();
                     let checked = menu_item.checked();
                     let icon = menu_item.icon();
+                    let horizontal_alignment = menu_item.horizontal_alignment();
                     self.item_cache.borrow_mut().insert(
                         id.clone(),
                         ShadowTreeNode { item: ItemRc::downgrade(&item), children },
                     );
                     result.push(MenuEntry {
                         title,
+                        horizontal_alignment,
                         id,
                         has_sub_menu,
                         is_separator,
@@ -189,6 +191,7 @@ MenuVTable_static!(static MENU_FROM_ITEM_TREE_VT for MenuFromItemTree);
 pub struct MenuItem {
     pub cached_rendering_data: CachedRenderingData,
     pub title: Property<SharedString>,
+    pub horizontal_alignment: Property<crate::items::TextHorizontalAlignment>,
     pub activated: Callback<VoidArg>,
     pub enabled: Property<bool>,
     pub checkable: Property<bool>,

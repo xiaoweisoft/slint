@@ -161,15 +161,22 @@ export component MenuItemBase {
                 label := Text {
                     text: entry.title;
                     color: root.default-foreground;
+                    horizontal-stretch: 1;
+                    horizontal-alignment: entry.horizontal-alignment;
                     vertical-alignment: center;
                 }
 
-                if entry.has-sub-menu : Image {
+                Rectangle {
                     width: root.icon-size;
                     y: (parent.height - self.height) / 2;
-                    source: root.sub-menu-icon;
-                    colorize: label.color;
-                    accessible-role: none;
+                    visible: entry.has-sub-menu || entry.horizontal-alignment == TextHorizontalAlignment.center || entry.horizontal-alignment == TextHorizontalAlignment.right;
+
+                    Image {
+                        visible: entry.has-sub-menu;
+                        source: root.sub-menu-icon;
+                        colorize: label.color;
+                        accessible-role: none;
+                    }
                 }
             }
 

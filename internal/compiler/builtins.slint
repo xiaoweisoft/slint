@@ -243,6 +243,7 @@ export component DropArea {
 
 component MenuItem {
     in property <string> title;
+    in property <TextHorizontalAlignment> horizontal-alignment;
     callback activated();
     in property <bool> enabled: true;
     in property <bool> checkable: false;

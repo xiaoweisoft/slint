@@ -851,7 +851,9 @@ impl SkiaRenderer {
 
     fn partial_rendering_state(&self) -> Option<&PartialRenderingState> {
         // We don't know where the application might render to, so disable partial rendering.
-        if self.rendering_notifier.borrow().is_some() {
+        // A failed borrow means the notifier is currently executing. Its callback may re-enter
+        // Slint and release item-tree graphics resources, so handle that like an installed notifier.
+        if self.rendering_notifier.try_borrow().map_or(true, |notifier| notifier.is_some()) {
             None
         } else {
             self.partial_rendering_state.as_ref()
@@ -1141,6 +1143,11 @@ mod tests {
     use super::*;
 
     struct UnsupportedSurface;
+    struct TestRenderingNotifier;
+
+    impl RenderingNotifier for TestRenderingNotifier {
+        fn notify(&mut self, _state: RenderingState, _graphics_api: &GraphicsAPI<'_>) {}
+    }
 
     impl Surface for UnsupportedSurface {
         fn new(
@@ -1207,6 +1214,15 @@ mod tests {
         assert!(!i_slint_core::renderer::RendererSealed::supports_projective_transformations(
             &unsupported_renderer
         ));
+    }
+
+    #[test]
+    fn active_rendering_notifier_disables_partial_rendering_without_panicking() {
+        let renderer = SkiaRenderer::default(&SkiaSharedContext::default());
+        *renderer.rendering_notifier.borrow_mut() = Some(Box::new(TestRenderingNotifier));
+        let _active_notifier = renderer.rendering_notifier.borrow_mut();
+
+        assert!(renderer.partial_rendering_state().is_none());
     }
 
     #[test]

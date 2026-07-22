@@ -67,6 +67,15 @@ A `MenuItem` represents a single menu entry. It must be a child of a `Menu` elem
 The title shown for this menu item.
 </SlintProperty>
 
+#### horizontal-alignment
+
+<SlintProperty propName="horizontal-alignment" typeName="TextHorizontalAlignment" defaultValue="left">
+Controls the horizontal alignment of the menu item's title in Slint-rendered menus.
+Centered and right-aligned entries balance the leading icon/checkmark gutter and
+the trailing submenu gutter around the title. Native operating-system menus may
+ignore this visual hint.
+</SlintProperty>
+
 #### enabled
 
 <SlintProperty propName="enabled" typeName="bool" defaultValue="true">
