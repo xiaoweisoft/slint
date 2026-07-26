@@ -9,6 +9,7 @@
 #![cfg_attr(slint_nightly_test, warn(non_exhaustive_omitted_patterns))]
 
 mod androidwindowadapter;
+mod back_key_state;
 mod javahelper;
 
 #[cfg(all(not(feature = "aa-06"), feature = "aa-05"))]

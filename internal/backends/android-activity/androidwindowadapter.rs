@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR LicenseRef-Slint-Software-3.0
 
 use super::*;
+use crate::back_key_state::{BackKey, BackKeyState, KeyPhase};
 use crate::javahelper::{JavaHelper, print_jni_error};
 use android_activity::input::{
     Axis, ButtonState, InputEvent, KeyAction, Keycode, MotionAction, MotionEvent, Source,
@@ -52,16 +53,11 @@ fn intercept_controller_axis(axis: Axis, value: f32, source: Source) -> bool {
     })
 }
 
-fn intercept_key_event(key_event: &android_activity::input::KeyEvent) -> bool {
-    let pressed = match key_event.action() {
-        KeyAction::Down | KeyAction::Multiple => true,
-        KeyAction::Up => false,
-        _ => return false,
-    };
+fn intercept_key_event(key_event: &android_activity::input::KeyEvent, phase: KeyPhase) -> bool {
     input_interceptor().is_some_and(|interceptor| {
         interceptor.intercept_key(AndroidKeyInput {
             key_code: u32::from(key_event.key_code()) as i32,
-            pressed,
+            pressed: phase == KeyPhase::Pressed,
             repeat_count: u32::try_from(key_event.repeat_count()).unwrap_or(0),
             source: u32::from(key_event.source()),
         }) == AndroidInputInterceptorResult::Handled
@@ -140,6 +136,7 @@ pub struct AndroidWindowAdapter {
     controller_axis_r_trigger: Cell<Option<ControllerAxisKey>>,
     controller_axis_gas: Cell<Option<ControllerAxisKey>>,
     controller_axis_brake: Cell<Option<ControllerAxisKey>>,
+    back_key_state: Cell<BackKeyState>,
 }
 
 impl WindowAdapter for AndroidWindowAdapter {
@@ -306,6 +303,7 @@ impl AndroidWindowAdapter {
             controller_axis_r_trigger: Cell::new(None),
             controller_axis_gas: Cell::new(None),
             controller_axis_brake: Cell::new(None),
+            back_key_state: Cell::new(BackKeyState::default()),
         })
     }
 
@@ -360,6 +358,9 @@ impl AndroidWindowAdapter {
                 self.window.try_dispatch_event(WindowEvent::WindowActiveChanged(true))?;
             }
             PollEvent::Main(MainEvent::LostFocus) => {
+                let mut back_key_state = self.back_key_state.get();
+                back_key_state.reset();
+                self.back_key_state.set(back_key_state);
                 self.window.try_dispatch_event(WindowEvent::WindowActiveChanged(false))?;
             }
             PollEvent::Main(MainEvent::ConfigChanged { .. }) => {
@@ -442,27 +443,18 @@ impl AndroidWindowAdapter {
                         key_event.action(),
                         key_event.repeat_count()
                     ));
-                    match map_key_event(key_event) {
-                        AndroidKeyMapping::InterceptorHandled => {
-                            android_backend_log("input key interceptor handled");
-                            InputStatus::Handled
-                        }
-                        AndroidKeyMapping::WindowEvent(ev) => {
-                            android_backend_log(&format!("input key mapped event={ev:?}"));
-                            if self.try_dispatch_key_event(ev)
-                                == i_slint_core::input::KeyEventResult::EventAccepted
-                            {
-                                android_backend_log("input key dispatch accepted");
-                                InputStatus::Handled
-                            } else {
-                                android_backend_log("input key dispatch unhandled");
-                                InputStatus::Unhandled
-                            }
-                        }
-                        AndroidKeyMapping::Unmapped => {
-                            android_backend_log("input key unmapped");
-                            InputStatus::Unhandled
-                        }
+                    let synthetic_press = self.observe_back_key_event(key_event);
+                    let synthetic_handled = synthetic_press
+                        && self.dispatch_mapped_key_event(map_key_event(
+                            key_event,
+                            Some(KeyPhase::Pressed),
+                        ));
+                    let event_handled =
+                        self.dispatch_mapped_key_event(map_key_event(key_event, None));
+                    if synthetic_handled || event_handled {
+                        InputStatus::Handled
+                    } else {
+                        InputStatus::Unhandled
                     }
                 }
                 InputEvent::MotionEvent(motion_event) => match motion_event.action() {
@@ -606,6 +598,54 @@ impl AndroidWindowAdapter {
 
             if !read_input {
                 return Ok(());
+            }
+        }
+    }
+
+    fn observe_back_key_event(&self, key_event: &android_activity::input::KeyEvent) -> bool {
+        let phase = match key_event.action() {
+            KeyAction::Down | KeyAction::Multiple => KeyPhase::Pressed,
+            KeyAction::Up => KeyPhase::Released,
+            _ => return false,
+        };
+        let key = match key_event.key_code() {
+            Keycode::Back => Some(BackKey::Back),
+            Keycode::ButtonB => Some(BackKey::ButtonB),
+            _ => None,
+        };
+        let mut state = self.back_key_state.get();
+        let synthesize_press = state.observe(key, phase);
+        self.back_key_state.set(state);
+        if synthesize_press {
+            android_backend_log(&format!(
+                "input key repair orphan_release code={:?} synthetic=pressed",
+                key_event.key_code()
+            ));
+        }
+        synthesize_press
+    }
+
+    fn dispatch_mapped_key_event(&self, mapping: AndroidKeyMapping) -> bool {
+        match mapping {
+            AndroidKeyMapping::InterceptorHandled => {
+                android_backend_log("input key interceptor handled");
+                true
+            }
+            AndroidKeyMapping::WindowEvent(ev) => {
+                android_backend_log(&format!("input key mapped event={ev:?}"));
+                if self.try_dispatch_key_event(ev)
+                    == i_slint_core::input::KeyEventResult::EventAccepted
+                {
+                    android_backend_log("input key dispatch accepted");
+                    true
+                } else {
+                    android_backend_log("input key dispatch unhandled");
+                    false
+                }
+            }
+            AndroidKeyMapping::Unmapped => {
+                android_backend_log("input key unmapped");
+                false
             }
         }
     }
@@ -903,8 +943,17 @@ fn button_for_event(
     return PointerEventButton::Other;
 }
 
-fn map_key_event(key_event: &android_activity::input::KeyEvent) -> AndroidKeyMapping {
-    if intercept_key_event(key_event) {
+fn map_key_event(
+    key_event: &android_activity::input::KeyEvent,
+    forced_phase: Option<KeyPhase>,
+) -> AndroidKeyMapping {
+    let phase = forced_phase.or_else(|| match key_event.action() {
+        KeyAction::Down | KeyAction::Multiple => Some(KeyPhase::Pressed),
+        KeyAction::Up => Some(KeyPhase::Released),
+        _ => None,
+    });
+    let Some(phase) = phase else { return AndroidKeyMapping::Unmapped };
+    if intercept_key_event(key_event, phase) {
         android_backend_log("input key routed=input-interceptor");
         return AndroidKeyMapping::InterceptorHandled;
     }
@@ -912,16 +961,24 @@ fn map_key_event(key_event: &android_activity::input::KeyEvent) -> AndroidKeyMap
         return AndroidKeyMapping::Unmapped;
     };
     let repeat = key_event.repeat_count() > 0;
-    match key_event.action() {
-        KeyAction::Down if repeat => {
+    match (forced_phase, key_event.action()) {
+        (Some(KeyPhase::Pressed), _) => {
+            AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressed { text })
+        }
+        (Some(KeyPhase::Released), _) => {
+            AndroidKeyMapping::WindowEvent(WindowEvent::KeyReleased { text })
+        }
+        (None, KeyAction::Down) if repeat => {
             AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressRepeated { text })
         }
-        KeyAction::Down => AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressed { text }),
-        KeyAction::Up => AndroidKeyMapping::WindowEvent(WindowEvent::KeyReleased { text }),
-        KeyAction::Multiple if repeat => {
+        (None, KeyAction::Down) => AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressed { text }),
+        (None, KeyAction::Up) => AndroidKeyMapping::WindowEvent(WindowEvent::KeyReleased { text }),
+        (None, KeyAction::Multiple) if repeat => {
             AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressRepeated { text })
         }
-        KeyAction::Multiple => AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressed { text }),
+        (None, KeyAction::Multiple) => {
+            AndroidKeyMapping::WindowEvent(WindowEvent::KeyPressed { text })
+        }
         _ => AndroidKeyMapping::Unmapped,
     }
 }
