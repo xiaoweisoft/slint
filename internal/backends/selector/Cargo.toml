@@ -35,11 +35,13 @@ renderer-skia = ["i-slint-backend-winit?/renderer-skia", "i-slint-backend-linuxk
 renderer-skia-opengl = [
   "i-slint-backend-winit?/renderer-skia-opengl",
   "i-slint-backend-linuxkms?/renderer-skia-opengl",
+  "i-slint-backend-android-activity?/renderer-skia-opengl",
   "i-slint-renderer-skia/opengl",
 ]
 renderer-skia-vulkan = [
   "i-slint-backend-winit?/renderer-skia-vulkan",
   "i-slint-backend-linuxkms?/renderer-skia-vulkan",
+  "i-slint-backend-android-activity?/renderer-skia-vulkan",
   "i-slint-renderer-skia/vulkan",
 ]
 renderer-software = ["i-slint-backend-winit?/renderer-software", "i-slint-backend-linuxkms?/renderer-software"]

@@ -45,6 +45,7 @@ impl SharedVulkanContext {
 
         let required_extensions = InstanceExtensions {
             khr_surface: true,
+            khr_android_surface: true,
             mvk_macos_surface: true,
             ext_metal_surface: true,
             khr_wayland_surface: true,
@@ -98,6 +99,38 @@ impl VulkanSurface {
             physical_device.properties().device_type,
         );*/
 
+        let surface_capabilities = physical_device
+            .surface_capabilities(&surface, Default::default())
+            .map_err(|vke| format!("Error matching Vulkan surface capabilities: {vke}"))?;
+        let surface_formats = physical_device
+            .surface_formats(&surface, Default::default())
+            .map_err(|vke| format!("Error matching Vulkan surface formats: {vke}"))?;
+        let preferred_formats = if cfg!(target_os = "android") {
+            [
+                vulkano::format::Format::R8G8B8A8_UNORM,
+                vulkano::format::Format::R8G8B8A8_SRGB,
+                vulkano::format::Format::B8G8R8A8_UNORM,
+                vulkano::format::Format::B8G8R8A8_SRGB,
+            ]
+        } else {
+            [
+                vulkano::format::Format::B8G8R8A8_UNORM,
+                vulkano::format::Format::B8G8R8A8_SRGB,
+                vulkano::format::Format::R8G8B8A8_UNORM,
+                vulkano::format::Format::R8G8B8A8_SRGB,
+            ]
+        };
+        let (image_format, image_color_space) = preferred_formats
+            .into_iter()
+            .find_map(|preferred| {
+                surface_formats.iter().find(|(format, _)| *format == preferred).copied()
+            })
+            .ok_or_else(|| {
+                format!(
+                    "Skia Vulkan Renderer: No compatible swapchain format in {surface_formats:?}"
+                )
+            })?;
+
         let (device, mut queues) = Device::new(
             physical_device.clone(),
             DeviceCreateInfo {
@@ -116,18 +149,13 @@ impl VulkanSurface {
         let queue = queues.next().ok_or_else(|| format!("Not Vulkan device queue found"))?;
 
         let (swapchain, swapchain_images) = {
-            let surface_capabilities = device
-                .physical_device()
-                .surface_capabilities(&surface, Default::default())
-                .map_err(|vke| format!("Error matching Vulkan surface capabilities: {vke}"))?;
-            let image_format = vulkano::format::Format::B8G8R8A8_UNORM.into();
-
             Swapchain::new(
                 device.clone(),
                 surface.clone(),
                 SwapchainCreateInfo {
                     min_image_count: surface_capabilities.min_image_count,
                     image_format,
+                    image_color_space,
                     image_extent: [size.width, size.height],
                     image_usage: ImageUsage::COLOR_ATTACHMENT,
                     composite_alpha: surface_capabilities
@@ -167,10 +195,7 @@ impl VulkanSurface {
 
             match result {
                 Some(f) => f as _,
-                None => {
-                    //println!("resolve of {} failed", of.name().to_str().unwrap());
-                    core::ptr::null()
-                }
+                None => core::ptr::null(),
             }
         };
 
@@ -179,7 +204,7 @@ impl VulkanSurface {
                 instance.handle().as_raw() as _,
                 physical_device.handle().as_raw() as _,
                 device.handle().as_raw() as _,
-                (queue.handle().as_raw() as _, queue.queue_index() as _),
+                (queue.handle().as_raw() as _, queue.queue_family_index() as _),
                 &get_proc,
             )
         };
@@ -347,9 +372,7 @@ impl super::Surface for VulkanSurface {
 
         let format = image_view.format();
 
-        debug_assert_eq!(format, vulkano::format::Format::B8G8R8A8_UNORM);
-        let (vk_format, color_type) =
-            (skia_safe::gpu::vk::Format::B8G8R8A8_UNORM, skia_safe::ColorType::BGRA8888);
+        let (vk_format, color_type) = skia_format(format)?;
 
         let alloc = skia_safe::gpu::vk::Alloc::default();
         let image_info = &unsafe {
@@ -423,7 +446,10 @@ impl super::Surface for VulkanSurface {
     fn bits_per_pixel(&self) -> Result<u8, i_slint_core::platform::PlatformError> {
         #[cfg_attr(slint_nightly_test, allow(non_exhaustive_omitted_patterns))]
         Ok(match self.swapchain.borrow().image_format() {
-            vulkano::format::Format::B8G8R8A8_UNORM => 32,
+            vulkano::format::Format::B8G8R8A8_UNORM
+            | vulkano::format::Format::B8G8R8A8_SRGB
+            | vulkano::format::Format::R8G8B8A8_UNORM
+            | vulkano::format::Format::R8G8B8A8_SRGB => 32,
             fmt @ _ => {
                 return Err(format!(
                     "Skia Vulkan Renderer: Unsupported swapchain image format found {fmt:?}"
@@ -438,6 +464,31 @@ impl super::Surface for VulkanSurface {
     }
 }
 
+fn skia_format(
+    format: vulkano::format::Format,
+) -> Result<(skia_safe::gpu::vk::Format, skia_safe::ColorType), i_slint_core::platform::PlatformError>
+{
+    #[cfg_attr(slint_nightly_test, allow(non_exhaustive_omitted_patterns))]
+    match format {
+        vulkano::format::Format::B8G8R8A8_UNORM => {
+            Ok((skia_safe::gpu::vk::Format::B8G8R8A8_UNORM, skia_safe::ColorType::BGRA8888))
+        }
+        vulkano::format::Format::B8G8R8A8_SRGB => {
+            Ok((skia_safe::gpu::vk::Format::B8G8R8A8_SRGB, skia_safe::ColorType::BGRA8888))
+        }
+        vulkano::format::Format::R8G8B8A8_UNORM => {
+            Ok((skia_safe::gpu::vk::Format::R8G8B8A8_UNORM, skia_safe::ColorType::RGBA8888))
+        }
+        vulkano::format::Format::R8G8B8A8_SRGB => {
+            Ok((skia_safe::gpu::vk::Format::R8G8B8A8_SRGB, skia_safe::ColorType::RGBA8888))
+        }
+        fmt @ _ => {
+            Err(format!("Skia Vulkan Renderer: Unsupported swapchain image format found {fmt:?}")
+                .into())
+        }
+    }
+}
+
 // FIXME(madsmtm): Why are we doing this instead of using `Surface::from_window`?
 fn create_surface(
     instance: &Arc<Instance>,
@@ -446,6 +497,12 @@ fn create_surface(
 ) -> Result<Arc<Surface>, vulkano::Validated<vulkano::VulkanError>> {
     #[cfg_attr(slint_nightly_test, allow(non_exhaustive_omitted_patterns))]
     match (window_handle.as_raw(), display_handle.as_raw()) {
+        (
+            raw_window_handle::RawWindowHandle::AndroidNdk(window),
+            raw_window_handle::RawDisplayHandle::Android(_),
+        ) => unsafe {
+            Surface::from_android(instance.clone(), window.a_native_window.as_ptr().cast(), None)
+        },
         #[cfg(target_vendor = "apple")]
         (raw_window_handle::RawWindowHandle::AppKit(handle), _) => unsafe {
             let layer = raw_window_metal::Layer::from_ns_view(handle.ns_view);
