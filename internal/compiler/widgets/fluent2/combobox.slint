@@ -79,6 +79,7 @@ export component ComboBox {
             spacing: Fluent2SizeSettings.combobox-content-spacing;
 
             text := Text {
+                horizontal-stretch: 1;
                 horizontal-alignment: left;
                 vertical-alignment: center;
                 font-size: Fluent2FontSettings.body.font-size;
@@ -86,6 +87,7 @@ export component ComboBox {
                 font-family: Fluent2Palette.font-family;
                 color: Fluent2Palette.combobox-foreground;
                 text: root.current-value;
+                overflow: elide;
                 accessible-role: none;
             }
 
@@ -122,6 +124,7 @@ export component ComboBox {
         y: Fluent2SizeSettings.combobox-popup-offset-y;
         width: root.width;
         height: root.visible-items * Fluent2SizeSettings.combobox-popup-item-height +  2 * root.popup-padding;
+        close-policy: PopupClosePolicy.close-on-click-outside;
         forward-focus: inner-fs;
 
         inner-fs := FocusScope {
@@ -132,7 +135,11 @@ export component ComboBox {
                 return base.popup-key-handler(event);
             }
             MenuBorder {
+                // The popup owns wheel and touch-pan gestures while it is open.
+                // This prevents a scrollable view behind it from moving.
                 ScrollView {
+                    mouse-drag-pan-enabled: true;
+
                     VerticalLayout {
                         alignment: start;
                         padding: root.popup-padding;
@@ -149,6 +156,7 @@ export component ComboBox {
 
                                 clicked => {
                                     base.select(index);
+                                    popup.close();
                                 }
                             }
                         }

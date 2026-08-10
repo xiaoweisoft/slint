@@ -108,6 +108,22 @@ fn test_fluent2_style_is_discoverable() {
 }
 
 #[test]
+fn test_fluent2_combobox_keeps_trailing_icon_and_owns_popup_gestures() {
+    let combobox = load_file(&std::path::PathBuf::from("builtin:/fluent2/combobox.slint"))
+        .expect("fluent2 ComboBox should be built in");
+    let source = String::from_utf8(combobox.read().into_owned())
+        .expect("fluent2 ComboBox should be valid UTF-8");
+
+    assert!(source.contains("horizontal-stretch: 1;"));
+    assert!(source.contains("overflow: elide;"));
+    assert!(source.contains("close-policy: PopupClosePolicy.close-on-click-outside;"));
+    assert!(source.contains("mouse-drag-pan-enabled: true;"));
+    assert!(
+        source.contains("base.select(index);\n                                    popup.close();")
+    );
+}
+
+#[test]
 fn test_fluent2_style_compiles_representative_controls() {
     let source = r#"
         import {
