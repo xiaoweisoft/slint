@@ -440,7 +440,7 @@ impl WinitWindowAdapter {
         #[cfg(all(unix, not(target_vendor = "apple")))]
         {
             if let Some(xdg_app_id) = WindowInner::from_pub(self.window()).xdg_app_id() {
-                #[cfg(feature = "wayland")]
+                #[cfg(feature = "wayland-platform")]
                 {
                     use winit::platform::wayland::WindowAttributesExtWayland;
                     window_attributes = window_attributes.with_name(xdg_app_id.clone(), "");

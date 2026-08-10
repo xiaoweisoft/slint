@@ -276,6 +276,14 @@ impl BackendBuilder {
         self
     }
 
+    /// Configures whether renderer selection and creation may fall back to a
+    /// different compiled renderer. The default is `true`.
+    #[must_use]
+    pub fn with_renderer_fallback(mut self, allow_fallback: bool) -> Self {
+        self.allow_fallback = allow_fallback;
+        self
+    }
+
     /// Configures this builder to use the specified hook that will be called before a Window is created.
     ///
     /// It can be used to adjust settings of window that will be created.
@@ -507,6 +515,7 @@ impl BackendBuilder {
 
         Ok(Backend {
             renderer_factory_fn,
+            allow_renderer_fallback: self.allow_fallback,
             event_loop_state: Default::default(),
             window_attributes_hook: self.window_attributes_hook,
             shared_data,
@@ -547,7 +556,7 @@ impl SharedBackendData {
 
         #[cfg(all(unix, not(target_vendor = "apple")))]
         {
-            #[cfg(feature = "wayland")]
+            #[cfg(feature = "wayland-platform")]
             {
                 use winit::platform::wayland::EventLoopBuilderExtWayland;
                 builder.with_any_thread(true);
@@ -560,7 +569,7 @@ impl SharedBackendData {
                 // Under WSL, the compositor sometimes crashes. Since we cannot reconnect after the compositor
                 // was restarted, the application panics. This does not happen when using XWayland. Therefore,
                 // when running under WSL, try to connect to X11 instead.
-                #[cfg(feature = "wayland")]
+                #[cfg(feature = "wayland-platform")]
                 if std::fs::metadata("/proc/sys/fs/binfmt_misc/WSLInterop").is_ok()
                     || std::fs::metadata("/run/WSL").is_ok()
                 {
@@ -578,7 +587,7 @@ impl SharedBackendData {
             builder.build().map_err(|e| format!("Error initializing winit event loop: {e}"))?;
 
         cfg_if::cfg_if! {
-            if #[cfg(all(unix, not(target_vendor = "apple"), feature = "wayland"))] {
+            if #[cfg(all(unix, not(target_vendor = "apple"), feature = "wayland-platform"))] {
                 use winit::platform::wayland::EventLoopExtWayland;
                 let is_wayland = event_loop.is_wayland();
             } else {
@@ -664,6 +673,23 @@ impl SharedBackendData {
 type RendererFactoryFn =
     fn(&Rc<SharedBackendData>) -> Result<Box<dyn WinitCompatibleRenderer>, PlatformError>;
 
+fn resolve_renderer_creation<T>(
+    allow_fallback: bool,
+    selected: Result<T, PlatformError>,
+    fallback: impl FnOnce() -> Option<T>,
+) -> Result<T, PlatformError> {
+    selected.or_else(|error| {
+        if !allow_fallback {
+            return Err(
+                format!("Winit backend failed to create the selected renderer: {error}").into()
+            );
+        }
+        fallback().ok_or_else(|| {
+            format!("Winit backend failed to find a suitable renderer: {error}").into()
+        })
+    })
+}
+
 #[i_slint_core_macros::slint_doc]
 /// This struct implements the Slint Platform trait.
 /// Use this in conjunction with [`slint::platform::set_platform`](slint:rust:slint/platform/fn.set_platform.html) to initialize.
@@ -675,6 +701,7 @@ type RendererFactoryFn =
 /// ```
 pub struct Backend {
     renderer_factory_fn: RendererFactoryFn,
+    allow_renderer_fallback: bool,
     event_loop_state: RefCell<Option<crate::event_loop::EventLoopState>>,
     shared_data: Rc<SharedBackendData>,
     custom_application_handler: RefCell<Option<Box<dyn crate::CustomApplicationHandler>>>,
@@ -751,29 +778,26 @@ impl i_slint_core::platform::Platform for Backend {
             attrs = hook(attrs);
         }
 
-        let adapter = (self.renderer_factory_fn)(&self.shared_data).map_or_else(
-            |e| {
-                try_create_window_with_fallback_renderer(
-                    &self.shared_data,
-                    attrs.clone(),
-                    &self.shared_data.event_loop_proxy.clone(),
-                    #[cfg(all(muda, target_os = "macos"))]
-                    self.muda_enable_default_menu_bar_bar,
-                )
-                .ok_or_else(|| format!("Winit backend failed to find a suitable renderer: {e}"))
-            },
-            |renderer| {
-                Ok(WinitWindowAdapter::new(
-                    self.shared_data.clone(),
-                    renderer,
-                    attrs.clone(),
-                    #[cfg(any(enable_accesskit, muda))]
-                    self.shared_data.event_loop_proxy.clone(),
-                    #[cfg(all(muda, target_os = "macos"))]
-                    self.muda_enable_default_menu_bar_bar,
-                ))
-            },
-        )?;
+        let selected = (self.renderer_factory_fn)(&self.shared_data).map(|renderer| {
+            WinitWindowAdapter::new(
+                self.shared_data.clone(),
+                renderer,
+                attrs.clone(),
+                #[cfg(any(enable_accesskit, muda))]
+                self.shared_data.event_loop_proxy.clone(),
+                #[cfg(all(muda, target_os = "macos"))]
+                self.muda_enable_default_menu_bar_bar,
+            )
+        });
+        let adapter = resolve_renderer_creation(self.allow_renderer_fallback, selected, || {
+            try_create_window_with_fallback_renderer(
+                &self.shared_data,
+                attrs.clone(),
+                &self.shared_data.event_loop_proxy.clone(),
+                #[cfg(all(muda, target_os = "macos"))]
+                self.muda_enable_default_menu_bar_bar,
+            )
+        })?;
         Ok(adapter)
     }
 
@@ -1026,6 +1050,23 @@ mod testui {
             Text { text: "Ok"; }
         }
     }
+}
+
+#[test]
+fn renderer_fallback_is_explicitly_configurable() {
+    assert!(Backend::builder().allow_fallback);
+    assert!(!Backend::builder().with_renderer_fallback(false).allow_fallback);
+
+    let fallback_called = std::cell::Cell::new(false);
+    let strict = resolve_renderer_creation::<()>(false, Err(PlatformError::NoPlatform), || {
+        fallback_called.set(true);
+        Some(())
+    });
+    assert!(strict.is_err());
+    assert!(!fallback_called.get());
+
+    let compatible = resolve_renderer_creation(true, Err(PlatformError::NoPlatform), || Some(7));
+    assert_eq!(compatible.unwrap(), 7);
 }
 
 // Sorry, can't test with rust test harness and multiple threads.

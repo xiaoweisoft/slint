@@ -19,7 +19,8 @@ path = "lib.rs"
 # Note, these features need to be kept in sync (along with their defaults) in
 # the C++ crate's CMakeLists.txt
 [features]
-wayland = ["glutin/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
+wayland-opengl = ["glutin/wayland"]
+wayland = ["wayland-opengl", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
 x11 = ["glutin/x11", "glutin/glx", "softbuffer/x11", "softbuffer/x11-dlopen"]
 opengl = []
 vulkan = ["skia-safe/vulkan", "dep:ash", "vulkano"]
@@ -110,7 +111,7 @@ read-fonts = { workspace = true }
 write-fonts = { version = "0.43" }
 
 [target.'cfg(not(any(target_vendor = "apple", target_family = "windows")))'.dependencies]
-skia-safe = { version = "0.90", features = ["gl", "vulkan"] }
+skia-safe = { version = "0.90", features = ["gl"] }
 wgpu-27 = { workspace = true, optional = true, features = ["vulkan"] }
 wgpu-28 = { workspace = true, optional = true, features = ["vulkan"] }
 

@@ -49,7 +49,7 @@ pub fn create_clipboard(
         ))]
         {
 
-            #[cfg(feature = "wayland")]
+            #[cfg(feature = "wayland-platform")]
             if let raw_window_handle::RawDisplayHandle::Wayland(wayland) = _display_handle.as_raw() {
                 let clipboard = unsafe { copypasta::wayland_clipboard::create_clipboards_from_external(wayland.display.as_ptr()) };
                 return (Box::new(clipboard.1), Box::new(clipboard.0));

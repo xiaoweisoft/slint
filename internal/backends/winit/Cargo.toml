@@ -19,15 +19,23 @@ path = "lib.rs"
 # Note, these features need to be kept in sync (along with their defaults) in
 # the C++ crate's CMakeLists.txt
 [features]
-wayland = [
+wayland-platform = [
   "winit/wayland",
   "winit/wayland-csd-adwaita",
   "glutin?/wayland",
   "glutin-winit?/wayland",
   "copypasta/wayland",
+]
+wayland = [
+  "wayland-platform",
   "i-slint-renderer-skia?/wayland",
   "softbuffer?/wayland",
   "softbuffer?/wayland-dlopen",
+]
+wayland-skia-opengl = [
+  "wayland-platform",
+  "renderer-skia-opengl",
+  "i-slint-renderer-skia/wayland-opengl",
 ]
 x11 = [
   "winit/x11",
@@ -42,8 +50,8 @@ x11 = [
 ]
 renderer-femtovg = ["i-slint-renderer-femtovg/opengl", "dep:glutin", "dep:glutin-winit"]
 renderer-femtovg-wgpu = ["i-slint-renderer-femtovg/wgpu", "dep:i-slint-renderer-femtovg", "unstable-wgpu-28"]
-renderer-skia = ["i-slint-renderer-skia"]
-renderer-skia-opengl = ["renderer-skia", "i-slint-renderer-skia/opengl"]
+renderer-skia = ["i-slint-renderer-skia", "i-slint-renderer-skia/default"]
+renderer-skia-opengl = ["i-slint-renderer-skia", "i-slint-renderer-skia/opengl"]
 renderer-skia-vulkan = ["renderer-skia", "i-slint-renderer-skia/vulkan"]
 renderer-software = [
   "dep:softbuffer",
@@ -82,7 +90,7 @@ scopeguard = { version = "1.1.0", default-features = false }
 i-slint-renderer-femtovg = { workspace = true, features = ["default"], optional = true }
 
 # For the Skia renderer
-i-slint-renderer-skia = { workspace = true, features = ["default"], optional = true }
+i-slint-renderer-skia = { workspace = true, optional = true }
 
 # For the software renderer
 i-slint-renderer-software = { workspace = true, optional = true }
