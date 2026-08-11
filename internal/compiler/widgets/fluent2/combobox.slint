@@ -94,6 +94,7 @@ export component ComboBox {
             icon := Image {
                 colorize: Fluent2Palette.combobox-icon-foreground;
                 width: Fluent2SizeSettings.combobox-icon-size;
+                height: Fluent2SizeSettings.combobox-icon-size;
                 source: Icons.dropdown;
                 y: Fluent2SizeSettings.combobox-icon-offset-y;
                 accessible-role: none;
@@ -147,11 +148,10 @@ export component ComboBox {
                         for value[index] in root.model : ListItem {
                             item: { text: value };
                             is-selected: index == root.current-index;
-                            has-focus: touch-area.has-focus;
                             has-hover: touch-area.has-hover;
                             pressed: touch-area.pressed;
 
-                            touch-area := FocusTouchArea {
+                            touch-area := TouchArea {
                                 enabled: root.enabled;
 
                                 clicked => {

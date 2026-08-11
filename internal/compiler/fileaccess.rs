@@ -116,6 +116,19 @@ fn test_fluent2_combobox_keeps_trailing_icon_and_owns_popup_gestures() {
 
     assert!(source.contains("horizontal-stretch: 1;"));
     assert!(source.contains("overflow: elide;"));
+
+    let icon = source
+        .split("icon := Image")
+        .nth(1)
+        .and_then(|after| after.split('}').next())
+        .expect("fluent2 ComboBox should define a trailing dropdown icon");
+    for expected in [
+        "width: Fluent2SizeSettings.combobox-icon-size;",
+        "height: Fluent2SizeSettings.combobox-icon-size;",
+    ] {
+        assert!(icon.contains(expected), "fluent2 ComboBox dropdown icon should use {expected}");
+    }
+
     assert!(source.contains("close-policy: PopupClosePolicy.close-on-click-outside;"));
     assert!(source.contains("mouse-drag-pan-enabled: true;"));
     assert!(
@@ -7411,16 +7424,11 @@ fn test_fluent2_date_picker_delegates_use_focus_touch_area() {
 }
 
 #[test]
-fn test_fluent2_combobox_popup_items_use_focus_touch_area() {
+fn test_fluent2_combobox_popup_items_use_standard_touch_area() {
     let source = load_file(&std::path::PathBuf::from("builtin:/fluent2/combobox.slint"))
         .expect("fluent2 should embed combobox.slint");
     let source_contents = source.read();
     let source = std::str::from_utf8(&source_contents).unwrap();
-
-    assert!(
-        source.contains("FocusTouchArea"),
-        "fluent2 ComboBox popup items should import Fluent2 interaction helpers"
-    );
 
     let block = source
         .split("for value[index] in root.model : ListItem")
@@ -7429,10 +7437,9 @@ fn test_fluent2_combobox_popup_items_use_focus_touch_area() {
         .expect("fluent2 ComboBox should define popup ListItem delegates");
 
     for expected in [
-        "has-focus: touch-area.has-focus",
         "has-hover: touch-area.has-hover",
         "pressed: touch-area.pressed",
-        "touch-area := FocusTouchArea",
+        "touch-area := TouchArea",
         "enabled: root.enabled",
         "clicked =>",
         "base.select(index)",
@@ -7441,37 +7448,20 @@ fn test_fluent2_combobox_popup_items_use_focus_touch_area() {
     }
 
     assert!(
-        !block.lines().any(|line| line.trim_start().starts_with("touch-area := TouchArea")),
-        "fluent2 ComboBox popup items should use FocusTouchArea instead of a bare TouchArea"
+        !block.contains("FocusTouchArea"),
+        "fluent2 ComboBox popup items must not insert another focus scope into popup input routing"
     );
 }
 
 #[test]
-fn test_fluent2_combobox_base_uses_focus_touch_area() {
-    let helper = load_file(&std::path::PathBuf::from("builtin:/fluent2/internal-components.slint"))
-        .expect("fluent2 should embed internal-components.slint");
-    let helper_contents = helper.read();
-    let helper = std::str::from_utf8(&helper_contents).unwrap();
-
-    let focus_touch_area = helper
-        .split("export component FocusTouchArea")
-        .nth(1)
-        .and_then(|after| after.split("export component IconButton").next())
-        .expect("fluent2 should define FocusTouchArea");
-
-    assert!(
-        focus_touch_area.contains("callback scroll-event <=> touch-area.scroll-event"),
-        "fluent2 FocusTouchArea should forward scroll events for composite controls"
-    );
-
+fn test_fluent2_combobox_base_uses_standard_touch_area() {
     let base = load_file(&std::path::PathBuf::from("builtin:/fluent2/combobox-base.slint"))
         .expect("fluent2 should own combobox-base.slint");
     let base_contents = base.read();
     let base = std::str::from_utf8(&base_contents).unwrap();
 
     for expected in [
-        "import { FocusTouchArea } from \"internal-components.slint\";",
-        "i-touch-area := FocusTouchArea",
+        "i-touch-area := TouchArea",
         "enabled: root.enabled",
         "scroll-event(event) =>",
         "root.focus();",
@@ -7481,8 +7471,8 @@ fn test_fluent2_combobox_base_uses_focus_touch_area() {
     }
 
     assert!(
-        !base.contains("i-touch-area := TouchArea"),
-        "fluent2 ComboBoxBase should use the shared focus/touch helper instead of a bare TouchArea"
+        !base.contains("FocusTouchArea"),
+        "fluent2 ComboBoxBase must not insert another focus scope between the control and popup"
     );
 }
 

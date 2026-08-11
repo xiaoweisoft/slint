@@ -17,6 +17,10 @@ publish = false
 path = "main.rs"
 name = "test-driver-rust"
 
+[[test]]
+name = "fluent2-widgets"
+path = "fluent2_widgets.rs"
+
 [features]
 build-time = ["i-slint-compiler", "spin_on"]
 
