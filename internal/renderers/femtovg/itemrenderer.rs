@@ -121,6 +121,10 @@ fn rect_with_radius_to_path(
         // rendering artifacts due to those edges.
         if width.approx_eq(&height) && (border_radius * 2.).approx_eq(&width) {
             path.circle(x + border_radius, y + border_radius, border_radius);
+        } else if (border_radius * 2.).approx_eq(&height) && width > height {
+            capsule_path(&mut path, x, y, width, height, border_radius, false);
+        } else if (border_radius * 2.).approx_eq(&width) && height > width {
+            capsule_path(&mut path, x, y, width, height, border_radius, true);
         } else {
             path.rounded_rect(x, y, width, height, border_radius);
         }
@@ -137,6 +141,40 @@ fn rect_with_radius_to_path(
         );
     }
     path
+}
+
+fn capsule_path(
+    path: &mut femtovg::Path,
+    x: f32,
+    y: f32,
+    width: f32,
+    height: f32,
+    radius: f32,
+    vertical: bool,
+) {
+    let right = x + width;
+    let bottom = y + height;
+    let near = radius * KAPPA90;
+    if vertical {
+        let center_x = x + radius;
+        path.move_to(center_x, y);
+        path.bezier_to(center_x + near, y, right, y + radius - near, right, y + radius);
+        path.line_to(right, bottom - radius);
+        path.bezier_to(right, bottom - radius + near, center_x + near, bottom, center_x, bottom);
+        path.bezier_to(center_x - near, bottom, x, bottom - radius + near, x, bottom - radius);
+        path.line_to(x, y + radius);
+        path.bezier_to(x, y + radius - near, center_x - near, y, center_x, y);
+    } else {
+        let center_y = y + radius;
+        path.move_to(x, center_y);
+        path.bezier_to(x, center_y + near, x + radius - near, bottom, x + radius, bottom);
+        path.line_to(right - radius, bottom);
+        path.bezier_to(right - radius + near, bottom, right, center_y + near, right, center_y);
+        path.bezier_to(right, center_y - near, right - radius + near, y, right - radius, y);
+        path.line_to(x + radius, y);
+        path.bezier_to(x + radius - near, y, x, center_y - near, x, center_y);
+    }
+    path.close();
 }
 
 fn rect_to_path(r: PhysicalRect) -> femtovg::Path {
@@ -1527,4 +1565,47 @@ impl<'a, R: femtovg::Renderer + TextureImporter> GLItemRenderer<'a, R> {
 
 pub fn to_femtovg_color(col: &Color) -> femtovg::Color {
     femtovg::Color::rgba(col.red(), col.green(), col.blue(), col.alpha())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use femtovg::{FillRule, Verb, renderer::Void};
+
+    fn capsule_path_for(size: PhysicalSize) -> femtovg::Path {
+        rect_with_radius_to_path(
+            PhysicalRect::new(PhysicalPoint::new(0., 0.), size),
+            PhysicalBorderRadius::new_uniform(size.width.min(size.height) / 2.),
+        )
+    }
+
+    fn assert_capsule_path(path: &femtovg::Path) {
+        let verbs = path.verbs().collect::<Vec<_>>();
+        assert_eq!(verbs.iter().filter(|verb| matches!(verb, Verb::BezierTo(..))).count(), 4);
+        assert_eq!(verbs.iter().filter(|verb| matches!(verb, Verb::LineTo(..))).count(), 2);
+    }
+
+    #[test]
+    fn horizontal_capsules_avoid_degenerate_rounded_rectangle_segments() {
+        let path = capsule_path_for(PhysicalSize::new(144., 60.));
+        assert_capsule_path(&path);
+
+        let mut canvas = femtovg::Canvas::new(Void).unwrap();
+        canvas.set_size(144, 60, 1.);
+        assert!(!canvas.contains_point(&path, 1., 1., FillRule::NonZero));
+        assert!(canvas.contains_point(&path, 1., 30., FillRule::NonZero));
+        assert!(canvas.contains_point(&path, 72., 1., FillRule::NonZero));
+    }
+
+    #[test]
+    fn vertical_capsules_avoid_degenerate_rounded_rectangle_segments() {
+        let path = capsule_path_for(PhysicalSize::new(60., 144.));
+        assert_capsule_path(&path);
+
+        let mut canvas = femtovg::Canvas::new(Void).unwrap();
+        canvas.set_size(60, 144, 1.);
+        assert!(!canvas.contains_point(&path, 1., 1., FillRule::NonZero));
+        assert!(canvas.contains_point(&path, 30., 1., FillRule::NonZero));
+        assert!(canvas.contains_point(&path, 1., 72., FillRule::NonZero));
+    }
 }
