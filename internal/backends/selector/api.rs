@@ -392,15 +392,16 @@ impl BackendSelector {
             return Err(format!("Only the Skia renderer is supported on Android").into());
         }
 
-        if cfg!(feature = "backend-android-activity") {
+        #[cfg(feature = "backend-android-activity")]
+        {
             i_slint_backend_android_activity::set_requested_graphics_api(
                 self.requested_graphics_api.clone(),
             )
-        } else {
-            Err(format!(
-                "The BackendSelector is only supported with the backend-android-activity backend"
-            )
-            .into())
+        }
+        #[cfg(not(feature = "backend-android-activity"))]
+        {
+            Err("The BackendSelector is only supported with the backend-android-activity backend"
+                .into())
         }
     }
 }
