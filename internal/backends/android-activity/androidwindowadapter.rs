@@ -43,12 +43,20 @@ fn android_backend_log(message: &str) {
     }
 }
 
-fn intercept_controller_axis(axis: Axis, value: f32, source: Source) -> bool {
+fn intercept_controller_axis(
+    axis: Axis,
+    value: f32,
+    source: Source,
+    device_id: i32,
+    event_time_ms: u64,
+) -> bool {
     input_interceptor().is_some_and(|interceptor| {
         interceptor.intercept_axis(AndroidAxisInput {
             axis: u32::from(axis) as i32,
             value,
             source: u32::from(source),
+            device_id,
+            event_time_ms,
         }) == AndroidInputInterceptorResult::Handled
     })
 }
@@ -60,6 +68,8 @@ fn intercept_key_event(key_event: &android_activity::input::KeyEvent, phase: Key
             pressed: phase == KeyPhase::Pressed,
             repeat_count: u32::try_from(key_event.repeat_count()).unwrap_or(0),
             source: u32::from(key_event.source()),
+            device_id: key_event.device_id(),
+            event_time_ms: u64::try_from(key_event.event_time()).unwrap_or_default() / 1_000_000,
         }) == AndroidInputInterceptorResult::Handled
     })
 }
@@ -345,6 +355,11 @@ impl AndroidWindowAdapter {
                         .show_or_hide_soft_input(false)
                         .unwrap_or_else(|e| print_jni_error(&self.app, e));
                 }
+            }
+            PollEvent::Main(MainEvent::TerminateWindow { .. }) => {
+                self.pending_redraw.set(false);
+                self.renderer.suspend()?;
+                android_backend_log("TerminateWindow renderer suspended");
             }
             PollEvent::Main(
                 MainEvent::WindowResized { .. } | MainEvent::ContentRectChanged { .. },
@@ -668,21 +683,92 @@ impl AndroidWindowAdapter {
         let r_trigger = pointer.axis_value(Axis::Rtrigger);
         let gas = pointer.axis_value(Axis::Gas);
         let brake = pointer.axis_value(Axis::Brake);
+        let rx = pointer.axis_value(Axis::Rx);
+        let ry = pointer.axis_value(Axis::Ry);
+        let generic_1 = pointer.axis_value(Axis::Generic1);
+        let generic_2 = pointer.axis_value(Axis::Generic2);
         android_backend_log(&format!(
             "input controller motion source=0x{source_bits:x} x={x:.3} y={y:.3} hat_x={hat_x:.3} hat_y={hat_y:.3} l_trigger={l_trigger:.3} r_trigger={r_trigger:.3} gas={gas:.3} brake={brake:.3}"
         ));
 
         let mut handled_by_shell = false;
-        handled_by_shell |= intercept_controller_axis(Axis::X, x, motion_event.source());
-        handled_by_shell |= intercept_controller_axis(Axis::Y, y, motion_event.source());
-        handled_by_shell |= intercept_controller_axis(Axis::HatX, hat_x, motion_event.source());
-        handled_by_shell |= intercept_controller_axis(Axis::HatY, hat_y, motion_event.source());
+        let device_id = motion_event.device_id();
+        let event_time_ms =
+            u64::try_from(motion_event.event_time()).unwrap_or_default() / 1_000_000;
         handled_by_shell |=
-            intercept_controller_axis(Axis::Ltrigger, l_trigger, motion_event.source());
+            intercept_controller_axis(Axis::X, x, motion_event.source(), device_id, event_time_ms);
         handled_by_shell |=
-            intercept_controller_axis(Axis::Rtrigger, r_trigger, motion_event.source());
-        handled_by_shell |= intercept_controller_axis(Axis::Gas, gas, motion_event.source());
-        handled_by_shell |= intercept_controller_axis(Axis::Brake, brake, motion_event.source());
+            intercept_controller_axis(Axis::Y, y, motion_event.source(), device_id, event_time_ms);
+        handled_by_shell |= intercept_controller_axis(
+            Axis::HatX,
+            hat_x,
+            motion_event.source(),
+            device_id,
+            event_time_ms,
+        );
+        handled_by_shell |= intercept_controller_axis(
+            Axis::HatY,
+            hat_y,
+            motion_event.source(),
+            device_id,
+            event_time_ms,
+        );
+        handled_by_shell |= intercept_controller_axis(
+            Axis::Ltrigger,
+            l_trigger,
+            motion_event.source(),
+            device_id,
+            event_time_ms,
+        );
+        handled_by_shell |= intercept_controller_axis(
+            Axis::Rtrigger,
+            r_trigger,
+            motion_event.source(),
+            device_id,
+            event_time_ms,
+        );
+        handled_by_shell |= intercept_controller_axis(
+            Axis::Gas,
+            gas,
+            motion_event.source(),
+            device_id,
+            event_time_ms,
+        );
+        handled_by_shell |= intercept_controller_axis(
+            Axis::Brake,
+            brake,
+            motion_event.source(),
+            device_id,
+            event_time_ms,
+        );
+        handled_by_shell |= intercept_controller_axis(
+            Axis::Rx,
+            rx,
+            motion_event.source(),
+            device_id,
+            event_time_ms,
+        );
+        handled_by_shell |= intercept_controller_axis(
+            Axis::Ry,
+            ry,
+            motion_event.source(),
+            device_id,
+            event_time_ms,
+        );
+        handled_by_shell |= intercept_controller_axis(
+            Axis::Generic1,
+            generic_1,
+            motion_event.source(),
+            device_id,
+            event_time_ms,
+        );
+        handled_by_shell |= intercept_controller_axis(
+            Axis::Generic2,
+            generic_2,
+            motion_event.source(),
+            device_id,
+            event_time_ms,
+        );
         if handled_by_shell {
             android_backend_log("input controller motion routed=input-interceptor");
             return true;

@@ -52,6 +52,10 @@ pub struct AndroidKeyInput {
     pub repeat_count: u32,
     /// Android input source bit field.
     pub source: u32,
+    /// Android input device id.
+    pub device_id: i32,
+    /// Monotonic Android event time in milliseconds.
+    pub event_time_ms: u64,
 }
 
 /// Product-neutral Android controller-axis sample offered before normal Slint
@@ -64,6 +68,10 @@ pub struct AndroidAxisInput {
     pub value: f32,
     /// Android input source bit field.
     pub source: u32,
+    /// Android input device id.
+    pub device_id: i32,
+    /// Monotonic Android event time in milliseconds.
+    pub event_time_ms: u64,
 }
 
 /// Optional application Adapter for intercepting Android input before Slint's
