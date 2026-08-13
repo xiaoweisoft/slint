@@ -91,15 +91,20 @@ export component ComboBox {
                 accessible-role: none;
             }
 
-            icon := Image {
-                colorize: Fluent2Palette.combobox-icon-foreground;
+            icon-container := Rectangle {
                 width: Fluent2SizeSettings.combobox-icon-size;
-                height: Fluent2SizeSettings.combobox-icon-size;
-                source: Icons.dropdown;
-                y: Fluent2SizeSettings.combobox-icon-offset-y;
-                accessible-role: none;
+                vertical-stretch: 1;
 
-                animate colorize { duration: Fluent2SizeSettings.combobox-motion-duration; }
+                icon := Image {
+                    y: (parent.height - self.height) / 2;
+                    width: Fluent2SizeSettings.combobox-icon-size;
+                    height: Fluent2SizeSettings.combobox-icon-size;
+                    colorize: Fluent2Palette.combobox-icon-foreground;
+                    source: Icons.dropdown;
+                    accessible-role: none;
+
+                    animate colorize { duration: Fluent2SizeSettings.combobox-motion-duration; }
+                }
             }
         }
 

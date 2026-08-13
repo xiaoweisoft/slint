@@ -24,6 +24,26 @@ slint::slint! {
 }
 
 #[test]
+fn combobox_icon_is_vertically_centered() {
+    i_slint_backend_testing::init_no_event_loop();
+    let instance = Fluent2ComboBoxHarness::new().unwrap();
+    let combo = i_slint_backend_testing::ElementHandle::find_by_element_id(
+        &instance,
+        "Fluent2ComboBoxHarness::box",
+    )
+    .next()
+    .unwrap();
+    let icon =
+        i_slint_backend_testing::ElementHandle::find_by_element_id(&instance, "ComboBox::icon")
+            .next()
+            .unwrap();
+
+    let combo_center = combo.absolute_position().y + combo.size().height / 2.0;
+    let icon_center = icon.absolute_position().y + icon.size().height / 2.0;
+    assert_eq!(icon_center, combo_center);
+}
+
+#[test]
 fn combobox_click_opens_popup() {
     i_slint_backend_testing::init_no_event_loop();
     let instance = Fluent2ComboBoxHarness::new().unwrap();
