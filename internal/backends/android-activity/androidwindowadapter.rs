@@ -1196,11 +1196,11 @@ fn map_key_code(code: android_activity::input::Keycode) -> Option<SharedString> 
         Keycode::ButtonA => Some(Key::Return.into()),
         Keycode::ButtonB => Some(Key::Escape.into()),
         Keycode::ButtonC => None,
-        // Preserve physical face positions in the shared controller alphabet:
-        // West maps to Secondary/Backspace and North maps to Action/Space.
-        // Printed Xbox/Nintendo labels are resolved separately by the product.
-        Keycode::ButtonX => Some(Key::Backspace.into()),
-        Keycode::ButtonY => Some(" ".into()),
+        // Preserve Android's standard positional keycodes in the shared
+        // controller alphabet. BUTTON_X is Action/Space and BUTTON_Y is
+        // Secondary/Backspace; printed labels remain product-owned.
+        Keycode::ButtonX => Some(" ".into()),
+        Keycode::ButtonY => Some(Key::Backspace.into()),
         Keycode::ButtonZ => None,
         Keycode::ButtonL1 => Some("[".into()),
         Keycode::ButtonR1 => Some("]".into()),
