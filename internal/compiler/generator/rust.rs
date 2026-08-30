@@ -1738,6 +1738,7 @@ fn generate_item_tree(
 
     let item_tree_array_len = item_tree_array.len();
     let item_array_len = item_array.len();
+    let item_array_init = item_array.iter().map(|item| quote!(items.push(#item);));
 
     let element_info_body = if root.has_debug_info {
         quote!(
@@ -1775,7 +1776,14 @@ fn generate_item_tree(
                 static ITEM_ARRAY : sp::OnceBox<
                     [sp::VOffset<#inner_component_id, sp::ItemVTable, sp::AllowPin>; #item_array_len]
                 > = sp::OnceBox::new();
-                &*ITEM_ARRAY.get_or_init(|| sp::vec![#(#item_array),*].into_boxed_slice().try_into().unwrap())
+                &*ITEM_ARRAY.get_or_init(|| {
+                    // Build directly in heap storage. A large fixed array literal is first
+                    // materialized on the caller's stack before boxing, which can overflow
+                    // Android NativeActivity's bounded android_main thread stack.
+                    let mut items = sp::Vec::with_capacity(#item_array_len);
+                    #(#item_array_init)*
+                    items.into_boxed_slice().try_into().unwrap()
+                })
             }
         }
 
@@ -3978,6 +3986,27 @@ pub fn generate_named_exports(exports: &crate::object_tree::Exports) -> Vec<Toke
             quote!(#type_id as #export_id)
         })
         .collect::<Vec<_>>()
+}
+
+#[cfg(test)]
+mod tests {
+    use quote::quote;
+
+    #[test]
+    fn item_array_initializer_builds_directly_in_heap_storage() {
+        let items = [quote!(first), quote!(second)];
+        let item_array_init = items.iter().map(|item| quote!(values.push(#item);));
+        let generated = quote!({
+            let mut values = sp::Vec::with_capacity(2usize);
+            #(#item_array_init)*
+            values.into_boxed_slice().try_into().unwrap()
+        })
+        .to_string();
+
+        assert!(generated.contains("sp :: Vec :: with_capacity"));
+        assert_eq!(generated.matches("values . push").count(), 2);
+        assert!(!generated.contains("sp :: vec !"));
+    }
 }
 
 fn compile_expression_no_parenthesis(expr: &Expression, ctx: &EvaluationContext) -> TokenStream {
