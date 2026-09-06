@@ -5,6 +5,89 @@ use slint::ComponentHandle;
 
 slint::slint! {
     #[style="fluent2-light"]
+    import { Button, CheckBox, Switch } from "std-widgets.slint";
+
+    export component Fluent2PointerHarness inherits Window {
+        width: 360px;
+        height: 240px;
+        in property <bool> controls-enabled: true;
+        in property <length> button-width: 180px;
+        out property <int> clicks;
+        out property <bool> checked <=> check.checked;
+        out property <bool> switched <=> toggle.checked;
+        VerticalLayout {
+            button := Button {
+                width: root.button-width;
+                height: 48px;
+                text: "Native button";
+                enabled: root.controls-enabled;
+                clicked => { root.clicks += 1; }
+            }
+            check := CheckBox { text: "Native checkbox"; enabled: root.controls-enabled; }
+            toggle := Switch { text: "Native switch"; enabled: root.controls-enabled; }
+        }
+    }
+}
+
+#[test]
+fn native_controls_keep_their_rendered_pointer_bounds() {
+    use i_slint_backend_testing::ElementHandle;
+    use slint::platform::{PointerEventButton, WindowEvent};
+    i_slint_backend_testing::init_no_event_loop();
+    let instance = Fluent2PointerHarness::new().unwrap();
+    for (label, enabled) in [
+        ("Native button", true),
+        ("Native checkbox", true),
+        ("Native switch", true),
+        ("Native button", false),
+        ("Native checkbox", false),
+        ("Native switch", false),
+    ] {
+        instance.set_controls_enabled(enabled);
+        let control = ElementHandle::find_by_accessible_label(&instance, label).next().unwrap();
+        let origin = control.absolute_position();
+        let size = control.size();
+        assert!(size.width > 0.0 && size.height > 0.0);
+        let position =
+            slint::LogicalPosition::new(origin.x + size.width / 2.0, origin.y + size.height / 2.0);
+        instance.window().dispatch_event(WindowEvent::PointerMoved { position });
+        instance.window().dispatch_event(WindowEvent::PointerPressed {
+            position,
+            button: PointerEventButton::Left,
+        });
+        instance.window().dispatch_event(WindowEvent::PointerReleased {
+            position,
+            button: PointerEventButton::Left,
+        });
+        match label {
+            "Native button" => assert_eq!(instance.get_clicks(), 1),
+            "Native checkbox" => assert!(instance.get_checked()),
+            "Native switch" => assert!(instance.get_switched()),
+            _ => unreachable!(),
+        }
+    }
+    // Explicit consumer geometry and later resizing override the fill default.
+    instance.set_controls_enabled(true);
+    instance.set_button_width(240.0);
+    let button =
+        ElementHandle::find_by_accessible_label(&instance, "Native button").next().unwrap();
+    assert_eq!(button.size().width, 240.0);
+    assert_eq!(button.size().height, 48.0);
+    let origin = button.absolute_position();
+    let position = slint::LogicalPosition::new(origin.x + 220.0, origin.y + 24.0);
+    instance.window().dispatch_event(WindowEvent::PointerMoved { position });
+    instance
+        .window()
+        .dispatch_event(WindowEvent::PointerPressed { position, button: PointerEventButton::Left });
+    instance.window().dispatch_event(WindowEvent::PointerReleased {
+        position,
+        button: PointerEventButton::Left,
+    });
+    assert_eq!(instance.get_clicks(), 2);
+}
+
+slint::slint! {
+    #[style="fluent2-light"]
     import { ComboBox } from "std-widgets.slint";
 
     export component Fluent2ComboBoxHarness inherits Window {

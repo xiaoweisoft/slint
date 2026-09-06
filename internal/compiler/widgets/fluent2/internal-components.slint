@@ -29,6 +29,10 @@ export struct IconButtonStyle {
 }
 
 export component FocusTouchArea {
+    // A focus-only child has zero geometry. Do not let it determine the
+    // pointer receiver's implicit size inside native controls.
+    width: 100%;
+    height: 100%;
     in property <bool> enabled;
     out property <bool> pressed <=> touch-area.pressed;
     out property <bool> has-hover <=> touch-area.has-hover;
