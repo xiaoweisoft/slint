@@ -329,7 +329,7 @@ impl<B: GraphicsBackend> RendererSealed for FemtoVGRenderer<B> {
         &self,
         data: &'static [u8],
     ) -> Result<(), Box<dyn std::error::Error>> {
-        sharedfontique::get_collection().register_fonts(data.to_vec().into(), None);
+        sharedfontique::register_font_from_memory(data);
         Ok(())
     }
 
@@ -337,10 +337,7 @@ impl<B: GraphicsBackend> RendererSealed for FemtoVGRenderer<B> {
         &self,
         path: &std::path::Path,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let requested_path = path.canonicalize().unwrap_or_else(|_| path.into());
-        let contents = std::fs::read(requested_path)?;
-        sharedfontique::get_collection().register_fonts(contents.into(), None);
-        Ok(())
+        sharedfontique::register_font_from_path(path)
     }
 
     fn default_font_size(&self) -> LogicalLength {

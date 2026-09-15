@@ -297,11 +297,14 @@ pub async fn run_passes(
         }
         _ => {
             // Create font registration calls for custom fonts, unless we're embedding pre-rendered glyphs
+            let embed_custom_fonts = type_loader.compiler_config.embed_resources
+                == crate::EmbedResourcesKind::EmbedAllResources
+                && std::env::var_os("SLINT_EMBED_CUSTOM_FONTS")
+                    .is_none_or(|value| value != "false");
             collect_custom_fonts::collect_custom_fonts(
                 doc,
                 std::iter::once(&*doc).chain(type_loader.all_documents()),
-                type_loader.compiler_config.embed_resources
-                    == crate::EmbedResourcesKind::EmbedAllResources,
+                embed_custom_fonts,
             );
         }
     };

@@ -9,6 +9,7 @@ use crate::{
 };
 use smol_str::SmolStr;
 use std::collections::BTreeSet;
+use std::path::{Path, PathBuf};
 
 pub fn collect_custom_fonts<'a>(
     doc: &Document,
@@ -52,7 +53,7 @@ pub fn collect_custom_fonts<'a>(
             )
         })
     } else {
-        Box::new(|font_path| Expression::StringLiteral(font_path.clone()))
+        Box::new(|font_path| Expression::StringLiteral(mapped_runtime_font_path(font_path)))
     };
 
     for c in doc.exported_roots() {
@@ -64,4 +65,28 @@ pub fn collect_custom_fonts<'a>(
             }
         }));
     }
+}
+
+fn mapped_runtime_font_path(font_path: &SmolStr) -> SmolStr {
+    let Some(mapping) = std::env::var_os("SLINT_CUSTOM_FONT_PATH_PREFIX_MAP") else {
+        return font_path.clone();
+    };
+    let Some(mapping) = mapping.to_str() else {
+        return font_path.clone();
+    };
+
+    for entry in mapping.split(';').filter(|entry| !entry.is_empty()) {
+        let Some((source, target)) = entry.split_once('=') else {
+            continue;
+        };
+        let source = Path::new(source);
+        let source = source.canonicalize().unwrap_or_else(|_| PathBuf::from(source));
+        let path = Path::new(font_path.as_str());
+        let path = path.canonicalize().unwrap_or_else(|_| PathBuf::from(path));
+        if let Ok(relative) = path.strip_prefix(&source) {
+            return Path::new(target).join(relative).to_string_lossy().into();
+        }
+    }
+
+    font_path.clone()
 }
