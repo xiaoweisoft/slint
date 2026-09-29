@@ -6,6 +6,7 @@ use i_slint_core::graphics::{
     Image, ImageCacheKey, ImageInner, IntRect, IntSize, OpaqueImage, OpaqueImageVTable,
     SharedImageBuffer, cache as core_cache,
 };
+use i_slint_core::graphics::{Rgba8Pixel, SharedPixelBuffer};
 use i_slint_core::items::ImageFit;
 use i_slint_core::lengths::{LogicalSize, ScaleFactor};
 
@@ -81,7 +82,7 @@ pub(crate) fn as_skia_image(
 
             skia_safe::images::raster_from_data(
                 &image_info,
-                skia_safe::Data::new_copy(pixels.as_bytes()),
+                shared_rgba_data(&pixels),
                 pixels.width() as usize * 4,
             )
         }
@@ -107,6 +108,54 @@ pub(crate) fn as_skia_image(
     }
 }
 
+fn shared_rgba_data(pixels: &SharedPixelBuffer<Rgba8Pixel>) -> skia_safe::Data {
+    let bytes = pixels.as_bytes();
+    // SharedPixelBuffer retains stable storage and uses copy-on-write for
+    // mutation. The native release callback holds the clone through GPU use.
+    unsafe { skia_safe::Data::from_owned_bytes(pixels.clone(), bytes.as_ptr(), bytes.len()) }
+}
+
+#[cfg(test)]
+mod shared_pixel_tests {
+    use super::*;
+
+    #[test]
+    fn native_data_retains_pixels_and_mutation_detaches() {
+        let mut pixels = SharedPixelBuffer::<Rgba8Pixel>::new(2, 2);
+        pixels.make_mut_bytes().fill(123);
+        let data = shared_rgba_data(&pixels);
+        assert_eq!(data.as_bytes().as_ptr(), pixels.as_bytes().as_ptr());
+        pixels.make_mut_bytes()[0] = 99;
+        assert_eq!(data.as_bytes()[0], 123);
+        drop(pixels);
+        std::thread::spawn(move || assert_eq!(data.as_bytes(), &[123; 16])).join().unwrap();
+    }
+
+    #[test]
+    fn raster_images_preserve_alpha_representation_and_own_pixels() {
+        for premultiplied in [false, true] {
+            let mut pixels = SharedPixelBuffer::<Rgba8Pixel>::new(1, 1);
+            pixels.make_mut_bytes().copy_from_slice(&[20, 30, 40, 128]);
+            let buffer = if premultiplied {
+                SharedImageBuffer::RGBA8Premultiplied(pixels)
+            } else {
+                SharedImageBuffer::RGBA8(pixels)
+            };
+            let image = image_buffer_to_skia_image(&buffer).unwrap();
+            drop(buffer);
+            assert_eq!(
+                image.alpha_type(),
+                if premultiplied {
+                    skia_safe::AlphaType::Premul
+                } else {
+                    skia_safe::AlphaType::Unpremul
+                }
+            );
+            assert_eq!(image.peek_pixels().unwrap().bytes().unwrap(), &[20, 30, 40, 128]);
+        }
+    }
+}
+
 fn image_buffer_to_skia_image(buffer: &SharedImageBuffer) -> Option<skia_safe::Image> {
     let (data, bpl, size, color_type, alpha_type) = match buffer {
         SharedImageBuffer::RGB8(pixels) => {
@@ -117,7 +166,11 @@ fn image_buffer_to_skia_image(buffer: &SharedImageBuffer) -> Option<skia_safe::I
                 .flat_map(|rgb| IntoIterator::into_iter([rgb[0], rgb[1], rgb[2], 255]))
                 .collect::<Vec<u8>>();
             (
-                skia_safe::Data::new_copy(&*rgba),
+                unsafe {
+                    let ptr = rgba.as_ptr();
+                    let len = rgba.len();
+                    skia_safe::Data::from_owned_bytes(rgba, ptr, len)
+                },
                 pixels.width() as usize * 4,
                 pixels.size(),
                 skia_safe::ColorType::RGBA8888,
@@ -125,14 +178,14 @@ fn image_buffer_to_skia_image(buffer: &SharedImageBuffer) -> Option<skia_safe::I
             )
         }
         SharedImageBuffer::RGBA8(pixels) => (
-            skia_safe::Data::new_copy(pixels.as_bytes()),
+            shared_rgba_data(pixels),
             pixels.width() as usize * 4,
             pixels.size(),
             skia_safe::ColorType::RGBA8888,
             skia_safe::AlphaType::Unpremul,
         ),
         SharedImageBuffer::RGBA8Premultiplied(pixels) => (
-            skia_safe::Data::new_copy(pixels.as_bytes()),
+            shared_rgba_data(pixels),
             pixels.width() as usize * 4,
             pixels.size(),
             skia_safe::ColorType::RGBA8888,

@@ -22,8 +22,18 @@ impl FontCache {
         self.fonts
             .entry((font.data.clone().into(), font.index))
             .or_insert_with(|| {
-                let typeface = self.font_mgr.new_from_data(
-                    font.data.as_ref(),
+                let bytes = font.data.as_ref();
+                // Font blobs own stable immutable storage. SkData retains that
+                // owner independently of this cache and any typeface clones.
+                let data = unsafe {
+                    skia_safe::Data::from_owned_bytes(
+                        font.data.clone(),
+                        bytes.as_ptr(),
+                        bytes.len(),
+                    )
+                };
+                let typeface = self.font_mgr.new_from_owned_data(
+                    data,
                     if font.index > 0 { Some(font.index as _) } else { None },
                 );
 
@@ -54,4 +64,29 @@ impl FontCache {
 
 thread_local! {
     pub static FONT_CACHE: RefCell<FontCache> = RefCell::new(Default::default())
+}
+
+#[cfg(test)]
+mod ownership_tests {
+    #[test]
+    fn owned_typeface_preserves_collection_indices_and_glyphs() {
+        let Ok(path) = std::env::var("SLINT_TEST_TTC_FONT") else { return };
+        let bytes = std::sync::Arc::new(std::fs::read(path).unwrap());
+        let mgr = skia_safe::FontMgr::new();
+        for index in 0..3 {
+            let original = mgr.new_from_data(&bytes, Some(index)).unwrap();
+            let data = unsafe {
+                skia_safe::Data::from_owned_bytes(bytes.clone(), bytes.as_ptr(), bytes.len())
+            };
+            let shared = mgr.new_from_owned_data(data, Some(index)).unwrap();
+            assert_eq!(original.family_name(), shared.family_name());
+            assert_eq!(original.count_glyphs(), shared.count_glyphs());
+            for ch in "English中文繁體日本語한국어".chars() {
+                assert_eq!(
+                    original.unichar_to_glyph(ch as i32),
+                    shared.unichar_to_glyph(ch as i32)
+                );
+            }
+        }
+    }
 }
